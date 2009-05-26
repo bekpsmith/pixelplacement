@@ -6,8 +6,8 @@
 #pragma strict
 
 //Init vars:
-var verticalOrientation:boolean=true;
-var screenCanDarken:boolean=true;
+var verticalOrientation:boolean=false;
+var screenCanDarken:boolean=false;
 
 //Modify iPhone settings:
 function Start (){
