@@ -8,10 +8,10 @@
 //Example:
 /*
 if (Input.GetKeyDown ("1")){
-		iSwap.swap("CubeScene");
+		iSwap.swapTo("CubeScene");
 	}
 	if (Input.GetKeyDown ("2")){
-		iSwap.swap("GroundScene");
+		iSwap.swapTo("GroundScene");
 	}
 */
 
@@ -22,6 +22,7 @@ static var staticScenes : GameObject[];
 static var staticInitialScene : String;
 static var activeScene:String;
 private var initialScene : GameObject;
+private var nextSceneGO : GameObject;
 var scenes : GameObject[];
 
 //Run initialize:
@@ -48,14 +49,18 @@ static function init(a:Array,b:GameObject):void{
 }
 
 //Swap scenes:
-static function Swap(nextScene:String):void{
-	var nextSceneGO : GameObject;
+static function swapTo(nextScene:String):void{
 	for(var i : int; i<staticScenes.length; i++){
 		if(staticScenes[i].name == nextScene){
-			nextSceneGO=staticScenes[i];
+			var nextSceneGO=staticScenes[i];
 		}
 	}
 	GameObject.Find(activeScene).SetActiveRecursively(false);
 	nextSceneGO.SetActiveRecursively(true);
 	activeScene=nextSceneGO.name;
+}
+
+//Depricated:
+static function swap(nextScene:String):void{
+	swapTo(nextScene);
 }
