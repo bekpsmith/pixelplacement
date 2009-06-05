@@ -1,4 +1,4 @@
-//iPhoneRotation: Retrieves iPhone rotation axis and stores static variables in range from -1 to 1 including a dead zone value.
+//iPhoneRotation: Retrieves iPhone rotation axis and stores static variables in range from -1 to 1 including an optional "dead zone" value for value retrieval.
 //Author: Pixelplacement
 //Usages: Component, Static
 //Methods: getRotationX, getRotationY
