@@ -172,6 +172,11 @@ private function moveTo(x : float, y: float, z: float, duration: float, delay: f
 			obj.position.y=linear(start.y,end.y,i);
 			obj.position.z=linear(start.z,end.z,i);
 		}
+		if(easing=="berp"){
+			obj.position.x=berp(start.x,end.x,i);
+			obj.position.y=berp(start.y,end.y,i);
+			obj.position.z=berp(start.z,end.z,i);
+		}
 		yield;
 	}
 	obj.position=end;	
@@ -204,6 +209,11 @@ private function moveFrom(x : float, y: float, z: float, duration: float, delay:
 			obj.position.y=linear(start.y,end.y,i);
 			obj.position.z=linear(start.z,end.z,i);
 		}
+		if(easing=="berp"){
+			obj.position.x=berp(start.x,end.x,i);
+			obj.position.y=berp(start.y,end.y,i);
+			obj.position.z=berp(start.z,end.z,i);
+		}
 		yield;
 	}
 	obj.position=end;	
@@ -227,7 +237,10 @@ private function fadeTo(endA: float, duration: float, delay: float, easing: Stri
 			}
 			if(easing=="linear"){
 				obj.guiTexture.color.a=linear(start,endA,i);
-			}			
+			}
+			if(easing=="berp"){
+				obj.guiTexture.color.a=berp(start,endA,i);
+			}				
 			yield;
 		}
 		guiTexture.color.a= endA;
@@ -245,6 +258,9 @@ private function fadeTo(endA: float, duration: float, delay: float, easing: Stri
 			}
 			if(easing=="linear"){
 				obj.renderer.material.color.a=linear(start,endA,i);
+			}
+			if(easing=="berp"){
+				obj.renderer.material.color.a=berp(start,endA,i);
 			}					
 			yield;
 		}
@@ -270,7 +286,10 @@ private function fadeFrom(endA: float, duration: float, delay: float, easing: St
 			}
 			if(easing=="linear"){
 				obj.guiTexture.color.a=linear(endA,finalA,i);
-			}				
+			}
+			if(easing=="berp"){
+				obj.guiTexture.color.a=berp(endA,finalA,i);
+			}					
 			yield;
 		}
 		obj.guiTexture.color.a= finalA;
@@ -289,6 +308,9 @@ private function fadeFrom(endA: float, duration: float, delay: float, easing: St
 			}
 			if(easing=="linear"){
 				obj.renderer.material.color.a=linear(endA,finalA,i);
+			}
+			if(easing=="berp"){
+				obj.renderer.material.color.a=berp(endA,finalA,i);
 			}					
 			yield;
 		}
@@ -305,9 +327,9 @@ private function rotateTo(x : float, y: float, z: float, duration: float, delay:
 	yield WaitForSeconds (delay);
 	obj = gameObject.transform;
 	start = Vector3(obj.eulerAngles.x,obj.eulerAngles.y,obj.eulerAngles.z);
-	end = Vector3(Clerp(start.x,x,1), Clerp(start.y,y,1), Clerp(start.z,z,1));
+	end = Vector3(clerp(start.x,x,1), clerp(start.y,y,1), clerp(start.z,z,1));
 	
-	print(Clerp(start.x,end.x,1));
+	print(clerp(start.x,end.x,1));
 	for (i = 0.0; i < 1.0; i += Time.deltaTime*(1/duration)) {
 		if(easing=="easeIn" || easing=="easein"){
 			obj.rotation=Quaternion.Euler(easeIn(start.x,end.x,i),easeIn(start.y,end.y,i),easeIn(start.z,end.z,i));
@@ -319,7 +341,10 @@ private function rotateTo(x : float, y: float, z: float, duration: float, delay:
 			obj.rotation=Quaternion.Euler(easeInOut(start.x,end.x,i),easeInOut(start.y,end.y,i),easeInOut(start.z,end.z,i));
 		}
 		if(easing=="linear"){
-			obj.rotation=Quaternion.Euler(Clerp(start.x,end.x,i),Clerp(start.y,end.y,i),Clerp(start.z,end.z,i));
+			obj.rotation=Quaternion.Euler(clerp(start.x,end.x,i),clerp(start.y,end.y,i),clerp(start.z,end.z,i));
+		}
+		if(easing=="berp"){
+			obj.rotation=Quaternion.Euler(berp(start.x,end.x,i),berp(start.y,end.y,i),berp(start.z,end.z,i));
 		}
 		yield;
 	}
@@ -336,7 +361,7 @@ private function rotateFrom(x : float, y: float, z: float, duration: float, dela
 	end = Vector3(obj.rotation.x, obj.rotation.y, obj.rotation.z);
 	obj.rotation = Quaternion.Euler(x,y,z);
 	start = Vector3(obj.eulerAngles.x,obj.eulerAngles.y,obj.eulerAngles.z);
-	end = Vector3(Clerp(start.x,end.x,1), Clerp(start.y,end.y,1), Clerp(start.z,end.z,1));
+	end = Vector3(clerp(start.x,end.x,1), clerp(start.y,end.y,1), clerp(start.z,end.z,1));
 	for (i = 0.0; i < 1.0; i += Time.deltaTime*(1/duration)) {
 		if(easing=="easeIn" || easing=="easein"){
 			obj.rotation=Quaternion.Euler(easeIn(start.x,end.x,i),easeIn(start.y,end.y,i),easeIn(start.z,end.z,i));
@@ -348,7 +373,10 @@ private function rotateFrom(x : float, y: float, z: float, duration: float, dela
 			obj.rotation=Quaternion.Euler(easeInOut(start.x,end.x,i),easeInOut(start.y,end.y,i),easeInOut(start.z,end.z,i));
 		}
 		if(easing=="linear"){
-			obj.rotation=Quaternion.Euler(Clerp(start.x,end.x,i),Clerp(start.y,end.y,i),Clerp(start.z,end.z,i));
+			obj.rotation=Quaternion.Euler(clerp(start.x,end.x,i),clerp(start.y,end.y,i),clerp(start.z,end.z,i));
+		}
+		if(easing=="berp"){
+			obj.rotation=Quaternion.Euler(berp(start.x,end.x,i),berp(start.y,end.y,i),berp(start.z,end.z,i));
 		}
 		yield;
 	}
@@ -368,11 +396,11 @@ private function findRegister(){
 
 //Curves
 private function easeOut(start : float, end : float, value : float) : float{
-    return Clerp(start, end, Mathf.Sin(value * Mathf.PI * 0.5));
+    return clerp(start, end, Mathf.Sin(value * Mathf.PI * 0.5));
 }
 
 private function easeIn(start : float, end : float, value : float) : float{
-    return Clerp(start, end, 1.0 - Mathf.Cos(value * Mathf.PI * 0.5));
+    return clerp(start, end, 1.0 - Mathf.Cos(value * Mathf.PI * 0.5));
 }
 
 private function easeInOut(start : float, end : float, value : float) : float{
@@ -383,7 +411,7 @@ private function linear(start : float, end : float, value : float) : float{
 	return Mathf.Lerp(start, end, value);
 }
 
-private function Clerp(start : float, end : float, value : float) : float {
+private function clerp(start : float, end : float, value : float) : float {
    var min = 0.0;
    var max = 360.0;
    var half = Mathf.Abs((max - min)/2.0);
@@ -400,4 +428,11 @@ private function Clerp(start : float, end : float, value : float) : float {
    }
    else retval =  start+(end-start)*value;
    return retval;
+}
+
+static function berp(start : float, end : float, value : float) : float
+{
+    value = Mathf.Clamp01(value);
+    value = (Mathf.Sin(value * Mathf.PI * (0.2 + 2.5 * value * value * value)) * Mathf.Pow(1 - value, 2.2) + value) * (1 + (1.2 * (1 - value)));
+    return start + (end - start) * value;
 }
