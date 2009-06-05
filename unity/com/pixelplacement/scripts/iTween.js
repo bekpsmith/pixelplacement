@@ -38,7 +38,6 @@ static function moveTo(obj: GameObject,x: float,y: float,z: float,duration: floa
 	}
 	obj.AddComponent ("iTween");
 	registers.push(obj);
-	//Adjust correct length of animation time!
 	params.push(new Array(x,y,z,duration,delay,easing,"moveTo"));
 }
 
@@ -73,6 +72,7 @@ static function fadeTo(obj: GameObject,endA: float,duration: float,delay: float,
 	params.push(new Array(endA,duration,delay,easing,"fadeTo"));
 }
 
+//fadeFrom registration function:
 static function fadeFrom(obj: GameObject,endA: float,duration: float,delay: float, easing: String){
 	if(duration<0){
 		Debug.LogError("ERROR: Duration property must be greater than or equal to 0!");
@@ -88,7 +88,7 @@ static function fadeFrom(obj: GameObject,endA: float,duration: float,delay: floa
 }
 
 //rotateTo registration function:
-static function rotateTo(obj: GameObject,x: float,y: float,z: float,duration: float,delay: float){
+static function rotateTo(obj: GameObject,x: float,y: float,z: float,duration: float,delay: float, easing: String){
 	if(duration<0){
 		Debug.LogError("ERROR: Duration property must be greater than or equal to 0!");
         return;
@@ -99,7 +99,22 @@ static function rotateTo(obj: GameObject,x: float,y: float,z: float,duration: fl
 	}
 	obj.AddComponent ("iTween");
 	registers.push(obj);
-	params.push(new Array(x,y,z,duration,delay,"rotate"));
+	params.push(new Array(x,y,z,duration,delay,easing,"rotateTo"));
+}
+
+//rotateFrom registration function:
+static function rotateFrom(obj: GameObject,x: float,y: float,z: float,duration: float,delay: float, easing: String){
+	if(duration<0){
+		Debug.LogError("ERROR: Duration property must be greater than or equal to 0!");
+        return;
+	}
+	if(delay<0){
+		Debug.LogError("ERROR: Delay property must be greater than or equal to 0!");
+        return;
+	}
+	obj.AddComponent ("iTween");
+	registers.push(obj);
+	params.push(new Array(x,y,z,duration,delay,easing,"rotateFrom"));
 }
 
 //Applied component launcher and loops:
@@ -120,46 +135,49 @@ function Start(){
 	if(paramList[paramList.length-1]=="fadeFrom"){
 		yield fadeFrom(paramList[0],paramList[1],paramList[2],paramList[3]);
 	}	
-	if(paramList[paramList.length-1]=="rotate"){
-		yield rotate(paramList[0],paramList[1],paramList[2],paramList[3],paramList[4]);
+	if(paramList[paramList.length-1]=="rotateTo"){
+		yield rotateTo(paramList[0],paramList[1],paramList[2],paramList[3],paramList[4],paramList[5]);
+	}
+	if(paramList[paramList.length-1]=="rotateFrom"){
+		yield rotateFrom(paramList[0],paramList[1],paramList[2],paramList[3],paramList[4],paramList[5]);
 	}
 	
 	Destroy(this);
 }
 
 //Move applied code:
-function moveTo(x : float, y: float, z: float, duration: float, delay: float, easing: String) {
+private function moveTo(x : float, y: float, z: float, duration: float, delay: float, easing: String) {
 	yield WaitForSeconds (delay);
 	obj = gameObject.transform;
 	start = obj.position;
 	end = Vector3(x, y, z);
 	for (i = 0.0; i < 1.0; i += Time.deltaTime*(1/duration)) {
 		if(easing=="easeIn" || easing=="easein"){
-			transform.position.x=easeIn(start.x,end.x,i);
-			transform.position.y=easeIn(start.y,end.y,i);
-			transform.position.z=easeIn(start.z,end.z,i);
+			obj.position.x=easeIn(start.x,end.x,i);
+			obj.position.y=easeIn(start.y,end.y,i);
+			obj.position.z=easeIn(start.z,end.z,i);
 		}
 		if(easing=="easeOut" || easing=="easeout"){
-			transform.position.x=easeOut(start.x,end.x,i);
-			transform.position.y=easeOut(start.y,end.y,i);
-			transform.position.z=easeOut(start.z,end.z,i);
+			obj.position.x=easeOut(start.x,end.x,i);
+			obj.position.y=easeOut(start.y,end.y,i);
+			obj.position.z=easeOut(start.z,end.z,i);
 		}
 		if(easing=="easeInOut" || easing=="easeinout"){
-			transform.position.x=easeInOut(start.x,end.x,i);
-			transform.position.y=easeInOut(start.y,end.y,i);
-			transform.position.z=easeInOut(start.z,end.z,i);
+			obj.position.x=easeInOut(start.x,end.x,i);
+			obj.position.y=easeInOut(start.y,end.y,i);
+			obj.position.z=easeInOut(start.z,end.z,i);
 		}
 		if(easing=="linear"){
-			transform.position.x=linear(start.x,end.x,i);
-			transform.position.y=linear(start.y,end.y,i);
-			transform.position.z=linear(start.z,end.z,i);
+			obj.position.x=linear(start.x,end.x,i);
+			obj.position.y=linear(start.y,end.y,i);
+			obj.position.z=linear(start.z,end.z,i);
 		}
 		yield;
 	}
 	obj.position=end;	
 }
 
-function moveFrom(x : float, y: float, z: float, duration: float, delay: float, easing: String) {
+private function moveFrom(x : float, y: float, z: float, duration: float, delay: float, easing: String) {
 	yield WaitForSeconds (delay);
 	obj = gameObject.transform;
 	end = Vector3(obj.position.x, obj.position.y, obj.position.z);
@@ -167,24 +185,24 @@ function moveFrom(x : float, y: float, z: float, duration: float, delay: float, 
 	start = obj.position;
 	for (i = 0.0; i < 1.0; i += Time.deltaTime*(1/duration)) {
 		if(easing=="easeIn" || easing=="easein"){
-			transform.position.x=easeIn(start.x,end.x,i);
-			transform.position.y=easeIn(start.y,end.y,i);
-			transform.position.z=easeIn(start.z,end.z,i);
+			obj.position.x=easeIn(start.x,end.x,i);
+			obj.position.y=easeIn(start.y,end.y,i);
+			obj.position.z=easeIn(start.z,end.z,i);
 		}
 		if(easing=="easeOut" || easing=="easeout"){
-			transform.position.x=easeOut(start.x,end.x,i);
-			transform.position.y=easeOut(start.y,end.y,i);
-			transform.position.z=easeOut(start.z,end.z,i);
+			obj.position.x=easeOut(start.x,end.x,i);
+			obj.position.y=easeOut(start.y,end.y,i);
+			obj.position.z=easeOut(start.z,end.z,i);
 		}
 		if(easing=="easeInOut" || easing=="easeinout"){
-			transform.position.x=easeInOut(start.x,end.x,i);
-			transform.position.y=easeInOut(start.y,end.y,i);
-			transform.position.z=easeInOut(start.z,end.z,i);
+			obj.position.x=easeInOut(start.x,end.x,i);
+			obj.position.y=easeInOut(start.y,end.y,i);
+			obj.position.z=easeInOut(start.z,end.z,i);
 		}
 		if(easing=="linear"){
-			transform.position.x=linear(start.x,end.x,i);
-			transform.position.y=linear(start.y,end.y,i);
-			transform.position.z=linear(start.z,end.z,i);
+			obj.position.x=linear(start.x,end.x,i);
+			obj.position.y=linear(start.y,end.y,i);
+			obj.position.z=linear(start.z,end.z,i);
 		}
 		yield;
 	}
@@ -192,110 +210,155 @@ function moveFrom(x : float, y: float, z: float, duration: float, delay: float, 
 }
 
 //Fade applied code:
-function fadeTo(endA: float, duration: float, delay: float, easing: String) {
+private function fadeTo(endA: float, duration: float, delay: float, easing: String) {
 	yield WaitForSeconds (delay);
 	obj = gameObject.transform;
-	if(guiTexture){
-		start=guiTexture.color.a;
+	if(obj.guiTexture){
+		start=obj.guiTexture.color.a;
 		for (i = 0.0; i < 1.0; i += Time.deltaTime*(1/duration)) {
 			if(easing=="easeIn" || easing=="easein"){
-				guiTexture.color.a=easeIn(start,endA,i);
+				obj.guiTexture.color.a=easeIn(start,endA,i);
 			}
 			if(easing=="easeOut" || easing=="easeout"){
-				guiTexture.color.a=easeOut(start,endA,i);
+				obj.guiTexture.color.a=easeOut(start,endA,i);
 			}
 			if(easing=="easeInOut" || easing=="easeinout"){
-				guiTexture.color.a=easeInOut(start,endA,i);
+				obj.guiTexture.color.a=easeInOut(start,endA,i);
 			}
 			if(easing=="linear"){
-				guiTexture.color.a=linear(start,endA,i);
+				obj.guiTexture.color.a=linear(start,endA,i);
 			}			
 			yield;
 		}
 		guiTexture.color.a= endA;
 	}else{
-		start=renderer.material.color.a;
+		start=obj.renderer.material.color.a;
 		for (i = 0.0; i < 1.0; i += Time.deltaTime*(1/duration)) {
 			if(easing=="easeIn" || easing=="easein"){
-				renderer.material.color.a=easeIn(start,endA,i);
+				obj.renderer.material.color.a=easeIn(start,endA,i);
 			}
 			if(easing=="easeOut" || easing=="easeout"){
-				renderer.material.color.a=easeOut(start,endA,i);
+				obj.renderer.material.color.a=easeOut(start,endA,i);
 			}
 			if(easing=="easeInOut" || easing=="easeinout"){
-				renderer.material.color.a=easeInOut(start,endA,i);
+				obj.renderer.material.color.a=easeInOut(start,endA,i);
 			}
 			if(easing=="linear"){
-				renderer.material.color.a=linear(start,endA,i);
+				obj.renderer.material.color.a=linear(start,endA,i);
 			}					
 			yield;
 		}
-		renderer.material.color.a= endA;
+		obj.renderer.material.color.a= endA;
 	}
 }
 
-function fadeFrom(endA: float, duration: float, delay: float, easing: String) {
+private function fadeFrom(endA: float, duration: float, delay: float, easing: String) {
 	yield WaitForSeconds (delay);
 	obj = gameObject.transform;
-	if(guiTexture){
-		finalA = guiTexture.color.a;
-		guiTexture.color.a=endA;
+	if(obj.guiTexture){
+		finalA = obj.guiTexture.color.a;
+		obj.guiTexture.color.a=endA;
 		for (i = 0.0; i < 1.0; i += Time.deltaTime*(1/duration)) {
 			if(easing=="easeIn" || easing=="easein"){
-				guiTexture.color.a=easeIn(endA,finalA,i);
+				obj.guiTexture.color.a=easeIn(endA,finalA,i);
 			}
 			if(easing=="easeOut" || easing=="easeout"){
-				guiTexture.color.a=easeOut(endA,finalA,i);
+				obj.guiTexture.color.a=easeOut(endA,finalA,i);
 			}
 			if(easing=="easeInOut" || easing=="easeinout"){
-				guiTexture.color.a=easeInOut(endA,finalA,i);
+				obj.guiTexture.color.a=easeInOut(endA,finalA,i);
 			}
 			if(easing=="linear"){
-				guiTexture.color.a=linear(endA,finalA,i);
+				obj.guiTexture.color.a=linear(endA,finalA,i);
 			}				
 			yield;
 		}
-		guiTexture.color.a= finalA;
+		obj.guiTexture.color.a= finalA;
 	}else{
-		finalA = renderer.material.color.a;
-		renderer.material.color.a=endA;
+		finalA = obj.renderer.material.color.a;
+		obj.renderer.material.color.a=endA;
 		for (i = 0.0; i < 1.0; i += Time.deltaTime*(1/duration)) {
 			if(easing=="easeIn" || easing=="easein"){
-				renderer.material.color.a=easeIn(endA,finalA,i);
+				obj.renderer.material.color.a=easeIn(endA,finalA,i);
 			}
 			if(easing=="easeOut" || easing=="easeout"){
-				renderer.material.color.a=easeOut(endA,finalA,i);
+				obj.renderer.material.color.a=easeOut(endA,finalA,i);
 			}
 			if(easing=="easeInOut" || easing=="easeinout"){
-				renderer.material.color.a=easeInOut(endA,finalA,i);
+				obj.renderer.material.color.a=easeInOut(endA,finalA,i);
 			}
 			if(easing=="linear"){
-				renderer.material.color.a=linear(endA,finalA,i);
+				obj.renderer.material.color.a=linear(endA,finalA,i);
 			}					
 			yield;
 		}
-		renderer.material.color.a= finalA;
+		obj.renderer.material.color.a= finalA;
 	}
 }
 
 //Rotate applied code:
-function rotate (x : float, y: float, z: float, duration: float, delay: float) {
+private function rotateTo(x : float, y: float, z: float, duration: float, delay: float, easing: String) {
 	if(guiTexture){
 		Debug.LogError("ERROR: GUITextures cannot be rotated!");
         return;		
 	}
 	yield WaitForSeconds (delay);
 	obj = gameObject.transform;
-	targetRot = Quaternion.Euler (x, y, z);
+	start = Vector3(obj.eulerAngles.x,obj.eulerAngles.y,obj.eulerAngles.z);
+	end = Vector3(Clerp(start.x,x,1), Clerp(start.y,y,1), Clerp(start.z,z,1));
+	
+	print(Clerp(start.x,end.x,1));
 	for (i = 0.0; i < 1.0; i += Time.deltaTime*(1/duration)) {
-		obj.rotation = Quaternion.Slerp(obj.rotation, targetRot, i);
+		if(easing=="easeIn" || easing=="easein"){
+			obj.rotation=Quaternion.Euler(easeIn(start.x,end.x,i),easeIn(start.y,end.y,i),easeIn(start.z,end.z,i));
+		}
+		if(easing=="easeOut" || easing=="easeout"){
+			obj.rotation=Quaternion.Euler(easeOut(start.x,end.x,i),easeOut(start.y,end.y,i),easeOut(start.z,end.z,i));
+		}
+		if(easing=="easeInOut" || easing=="easeinout"){
+			obj.rotation=Quaternion.Euler(easeInOut(start.x,end.x,i),easeInOut(start.y,end.y,i),easeInOut(start.z,end.z,i));
+		}
+		if(easing=="linear"){
+			obj.rotation=Quaternion.Euler(Clerp(start.x,end.x,i),Clerp(start.y,end.y,i),Clerp(start.z,end.z,i));
+		}
 		yield;
-	} 
-	obj.rotation = targetRot;
+	}
+	obj.rotation=Quaternion.Euler(end.x,end.y,end.z);
+}
+
+private function rotateFrom(x : float, y: float, z: float, duration: float, delay: float, easing: String) {
+	if(guiTexture){
+		Debug.LogError("ERROR: GUITextures cannot be rotated!");
+        return;		
+	}
+	yield WaitForSeconds (delay);
+	obj = gameObject.transform;
+	end = Vector3(obj.rotation.x, obj.rotation.y, obj.rotation.z);
+	obj.rotation = Quaternion.Euler(x,y,z);
+	start = Vector3(obj.eulerAngles.x,obj.eulerAngles.y,obj.eulerAngles.z);
+	end = Vector3(Clerp(start.x,end.x,1), Clerp(start.y,end.y,1), Clerp(start.z,end.z,1));
+	for (i = 0.0; i < 1.0; i += Time.deltaTime*(1/duration)) {
+		if(easing=="easeIn" || easing=="easein"){
+			obj.rotation=Quaternion.Euler(easeIn(start.x,end.x,i),easeIn(start.y,end.y,i),easeIn(start.z,end.z,i));
+		}
+		if(easing=="easeOut" || easing=="easeout"){
+			obj.rotation=Quaternion.Euler(easeOut(start.x,end.x,i),easeOut(start.y,end.y,i),easeOut(start.z,end.z,i));
+		}
+		if(easing=="easeInOut" || easing=="easeinout"){
+			obj.rotation=Quaternion.Euler(easeInOut(start.x,end.x,i),easeInOut(start.y,end.y,i),easeInOut(start.z,end.z,i));
+		}
+		if(easing=="linear"){
+			obj.rotation=Quaternion.Euler(Clerp(start.x,end.x,i),Clerp(start.y,end.y,i),Clerp(start.z,end.z,i));
+		}
+		yield;
+	}
+	obj.rotation.x=end.x;
+	obj.rotation.y=end.y;
+	obj.rotation.z=end.z;	
 }
 
 //Registers ID lookup:
-function findRegister(){
+private function findRegister(){
 	for(i = 0; i < registers.length; i++){
 		if(registers[i]==gameObject){
 			id =  i;
@@ -304,18 +367,37 @@ function findRegister(){
 }
 
 //Curves
-function easeOut(start : float, end : float, value : float) : float{
-    return Mathf.Lerp(start, end, Mathf.Sin(value * Mathf.PI * 0.5));
+private function easeOut(start : float, end : float, value : float) : float{
+    return Clerp(start, end, Mathf.Sin(value * Mathf.PI * 0.5));
 }
 
-function easeIn(start : float, end : float, value : float) : float{
-    return Mathf.Lerp(start, end, 1.0 - Mathf.Cos(value * Mathf.PI * 0.5));
+private function easeIn(start : float, end : float, value : float) : float{
+    return Clerp(start, end, 1.0 - Mathf.Cos(value * Mathf.PI * 0.5));
 }
 
-function easeInOut(start : float, end : float, value : float) : float{
+private function easeInOut(start : float, end : float, value : float) : float{
 	return Mathf.SmoothStep(start, end, value);
 }
 
-function linear(start : float, end : float, value : float) : float{
+private function linear(start : float, end : float, value : float) : float{
 	return Mathf.Lerp(start, end, value);
+}
+
+private function Clerp(start : float, end : float, value : float) : float {
+   var min = 0.0;
+   var max = 360.0;
+   var half = Mathf.Abs((max - min)/2.0);
+   var retval = 0.0;
+   var diff = 0.0;
+   
+   if((end - start) < -half){
+       diff = ((max - start)+end)*value;
+       retval =  start+diff;
+   }
+   else if((end - start) > half){
+       diff = -((max - end)+start)*value;
+       retval =  start+diff;
+   }
+   else retval =  start+(end-start)*value;
+   return retval;
 }
