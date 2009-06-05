@@ -8,11 +8,11 @@
 //Example:
 /*
 if (Input.GetKeyDown ("1")){
-		iSwap.swapTo("CubeScene");
-	}
-	if (Input.GetKeyDown ("2")){
-		iSwap.swapTo("GroundScene");
-	}
+	iSwap.swapTo("CubeScene");
+}
+if (Input.GetKeyDown ("2")){
+	iSwap.swapTo("GroundScene");
+}
 */
 
 #pragma strict
@@ -26,7 +26,7 @@ private var nextSceneGO : GameObject;
 var scenes : GameObject[];
 
 //Run initialize:
-function Start(){
+function Awake(){
 	initialScene = gameObject;
 	if(scenes.length<2){
 		Debug.LogError("ERROR: Scenes array requires more than one GO!",this);
@@ -54,7 +54,7 @@ static function swapTo(nextScene:String):void{
 		if(staticScenes[i].name == nextScene){
 			var nextSceneGO=staticScenes[i];
 		}
-	}
+	} 
 	GameObject.Find(activeScene).SetActiveRecursively(false);
 	nextSceneGO.SetActiveRecursively(true);
 	activeScene=nextSceneGO.name;
