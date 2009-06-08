@@ -1,6 +1,6 @@
 //iTween: Easy movement, rotation and fading of GUITextures and meshes.//If using fadeTo on a mesh, make sure it has a shader that supports transparency.//rotateTo will not a work on a GUITexture since it doesn't have rotation.//iTween calls can be staked with delays to chain animations.//29 possible ease curves are: linear,spring,easeInQuad,easeOutQuad,easeInOutQuad,easeInCubic,easeOutCubic,easeInOutCubic,easeInQuart,easeOutQuart,easeInOutQuart,easeInQuint,easeOutQuint,easeInOutQuint,easeInSine,easeOutSine,easeInOutSine,easeInExpo,easeOutExpo,easeInOutExpo,easeInCirc,easeOutCirc,bounce,easeInBack,easeOutBack,easeInOutBack//Author: Pixelplacement//Usage: Static//Methods: fadeTo,fadeFrom,moveTo,moveFrom,rotateTo
 
-//To do animations: volumeTo(),volumeFrom(),fadeAway(duration,delay),shake(x,y,duration,delay,lockConter:boolean),scaleTo(),scaleFrom(),colorTo(),colorFrom()
+//To do animations: volumeTo(),volumeFrom(),fadeAway(duration,delay), scaleTo(),scaleFrom(),colorTo(),colorFrom()
 //To do methods: stop()
 //Clean up: Handle destruction of lingering iTweens after object has been disabled - i.e. avoid issues with iSwap
 #pragma strict//Init vars:static var registers : Array = new Array();static var params : Array = new Array();var id : int = 0;//Registration functions:static function moveTo(obj: GameObject,x: float,y: float,z: float,duration: float,delay: float, easing: String){	obj.AddComponent ("iTween");	registers.push(obj);	params.push(new Array(x,y,z,duration,delay,easing,"moveTo"));}static function moveFrom(obj: GameObject,x: float,y: float,z: float,duration: float,delay: float, easing: String){	obj.AddComponent ("iTween");	registers.push(obj);	params.push(new Array(x,y,z,duration,delay,easing,"moveFrom"));}static function fadeTo(obj: GameObject,endA: float,duration: float,delay: float){	obj.AddComponent ("iTween");	registers.push(obj);	params.push(new Array(endA,duration,delay,"linear","fadeTo"));}static function fadeFrom(obj: GameObject,endA: float,duration: float,delay: float){	obj.AddComponent ("iTween");	registers.push(obj);	params.push(new Array(endA,duration,delay,"fadeFrom"));}static function rotateTo(obj: GameObject,x: float,y: float,z: float,duration: float,delay: float, easing: String){	obj.AddComponent ("iTween");	registers.push(obj);	params.push(new Array(x,y,z,duration,delay,easing,"rotateTo"));}static function rotateFrom(obj: GameObject,x: float,y: float,z: float,duration: float,delay: float, easing: String){	obj.AddComponent ("iTween");	registers.push(obj);	params.push(new Array(x,y,z,duration,delay,easing,"rotateFrom"));}
@@ -15,7 +15,6 @@ function stab(sound: AudioSource,volume: float,pitch: float,delay: float){
 	if(delay > 0){
 		yield WaitForSeconds (delay);
 	}
-	print("ass");
 	sound.volume=volume;
 	sound.pitch=pitch;
 	sound.PlayOneShot(sound.clip);
