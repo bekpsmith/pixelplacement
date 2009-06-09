@@ -29,7 +29,6 @@ function Update () {
 
 //Check for single hit:
 static function OnFingerDown(rect:Rect):boolean{
-	print(phase.fingerId);
 	if(phase.phase==iPhoneTouchPhase.Began && iPhoneInput.touchCount>0){
 		if (rect.Contains(phase.position)){
 			touchLocation=phase.position;
