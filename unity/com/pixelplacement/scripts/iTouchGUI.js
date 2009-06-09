@@ -18,6 +18,7 @@ if(iTouchGUI.OnFingerHeld(guiTexture.GetScreenRect())){
 //Init vars:
 static var phase : iPhoneTouch;
 static var touch;
+static var touchLocation : Vector2;
 
 //Check for touch:
 function Update () {
@@ -30,8 +31,10 @@ function Update () {
 static function OnFingerDown(rect:Rect):boolean{
 	if(phase.phase==iPhoneTouchPhase.Began){
 		if (rect.Contains(phase.position)){
+			touchLocation=phase.position;
         	return(true);
 		}else{
+			touchLocation=Vector2(-1,-1);
 			return(false);	
 		}
 	}
@@ -41,9 +44,11 @@ static function OnFingerDown(rect:Rect):boolean{
 static function OnFingerHeld(rect:Rect):boolean{
 	if (rect.Contains(phase.position)){
 		if(phase.phase==iPhoneTouchPhase.Stationary || phase.phase==iPhoneTouchPhase.Moved){
+			touchLocation=phase.position;
 			return(true);
 		}
 	}else{
+		touchLocation=Vector2(-1,-1);
 		return(false);	
 	}
 }
