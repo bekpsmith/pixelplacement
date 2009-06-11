@@ -4,10 +4,10 @@
 //Usage: Component
 //Methods: None
 
-var tileSize : Vector2;
+private var tileSize : Vector2;
 var columns : float = 6;
 var rows : float = 7;
-var startPosition : Vector2; 
+private var startPosition : Vector2; 
 var framesPerSecond : float = 41;
 
 function Start (){
