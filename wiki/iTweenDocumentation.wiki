@@ -24,7 +24,15 @@ iTween.moveTo(gameObject,1,1,1,1,0,"easeInOutQuint");
 *punchPosition*(obj: GameObject,x: float,y: float,z: float,duration: float,delay: float) : void
 <ul>
 <li>Applies a jolt of force on the given access and springs the GameObject back to its original position like a punching bag.</li>
-<li>Negative/positive values dictate the direction of the applies force.</li>
+<li>Negative/positive values dictate the direction of the applied force.</li>
+</ul>
+</p>
+<br><br>
+<p>
+*punchRotation*(obj: GameObject,x: float,y: float,z: float,duration: float,delay: float) : void
+<ul>
+<li>Applies a jolt of rotation force on the given access based on a percentage or multiplier of 360 degrees and springs the GameObject back to its original position like a punching bag.</li>
+<li>Negative/positive values dictate the direction of the applied force.</li>
 </ul>
 </p>
 <br><br>
