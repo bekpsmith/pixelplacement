@@ -43,28 +43,34 @@ static function scaleFrom(obj: GameObject,x: float,y: float,z: float,duration: f
 	if(paramList[paramList.length-1]=="scaleFrom"){		yield scaleFrom(paramList[0],paramList[1],paramList[2],paramList[3],paramList[4],paramList[5]);	}
 		Destroy(this);}
 
-//Scale applied code:
+//Loops
 private function punchRotation(x : float, y: float, z: float, duration: float, delay: float) {
 	if(delay > 0){
 		yield WaitForSeconds (delay);
-	}	obj = gameObject.transform;
-	pos = obj.position;
+	}
+	x*=360;
+	y*=360;
+	z*=360;	obj = gameObject.transform;
+	pos = obj.localEulerAngles;
+	var posAug : Vector3;	
 	for (i = 0.0; i < 1.0; i += Time.deltaTime*(1/duration)) {
 		if(x>0){
-			obj.localRotation.x=punch(pos.x,pos.x,i,x,0);
+			posAug.x=punch(pos.x,pos.x,i,x,0);
 		}else if(x<0){
-			obj.localRotation.x=-punch(pos.x,pos.x,i,Mathf.Abs(x),0);	
+			posAug.x=-punch(pos.x,pos.x,i,Mathf.Abs(x),0);	
 		}
 		if(y>0){
-			obj.localRotation.y=punch(pos.y,pos.y,i,y,0);
+			posAug.y=punch(pos.y,pos.y,i,y,0);
 		}else if(y<0){
-			obj.localRotation.y=-punch(pos.y,pos.y,i,Mathf.Abs(y),0);	
+			posAug.y=-punch(pos.y,pos.y,i,Mathf.Abs(y),0);	
 		}
 		if(z>0){
-			obj.localRotation.z=punch(pos.z,pos.z,i,z,0);
+			posAug.z=punch(pos.z,pos.z,i,z,0);
 		}else if(z<0){
-			obj.localRotation.z=-punch(pos.z,pos.z,i,Mathf.Abs(z),0);	
+			posAug.z=-punch(pos.z,pos.z,i,Mathf.Abs(z),0);	
 		}
+		
+		obj.localRotation=Quaternion.Euler(posAug);
 		yield;
 	}
 	obj.localRotation=Quaternion.Euler(pos.x,pos.y,pos.z);
@@ -118,7 +124,6 @@ private function punchPosition(x : float, y: float, z: float, duration: float, d
 		if(easing=="bounce"){			obj.localScale.x=bounce(start.x,end.x,i);			obj.localScale.y=bounce(start.y,end.y,i);			obj.localScale.z=bounce(start.z,end.z,i);		}
 		if(easing=="easeInBack"){			obj.localScale.x=easeInBack(start.x,end.x,i);			obj.localScale.y=easeInBack(start.y,end.y,i);			obj.localScale.z=easeInBack(start.z,end.z,i);		}		yield;	}	obj.localScale=end;}
 
-//Stab applied code:
 function stab(sound: AudioSource,volume: float,pitch: float,delay: float){
 	if(delay > 0){
 		yield WaitForSeconds (delay);
@@ -128,8 +133,6 @@ function stab(sound: AudioSource,volume: float,pitch: float,delay: float){
 	sound.PlayOneShot(sound.clip);
 	yield;}
 
-//Shake applied code:
-//Negative values will designate initial impact direction
 function shake(x : float, y: float, z: float, duration: float, delay: float){
 	if(delay > 0){
 		yield WaitForSeconds (delay);
@@ -153,12 +156,11 @@ function shake(x : float, y: float, z: float, duration: float, delay: float){
 		shakeMagnitude.z=z-(i*z);
 				yield;	}
 	obj.position=start;}
-
-//Fade applied code:private function fadeTo(endA: float, duration: float, delay: float) {	if(delay > 0){
+private function fadeTo(endA: float, duration: float, delay: float) {	if(delay > 0){
 		yield WaitForSeconds (delay);
 	}	obj = gameObject.transform;	if(obj.guiTexture){		start=obj.guiTexture.color.a;		for (i = 0.0; i < 1.0; i += Time.deltaTime*(1/duration)) {			obj.guiTexture.color.a=linear(start,endA,i);					yield;		}		guiTexture.color.a= endA;	}else{		start=obj.renderer.material.color.a;		for (i = 0.0; i < 1.0; i += Time.deltaTime*(1/duration)) {			obj.renderer.material.color.a=linear(start,endA,i);						yield;		}		obj.renderer.material.color.a= endA;	}}private function fadeFrom(endA: float, duration: float, delay: float) {	if(delay > 0){
 		yield WaitForSeconds (delay);
-	}	obj = gameObject.transform;	if(obj.guiTexture){		finalA = obj.guiTexture.color.a;		obj.guiTexture.color.a=endA;		for (i = 0.0; i < 1.0; i += Time.deltaTime*(1/duration)) {			obj.guiTexture.color.a=linear(endA,finalA,i);							yield;		}		obj.guiTexture.color.a= finalA;	}else{		finalA = obj.renderer.material.color.a;		obj.renderer.material.color.a=endA;		for (i = 0.0; i < 1.0; i += Time.deltaTime*(1/duration)) {			obj.renderer.material.color.a=linear(endA,finalA,i);						yield;		}		obj.renderer.material.color.a= finalA;	}}//Move applied code:private function moveTo(x : float, y: float, z: float, duration: float, delay: float, easing: String) {	if(delay > 0){
+	}	obj = gameObject.transform;	if(obj.guiTexture){		finalA = obj.guiTexture.color.a;		obj.guiTexture.color.a=endA;		for (i = 0.0; i < 1.0; i += Time.deltaTime*(1/duration)) {			obj.guiTexture.color.a=linear(endA,finalA,i);							yield;		}		obj.guiTexture.color.a= finalA;	}else{		finalA = obj.renderer.material.color.a;		obj.renderer.material.color.a=endA;		for (i = 0.0; i < 1.0; i += Time.deltaTime*(1/duration)) {			obj.renderer.material.color.a=linear(endA,finalA,i);						yield;		}		obj.renderer.material.color.a= finalA;	}}private function moveTo(x : float, y: float, z: float, duration: float, delay: float, easing: String) {	if(delay > 0){
 		yield WaitForSeconds (delay);
 	}	obj = gameObject.transform;	start = obj.position;	end = Vector3(x, y, z);	for (i = 0.0; i < 1.0; i += Time.deltaTime*(1/duration)) {		if(easing=="easeInQuad"){			obj.position.x=easeInQuad(start.x,end.x,i);			obj.position.y=easeInQuad(start.y,end.y,i);			obj.position.z=easeInQuad(start.z,end.z,i);		}		if(easing=="easeOutQuad"){			obj.position.x=easeOutQuad(start.x,end.x,i);			obj.position.y=easeOutQuad(start.y,end.y,i);			obj.position.z=easeOutQuad(start.z,end.z,i);		}		if(easing=="easeInOutQuad"){			obj.position.x=easeInOutQuad(start.x,end.x,i);			obj.position.y=easeInOutQuad(start.y,end.y,i);			obj.position.z=easeInOutQuad(start.z,end.z,i);		}		if(easing=="easeInCubic"){			obj.position.x=easeInCubic(start.x,end.x,i);			obj.position.y=easeInCubic(start.y,end.y,i);			obj.position.z=easeInCubic(start.z,end.z,i);		}		if(easing=="easeOutCubic"){			obj.position.x=easeOutCubic(start.x,end.x,i);			obj.position.y=easeOutCubic(start.y,end.y,i);			obj.position.z=easeOutCubic(start.z,end.z,i);		}		if(easing=="easeInOutCubic"){			obj.position.x=easeInOutCubic(start.x,end.x,i);			obj.position.y=easeInOutCubic(start.y,end.y,i);			obj.position.z=easeInOutCubic(start.z,end.z,i);		}
 		if(easing=="easeInQuart"){			obj.position.x=easeInQuart(start.x,end.x,i);			obj.position.y=easeInQuart(start.y,end.y,i);			obj.position.z=easeInQuart(start.z,end.z,i);		}		if(easing=="easeOutQuart"){			obj.position.x=easeOutQuart(start.x,end.x,i);			obj.position.y=easeOutQuart(start.y,end.y,i);			obj.position.z=easeOutQuart(start.z,end.z,i);		}		if(easing=="easeInOutQuart"){			obj.position.x=easeInOutQuart(start.x,end.x,i);			obj.position.y=easeInOutQuart(start.y,end.y,i);			obj.position.z=easeInOutQuart(start.z,end.z,i);		}	
@@ -179,7 +181,7 @@ function shake(x : float, y: float, z: float, duration: float, delay: float){
 		if(easing=="easeInExpo"){			obj.position.x=easeInExpo(start.x,end.x,i);			obj.position.y=easeInExpo(start.y,end.y,i);			obj.position.z=easeInExpo(start.z,end.z,i);		}		if(easing=="easeOutExpo"){			obj.position.x=easeOutExpo(start.x,end.x,i);			obj.position.y=easeOutExpo(start.y,end.y,i);			obj.position.z=easeOutExpo(start.z,end.z,i);		}		if(easing=="easeInOutExpo"){			obj.position.x=easeInOutExpo(start.x,end.x,i);			obj.position.y=easeInOutExpo(start.y,end.y,i);			obj.position.z=easeInOutExpo(start.z,end.z,i);		}
 		if(easing=="easeInCirc"){			obj.position.x=easeInCirc(start.x,end.x,i);			obj.position.y=easeInCirc(start.y,end.y,i);			obj.position.z=easeInCirc(start.z,end.z,i);		}		if(easing=="easeOutCirc"){			obj.position.x=easeOutCirc(start.x,end.x,i);			obj.position.y=easeOutCirc(start.y,end.y,i);			obj.position.z=easeOutCirc(start.z,end.z,i);		}		if(easing=="easeInOutCirc"){			obj.position.x=easeInOutCirc(start.x,end.x,i);			obj.position.y=easeInOutCirc(start.y,end.y,i);			obj.position.z=easeInOutCirc(start.z,end.z,i);		}				if(easing=="linear"){			obj.position.x=linear(start.x,end.x,i);			obj.position.y=linear(start.y,end.y,i);			obj.position.z=linear(start.z,end.z,i);		}		if(easing=="spring"){			obj.position.x=spring(start.x,end.x,i);			obj.position.y=spring(start.y,end.y,i);			obj.position.z=spring(start.z,end.z,i);		}
 		if(easing=="bounce"){			obj.position.x=bounce(start.x,end.x,i);			obj.position.y=bounce(start.y,end.y,i);			obj.position.z=bounce(start.z,end.z,i);		}
-		if(easing=="easeInBack"){			obj.position.x=easeInBack(start.x,end.x,i);			obj.position.y=easeInBack(start.y,end.y,i);			obj.position.z=easeInBack(start.z,end.z,i);		}		yield;	}	obj.position=end;}//Rotate applied code:
+		if(easing=="easeInBack"){			obj.position.x=easeInBack(start.x,end.x,i);			obj.position.y=easeInBack(start.y,end.y,i);			obj.position.z=easeInBack(start.z,end.z,i);		}		yield;	}	obj.position=end;}
 private function rotateBy(x : float, y: float, z: float, duration: float, delay: float, easing: String) {	if(guiTexture){		Debug.LogError("ERROR: GUITextures cannot be rotated!");        return;			}	if(delay > 0){
 		yield WaitForSeconds (delay);
 	}	obj = gameObject.transform;	start = Vector3(obj.localEulerAngles.x,obj.localEulerAngles.y,obj.localEulerAngles.z);	end = Vector3(360*x + obj.localEulerAngles.x, 360*y + obj.localEulerAngles.y, 360 *z + obj.localEulerAngles.x);	for (i = 0.0; i < 1.0; i += Time.deltaTime*(1/duration)) {		if(easing=="easeInQuad"){			obj.localRotation=Quaternion.Euler(easeInQuad(start.x,end.x,i),easeInQuad(start.y,end.y,i),easeInQuad(start.z,end.z,i));		}		if(easing=="easeOutQuad"){			obj.localRotation=Quaternion.Euler(easeOutQuad(start.x,end.x,i),easeOutQuad(start.y,end.y,i),easeOutQuad(start.z,end.z,i));		}		if(easing=="easeInOutQuad"){			obj.localRotation=Quaternion.Euler(easeInOutQuad(start.x,end.x,i),easeInOutQuad(start.y,end.y,i),easeInOutQuad(start.z,end.z,i));		}		if(easing=="easeInCubic"){			obj.localRotation=Quaternion.Euler(easeInCubic(start.x,end.x,i),easeInCubic(start.y,end.y,i),easeInCubic(start.z,end.z,i));		}		if(easing=="easeOutCubic"){			obj.localRotation=Quaternion.Euler(easeOutCubic(start.x,end.x,i),easeOutCubic(start.y,end.y,i),easeOutCubic(start.z,end.z,i));		}		if(easing=="easeInOutCubic"){			obj.localRotation=Quaternion.Euler(easeInOutCubic(start.x,end.x,i),easeInOutCubic(start.y,end.y,i),easeInOutCubic(start.z,end.z,i));		}
