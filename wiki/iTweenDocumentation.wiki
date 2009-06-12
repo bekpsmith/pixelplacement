@@ -27,18 +27,21 @@ iTween.moveTo(gameObject,1,1,1,1,0,"easeInOutQuint");
 <li>Negative/positive values dictate the direction of the applies force.</li>
 </ul>
 </p>
+<br><br>
 <p>
 *moveTo*(obj: GameObject,x: float,y: float,z: float,duration: float,delay: float, easing: String) : void 
 <ul>
 <li>Moves the GameObject to the supplied coordinates.</li>
 </ul>
 </p>
+<br><br>
 <p>
 *moveFrom*(obj: GameObject,x: float,y: float,z: float,duration: float,delay: float, easing: String) : void
 <ul>
 <li>Moves the GameObject from the supplied coordinates</li>
 </ul>
 </p>
+<br><br>
 <p>
 *fadeTo*(obj: GameObject,endA: float,duration: float,delay: float) : void
 <ul>
@@ -46,6 +49,7 @@ iTween.moveTo(gameObject,1,1,1,1,0,"easeInOutQuint");
 <li>Only works if the GameObject's material calculates transparency.</li>
 </ul>
 </p>
+<br><br>
 <p>
 *fadeFrom*(obj: GameObject,endA: float,duration: float,delay: float) : void
 <ul>
@@ -53,6 +57,7 @@ iTween.moveTo(gameObject,1,1,1,1,0,"easeInOutQuint");
 <li>Only works if the GameObject's material calculates transparency.</li>
 </ul>
 </p>
+<br><br>
 <p>
 *rotateTo*(obj: GameObject,x: float,y: float,z: float,duration: float,delay: float, easing: String) : void
 <ul>
@@ -61,6 +66,7 @@ iTween.moveTo(gameObject,1,1,1,1,0,"easeInOutQuint");
 <li>Does not apply to GUITextures.</li>
 </ul>
 </p>
+<br><br>
 <p>
 *rotateFrom*(obj: GameObject,x: float,y: float,z: float,duration: float,delay: float, easing: String) : void
 <ul>
@@ -69,6 +75,7 @@ iTween.moveTo(gameObject,1,1,1,1,0,"easeInOutQuint");
 <li>Does not apply to GUITextures.</li>
 </ul>
 </p>
+<br><br>
 <p>
 *rotateBy*(obj: GameObject,x: float,y: float,z: float,duration: float,delay: float, easing: String) : void
 <ul>
@@ -77,6 +84,7 @@ iTween.moveTo(gameObject,1,1,1,1,0,"easeInOutQuint");
 <li>Does not apply to GUITextures.</li>
 </ul>
 </p>
+<br><br>
 <p>
 *shake*(obj: GameObject,x: float,y: float,z: float,duration: float,delay: float) : void
 <ul>
@@ -84,18 +92,21 @@ iTween.moveTo(gameObject,1,1,1,1,0,"easeInOutQuint");
 <li>Negative/positive values dictate direction of initial impact.</li>
 </ul>
 </p>
+<br><br>
 <p>
 *stab*(obj: GameObject,sound: AudioSource,volume: float,pitch: float,delay: float) : void
 <ul>
 <li>Plays an audio clip one time based on supplied volume and pitch.</li>
 </ul>
 </p>
+<br><br>
 <p>
 *scaleTo*(obj: GameObject,x: float,y: float,z: float,duration: float,delay: float, easing: String) : void
 <ul>
 <li>Scales the GameObject to the supplied coordinates.</li>
 </ul>
 </p>
+<br><br>
 <p>
 *scaleFrom*(obj: GameObject,x: float,y: float,z: float,duration: float,delay: float, easing: String) : void
 <ul>
