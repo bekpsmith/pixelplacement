@@ -4,7 +4,7 @@
 <p>
 iTween.moveTo(gameObject,1,1,1,1,0,"easeInOutQuint");
 </p>
-<br><br><br><br>
+<br><br>
 =Management Methods:=
 <p>
 *stop*(obj: GameObject) : void
@@ -12,63 +12,74 @@ iTween.moveTo(gameObject,1,1,1,1,0,"easeInOutQuint");
 <li>Stops and destroys all iTweens for the supplied GameObject.</li>
 </ul>
 </p>
-
 <p>
 *getTweenCount*(obj: GameObject) : int
 <ul>
 <li>- Returns an integer of the total iTweens running on the supplied GameObject.</li>
 </ul>
 </p>
-
-*Movement Methods:*
-
+<br><br>
+=Movement Methods:=
+<p>
 *punchPosition*(obj: GameObject,x: float,y: float,z: float,duration: float,delay: float) : void
 - Applies a jolt of force on the given access and springs the GameObject back to its original position like a punching bag.
 - Negative/positive values dictate the direction of the applies force.
-
+</p>
+<p>
 *moveTo*(obj: GameObject,x: float,y: float,z: float,duration: float,delay: float, easing: String) : void 
 - Moves the GameObject to the supplied coordinates.
-
+</p>
+<p>
 *moveFrom*(obj: GameObject,x: float,y: float,z: float,duration: float,delay: float, easing: String) : void
 - Moves the GameObject from the supplied coordinates
-
+</p>
+<p>
 *fadeTo*(obj: GameObject,endA: float,duration: float,delay: float) : void
 - Fades the material of the GameObject to the supplied alpha.
 - Only works if the GameObject's material calculates transparency.
-
+</p>
+<p>
 *fadeFrom*(obj: GameObject,endA: float,duration: float,delay: float) : void
 - Fades the material of the GameObject from the supplied alpha.
 - Only works if the GameObject's material calculates transparency.
-
+</p>
+<p>
 *rotateTo*(obj: GameObject,x: float,y: float,z: float,duration: float,delay: float, easing: String) : void
 - Rotates the GameObject to the supplied degrees.
 - Rotation direction is automatically decided based on shortest travel time.
 - Does not apply to GUITextures.
-
+</p>
+<p>
 *rotateFrom*(obj: GameObject,x: float,y: float,z: float,duration: float,delay: float, easing: String) : void
 - Rotates the GameObject from the supplied degrees.
 - Rotation direction is automatically decided based on shortest travel time.
 - Does not apply to GUITextures.
-
+</p>
+<p>
 *rotateBy*(obj: GameObject,x: float,y: float,z: float,duration: float,delay: float, easing: String) : void
 - Rotates the GameObject 360 degrees times the supplied multiplier.
 - Negative/positive values dictate direction of rotation.
 - Does not apply to GUITextures.
-
+</p>
+<p>
 *shake*(obj: GameObject,x: float,y: float,z: float,duration: float,delay: float) : void
 - Randomly shakes the GameObject on each axis by the supplied magnitude.
 - Negative/positive values dictate direction of initial impact.
-
+</p>
+<p>
 *stab*(obj: GameObject,sound: AudioSource,volume: float,pitch: float,delay: float) : void
 - Plays an audio clip one time based on supplied volume and pitch.
-
+</p>
+<p>
 *scaleTo*(obj: GameObject,x: float,y: float,z: float,duration: float,delay: float, easing: String) : void
 - Scales the GameObject to the supplied coordinates.
-
+</p>
+<p>
 *scaleFrom*(obj: GameObject,x: float,y: float,z: float,duration: float,delay: float, easing: String) : void
 - Scales the GameObject from the supplied coordinates.
-
-*Easing Curves:*
+</p>
+<br><br>
+=Easing Curves:=
 
 linear
 spring
