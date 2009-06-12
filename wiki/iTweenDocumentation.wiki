@@ -15,68 +15,92 @@ iTween.moveTo(gameObject,1,1,1,1,0,"easeInOutQuint");
 <p>
 *getTweenCount*(obj: GameObject) : int
 <ul>
-<li>- Returns an integer of the total iTweens running on the supplied GameObject.</li>
+<li>Returns an integer of the total iTweens running on the supplied GameObject.</li>
 </ul>
 </p>
 <br><br>
 =Movement Methods:=
 <p>
 *punchPosition*(obj: GameObject,x: float,y: float,z: float,duration: float,delay: float) : void
-- Applies a jolt of force on the given access and springs the GameObject back to its original position like a punching bag.
-- Negative/positive values dictate the direction of the applies force.
+<ul>
+<li>Applies a jolt of force on the given access and springs the GameObject back to its original position like a punching bag.</li>
+<li>Negative/positive values dictate the direction of the applies force.</li>
+</ul>
 </p>
 <p>
 *moveTo*(obj: GameObject,x: float,y: float,z: float,duration: float,delay: float, easing: String) : void 
-- Moves the GameObject to the supplied coordinates.
+<ul>
+<li>Moves the GameObject to the supplied coordinates.</li>
+</ul>
 </p>
 <p>
 *moveFrom*(obj: GameObject,x: float,y: float,z: float,duration: float,delay: float, easing: String) : void
-- Moves the GameObject from the supplied coordinates
+<ul>
+<li>Moves the GameObject from the supplied coordinates</li>
+</ul>
 </p>
 <p>
 *fadeTo*(obj: GameObject,endA: float,duration: float,delay: float) : void
-- Fades the material of the GameObject to the supplied alpha.
-- Only works if the GameObject's material calculates transparency.
+<ul>
+<li>Fades the material of the GameObject to the supplied alpha.</li>
+<li>Only works if the GameObject's material calculates transparency.</li>
+</ul>
 </p>
 <p>
 *fadeFrom*(obj: GameObject,endA: float,duration: float,delay: float) : void
-- Fades the material of the GameObject from the supplied alpha.
-- Only works if the GameObject's material calculates transparency.
+<ul>
+<li>Fades the material of the GameObject from the supplied alpha.</li>
+<li>Only works if the GameObject's material calculates transparency.</li>
+</ul>
 </p>
 <p>
 *rotateTo*(obj: GameObject,x: float,y: float,z: float,duration: float,delay: float, easing: String) : void
-- Rotates the GameObject to the supplied degrees.
-- Rotation direction is automatically decided based on shortest travel time.
-- Does not apply to GUITextures.
+<ul>
+<li>Rotates the GameObject to the supplied degrees.</li>
+<li>Rotation direction is automatically decided based on shortest travel time.</li>
+<li>Does not apply to GUITextures.</li>
+</ul>
 </p>
 <p>
 *rotateFrom*(obj: GameObject,x: float,y: float,z: float,duration: float,delay: float, easing: String) : void
-- Rotates the GameObject from the supplied degrees.
-- Rotation direction is automatically decided based on shortest travel time.
-- Does not apply to GUITextures.
+<ul>
+<li>Rotates the GameObject from the supplied degrees.</li>
+<li>Rotation direction is automatically decided based on shortest travel time.</li>
+<li>Does not apply to GUITextures.</li>
+</ul>
 </p>
 <p>
 *rotateBy*(obj: GameObject,x: float,y: float,z: float,duration: float,delay: float, easing: String) : void
-- Rotates the GameObject 360 degrees times the supplied multiplier.
-- Negative/positive values dictate direction of rotation.
-- Does not apply to GUITextures.
+<ul>
+<li>Rotates the GameObject 360 degrees times the supplied multiplier.</li>
+<li>Negative/positive values dictate direction of rotation.</li>
+<li>Does not apply to GUITextures.</li>
+</ul>
 </p>
 <p>
 *shake*(obj: GameObject,x: float,y: float,z: float,duration: float,delay: float) : void
-- Randomly shakes the GameObject on each axis by the supplied magnitude.
-- Negative/positive values dictate direction of initial impact.
+<ul>
+<li>Randomly shakes the GameObject on each axis by the supplied magnitude.</li>
+<li>Negative/positive values dictate direction of initial impact.</li>
+</ul>
 </p>
 <p>
 *stab*(obj: GameObject,sound: AudioSource,volume: float,pitch: float,delay: float) : void
-- Plays an audio clip one time based on supplied volume and pitch.
+<ul>
+<li>Plays an audio clip one time based on supplied volume and pitch.</li>
+</ul>
 </p>
 <p>
 *scaleTo*(obj: GameObject,x: float,y: float,z: float,duration: float,delay: float, easing: String) : void
-- Scales the GameObject to the supplied coordinates.
+<ul>
+<li>Scales the GameObject to the supplied coordinates.</li>
+</ul>
 </p>
 <p>
 *scaleFrom*(obj: GameObject,x: float,y: float,z: float,duration: float,delay: float, easing: String) : void
-- Scales the GameObject from the supplied coordinates.
+<ul>
+<li>Scales the GameObject from the supplied coordinates.</li>
+</ul>
 </p>
 <br><br>
 =Easing Curves:=
