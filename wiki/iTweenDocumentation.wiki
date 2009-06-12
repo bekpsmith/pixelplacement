@@ -28,8 +28,7 @@ iTween.moveTo(gameObject,1,1,1,1,0,"easeInOutQuint");
 
 *getTweenCount*(obj: GameObject) : int
 - Returns an integer of the total iTweens running on the supplied GameObject.
-
-</br></br></br></br></br></br>
+<br><br><br><br><br>
 
 *Movement Methods:*
 
