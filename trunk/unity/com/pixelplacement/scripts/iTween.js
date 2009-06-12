@@ -55,26 +55,31 @@ private function punchRotation(x : float, y: float, z: float, duration: float, d
 	var posAug : Vector3;	
 	for (i = 0.0; i < 1.0; i += Time.deltaTime*(1/duration)) {
 		if(x>0){
-			posAug.x=punch(pos.x,pos.x,i,x,0);
+			posAug.x = punch(x,i) + pos.x;
 		}else if(x<0){
-			posAug.x=-punch(pos.x,pos.x,i,Mathf.Abs(x),0);	
+			posAug.x=-punch(Mathf.Abs(x),i) + pos.x;	
 		}
 		if(y>0){
-			posAug.y=punch(pos.y,pos.y,i,y,0);
+			posAug.y=punch(y,i) + pos.y;
 		}else if(y<0){
-			posAug.y=-punch(pos.y,pos.y,i,Mathf.Abs(y),0);	
+			posAug.y=-punch(Mathf.Abs(y),i) + pos.y;	
 		}
 		if(z>0){
-			posAug.z=punch(pos.z,pos.z,i,z,0);
+			posAug.z=punch(z,i) + pos.z;
 		}else if(z<0){
-			posAug.z=-punch(pos.z,pos.z,i,Mathf.Abs(z),0);	
+			posAug.z=-punch(Mathf.Abs(z),i) + pos.z;	
 		}
-		
-		obj.localRotation=Quaternion.Euler(posAug);
+		obj.localRotation=Quaternion.Euler(posAug.x,posAug.y,posAug.z);
 		yield;
 	}
 	obj.localRotation=Quaternion.Euler(pos.x,pos.y,pos.z);
 }
+
+/*
+private function rotateBy(x : float, y: float, z: float, duration: float, delay: float, easing: String) {	if(guiTexture){		Debug.LogError("ERROR: GUITextures cannot be rotated!");        return;			}	if(delay > 0){
+		yield WaitForSeconds (delay);
+	}	obj = gameObject.transform;	start = Vector3(obj.localEulerAngles.x,obj.localEulerAngles.y,obj.localEulerAngles.z);	end = Vector3(360*x + obj.localEulerAngles.x, 360*y + obj.localEulerAngles.y, 360 *z + obj.localEulerAngles.x);	for (i = 0.0; i < 1.0; i += Time.deltaTime*(1/duration)) {		if(easing=="easeInQuad"){			obj.localRotation=Quaternion.Euler(easeInQuad(start.x,end.x,i),easeInQuad(start.y,end.y,i),easeInQuad(start.z,end.z,i));		}		yield;	}	obj.localRotation=Quaternion.Euler(end.x,end.y,end.z);}
+*/
 
 private function punchPosition(x : float, y: float, z: float, duration: float, delay: float) {
 	if(delay > 0){
@@ -83,19 +88,19 @@ private function punchPosition(x : float, y: float, z: float, duration: float, d
 	pos = obj.position;
 	for (i = 0.0; i < 1.0; i += Time.deltaTime*(1/duration)) {
 		if(x>0){
-			obj.position.x=punch(pos.x,pos.x,i,x,0);
+			obj.position.x=punch(x,i) + pos.x;
 		}else if(x<0){
-			obj.position.x=-punch(pos.x,pos.x,i,Mathf.Abs(x),0);	
+			obj.position.x=-punch(Mathf.Abs(x),i) + pos.x;	
 		}
 		if(y>0){
-			obj.position.y=punch(pos.y,pos.y,i,y,0);
+			obj.position.y=punch(y,i) + pos.y;
 		}else if(y<0){
-			obj.position.y=-punch(pos.y,pos.y,i,Mathf.Abs(y),0);	
+			obj.position.y=-punch(Mathf.Abs(y),i) + pos.y;	
 		}
 		if(z>0){
-			obj.position.z=punch(pos.z,pos.z,i,z,0);
+			obj.position.z=punch(z,i) + pos.z;
 		}else if(z<0){
-			obj.position.z=-punch(pos.z,pos.z,i,Mathf.Abs(z),0);	
+			obj.position.z=-punch(Mathf.Abs(z),i) + pos.z;	
 		}
 		yield;
 	}
@@ -336,7 +341,9 @@ function easeInOutBack (start : float, end : float, value : float) : float {
 	return end/2*((value)*value*(((s)+1)*value + s) + 2) + start;
 }
 
-function punch (start : float, end : float, value : float, amplitude : float, period : float) : float {	
+function punch (amplitude : float, value: float) : float {	
+	var start=0;
+	var end=0;
 	var s : float;
 	
 	if (value==0){
@@ -349,7 +356,7 @@ function punch (start : float, end : float, value : float, amplitude : float, pe
 		return start+end;  
 	}
 	
-	period=1*.3;
+	var period=1*.3;
 	
 	if (amplitude < Mathf.Abs(end)) { 
 		amplitude=end; 
