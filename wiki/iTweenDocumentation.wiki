@@ -1,34 +1,24 @@
 #summary Online documentation for iTween.
 
-= Introduction =
-
-iTween Documentation
-
-
-= Details =
-
-Add your content here.  Format your content with:
-  * Text in *bold* or _italic_
-  * Headings, paragraphs, and lists
-  * Automatic links to other wiki pages
-
-*Start an iTween:*
-
+=Start an iTween:=
+<p>
 iTween.moveTo(gameObject,1,1,1,1,0,"easeInOutQuint");
-
-
-
-<h1>*Management Methods:*</h1>
-
+</p>
+<br><br><br><br>
+=Management Methods:=
+<p>
 *stop*(obj: GameObject) : void
 <ul>
 <li>Stops and destroys all iTweens for the supplied GameObject.</li>
 </ul>
+</p>
 
-
+<p>
 *getTweenCount*(obj: GameObject) : int
-- Returns an integer of the total iTweens running on the supplied GameObject.
-<br><br><br><br><br>
+<ul>
+<li>- Returns an integer of the total iTweens running on the supplied GameObject.</li>
+</ul>
+</p>
 
 *Movement Methods:*
 
