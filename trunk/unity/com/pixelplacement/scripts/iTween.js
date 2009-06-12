@@ -1,7 +1,6 @@
-//iTween: Easy movement, rotation and fading of GUITextures and meshes.//If using fadeTo on a mesh, make sure it has a shader that supports transparency.//rotateTo will not a work on a GUITexture since it doesn't have rotation.//iTween calls can be staked with delays to chain animations.//29 possible ease curves are: linear,spring,easeInQuad,easeOutQuad,easeInOutQuad,easeInCubic,easeOutCubic,easeInOutCubic,easeInQuart,easeOutQuart,easeInOutQuart,easeInQuint,easeOutQuint,easeInOutQuint,easeInSine,easeOutSine,easeInOutSine,easeInExpo,easeOutExpo,easeInOutExpo,easeInCirc,easeOutCirc,bounce,easeInBack,easeOutBack,easeInOutBack//Author: Pixelplacement//Usage: Static//Methods: fadeTo,fadeFrom,moveTo,moveFrom,rotateTo
+//iTween: Easy movement, rotation and fading of GUITextures and meshes.//Author: Pixelplacement//Usage: Static//Methods: See documentation in the Wiki
 
 //To do animations: volumeTo(),volumeFrom(),fadeAway(duration,delay),colorTo(),colorFrom(),twinkle(),strobe()
-//To do methods: stop()
 //Clean up: Handle destruction of lingering iTweens after object has been disabled - i.e. avoid issues with iSwap
 #pragma strict//Init vars:static var registers : Array = new Array();static var params : Array = new Array();var id : int = 0;
 
@@ -22,7 +21,11 @@ static function getTweenCount(obj: GameObject) : int{
 	}
 	return scriptCount;
 }
-//Registration functions:static function moveTo(obj: GameObject,x: float,y: float,z: float,duration: float,delay: float, easing: String){	obj.AddComponent ("iTween");	registers.push(obj);	params.push(new Array(x,y,z,duration,delay,easing,"moveTo"));}static function moveFrom(obj: GameObject,x: float,y: float,z: float,duration: float,delay: float, easing: String){	obj.AddComponent ("iTween");	registers.push(obj);	params.push(new Array(x,y,z,duration,delay,easing,"moveFrom"));}static function fadeTo(obj: GameObject,endA: float,duration: float,delay: float){	obj.AddComponent ("iTween");	registers.push(obj);	params.push(new Array(endA,duration,delay,"linear","fadeTo"));}static function fadeFrom(obj: GameObject,endA: float,duration: float,delay: float){	obj.AddComponent ("iTween");	registers.push(obj);	params.push(new Array(endA,duration,delay,"fadeFrom"));}static function rotateTo(obj: GameObject,x: float,y: float,z: float,duration: float,delay: float, easing: String){	obj.AddComponent ("iTween");	registers.push(obj);	params.push(new Array(x,y,z,duration,delay,easing,"rotateTo"));}static function rotateFrom(obj: GameObject,x: float,y: float,z: float,duration: float,delay: float, easing: String){	obj.AddComponent ("iTween");	registers.push(obj);	params.push(new Array(x,y,z,duration,delay,easing,"rotateFrom"));}
+//Registration functions:
+static function punchRotation(obj: GameObject,x: float,y: float,z: float,duration: float,delay: float){	obj.AddComponent ("iTween");	registers.push(obj);	params.push(new Array(x,y,z,duration,delay,"punchRotation"));}
+
+static function punchPosition(obj: GameObject,x: float,y: float,z: float,duration: float,delay: float){	obj.AddComponent ("iTween");	registers.push(obj);	params.push(new Array(x,y,z,duration,delay,"punchPosition"));}
+static function moveTo(obj: GameObject,x: float,y: float,z: float,duration: float,delay: float, easing: String){	obj.AddComponent ("iTween");	registers.push(obj);	params.push(new Array(x,y,z,duration,delay,easing,"moveTo"));}static function moveFrom(obj: GameObject,x: float,y: float,z: float,duration: float,delay: float, easing: String){	obj.AddComponent ("iTween");	registers.push(obj);	params.push(new Array(x,y,z,duration,delay,easing,"moveFrom"));}static function fadeTo(obj: GameObject,endA: float,duration: float,delay: float){	obj.AddComponent ("iTween");	registers.push(obj);	params.push(new Array(endA,duration,delay,"linear","fadeTo"));}static function fadeFrom(obj: GameObject,endA: float,duration: float,delay: float){	obj.AddComponent ("iTween");	registers.push(obj);	params.push(new Array(endA,duration,delay,"fadeFrom"));}static function rotateTo(obj: GameObject,x: float,y: float,z: float,duration: float,delay: float, easing: String){	obj.AddComponent ("iTween");	registers.push(obj);	params.push(new Array(x,y,z,duration,delay,easing,"rotateTo"));}static function rotateFrom(obj: GameObject,x: float,y: float,z: float,duration: float,delay: float, easing: String){	obj.AddComponent ("iTween");	registers.push(obj);	params.push(new Array(x,y,z,duration,delay,easing,"rotateFrom"));}
 
 static function rotateBy(obj: GameObject,x: float,y: float,z: float,duration: float,delay: float, easing: String){	obj.AddComponent ("iTween");	registers.push(obj);	params.push(new Array(x,y,z,duration,delay,easing,"rotateBy"));}
 static function shake(obj: GameObject,x: float,y: float,z: float,duration: float,delay: float){	obj.AddComponent ("iTween");	registers.push(obj);	params.push(new Array(x,y,z,duration,delay,"shake"));}
@@ -31,14 +34,68 @@ static function rotateBy(obj: GameObject,x: float,y: float,z: float,duration: fl
 static function scaleTo(obj: GameObject,x: float,y: float,z: float,duration: float,delay: float, easing: String){	obj.AddComponent ("iTween");	registers.push(obj);	params.push(new Array(x,y,z,duration,delay,easing,"scaleTo"));}
 
 static function scaleFrom(obj: GameObject,x: float,y: float,z: float,duration: float,delay: float, easing: String){	obj.AddComponent ("iTween");	registers.push(obj);	params.push(new Array(x,y,z,duration,delay,easing,"scaleFrom"));}
-//Applied component launcher and loops:function Start(){	findRegister();	var paramList : Array = params[id];	registers.RemoveAt(id);	params.RemoveAt(id);	if(paramList[paramList.length-1]=="moveTo"){		yield moveTo(paramList[0],paramList[1],paramList[2],paramList[3],paramList[4],paramList[5]);	}	if(paramList[paramList.length-1]=="moveFrom"){		yield moveFrom(paramList[0],paramList[1],paramList[2],paramList[3],paramList[4],paramList[5]);	}	if(paramList[paramList.length-1]=="fadeTo"){		yield fadeTo(paramList[0],paramList[1],paramList[2]);	}	if(paramList[paramList.length-1]=="fadeFrom"){		yield fadeFrom(paramList[0],paramList[1],paramList[2]);	}		if(paramList[paramList.length-1]=="rotateTo"){		yield rotateTo(paramList[0],paramList[1],paramList[2],paramList[3],paramList[4],paramList[5]);	}	if(paramList[paramList.length-1]=="rotateFrom"){		yield rotateFrom(paramList[0],paramList[1],paramList[2],paramList[3],paramList[4],paramList[5]);	}
+//Applied component launcher and loops:function Start(){	findRegister();	var paramList : Array = params[id];	registers.RemoveAt(id);	params.RemoveAt(id);
+	if(paramList[paramList.length-1]=="punchRotation"){		yield punchRotation(paramList[0],paramList[1],paramList[2],paramList[3],paramList[4]);	}
+	if(paramList[paramList.length-1]=="punchPosition"){		yield punchPosition(paramList[0],paramList[1],paramList[2],paramList[3],paramList[4]);	}	if(paramList[paramList.length-1]=="moveTo"){		yield moveTo(paramList[0],paramList[1],paramList[2],paramList[3],paramList[4],paramList[5]);	}	if(paramList[paramList.length-1]=="moveFrom"){		yield moveFrom(paramList[0],paramList[1],paramList[2],paramList[3],paramList[4],paramList[5]);	}	if(paramList[paramList.length-1]=="fadeTo"){		yield fadeTo(paramList[0],paramList[1],paramList[2]);	}	if(paramList[paramList.length-1]=="fadeFrom"){		yield fadeFrom(paramList[0],paramList[1],paramList[2]);	}		if(paramList[paramList.length-1]=="rotateTo"){		yield rotateTo(paramList[0],paramList[1],paramList[2],paramList[3],paramList[4],paramList[5]);	}	if(paramList[paramList.length-1]=="rotateFrom"){		yield rotateFrom(paramList[0],paramList[1],paramList[2],paramList[3],paramList[4],paramList[5]);	}
 	if(paramList[paramList.length-1]=="rotateBy"){		yield rotateBy(paramList[0],paramList[1],paramList[2],paramList[3],paramList[4],paramList[5]);	}	if(paramList[paramList.length-1]=="shake"){		yield shake(paramList[0],paramList[1],paramList[2],paramList[3],paramList[4]);	}
 	if(paramList[paramList.length-1]=="stab"){		yield stab(paramList[0],paramList[1],paramList[2],paramList[3]);	}
 	if(paramList[paramList.length-1]=="scaleTo"){		yield scaleTo(paramList[0],paramList[1],paramList[2],paramList[3],paramList[4],paramList[5]);	}
 	if(paramList[paramList.length-1]=="scaleFrom"){		yield scaleFrom(paramList[0],paramList[1],paramList[2],paramList[3],paramList[4],paramList[5]);	}
 		Destroy(this);}
 
-//Scale applied code:private function scaleTo(x : float, y: float, z: float, duration: float, delay: float, easing: String) {	if(delay > 0){
+//Scale applied code:
+private function punchRotation(x : float, y: float, z: float, duration: float, delay: float) {
+	if(delay > 0){
+		yield WaitForSeconds (delay);
+	}	obj = gameObject.transform;
+	pos = obj.position;
+	for (i = 0.0; i < 1.0; i += Time.deltaTime*(1/duration)) {
+		if(x>0){
+			obj.localRotation.x=punch(pos.x,pos.x,i,x,0);
+		}else if(x<0){
+			obj.localRotation.x=-punch(pos.x,pos.x,i,Mathf.Abs(x),0);	
+		}
+		if(y>0){
+			obj.localRotation.y=punch(pos.y,pos.y,i,y,0);
+		}else if(y<0){
+			obj.localRotation.y=-punch(pos.y,pos.y,i,Mathf.Abs(y),0);	
+		}
+		if(z>0){
+			obj.localRotation.z=punch(pos.z,pos.z,i,z,0);
+		}else if(z<0){
+			obj.localRotation.z=-punch(pos.z,pos.z,i,Mathf.Abs(z),0);	
+		}
+		yield;
+	}
+	obj.localRotation=Quaternion.Euler(pos.x,pos.y,pos.z);
+}
+
+private function punchPosition(x : float, y: float, z: float, duration: float, delay: float) {
+	if(delay > 0){
+		yield WaitForSeconds (delay);
+	}	obj = gameObject.transform;
+	pos = obj.position;
+	for (i = 0.0; i < 1.0; i += Time.deltaTime*(1/duration)) {
+		if(x>0){
+			obj.position.x=punch(pos.x,pos.x,i,x,0);
+		}else if(x<0){
+			obj.position.x=-punch(pos.x,pos.x,i,Mathf.Abs(x),0);	
+		}
+		if(y>0){
+			obj.position.y=punch(pos.y,pos.y,i,y,0);
+		}else if(y<0){
+			obj.position.y=-punch(pos.y,pos.y,i,Mathf.Abs(y),0);	
+		}
+		if(z>0){
+			obj.position.z=punch(pos.z,pos.z,i,z,0);
+		}else if(z<0){
+			obj.position.z=-punch(pos.z,pos.z,i,Mathf.Abs(z),0);	
+		}
+		yield;
+	}
+	obj.position=pos;
+}
+private function scaleTo(x : float, y: float, z: float, duration: float, delay: float, easing: String) {	if(delay > 0){
 		yield WaitForSeconds (delay);
 	}	obj = gameObject.transform;	start = obj.localScale;	end = Vector3(x, y, z);	for (i = 0.0; i < 1.0; i += Time.deltaTime*(1/duration)) {		if(easing=="easeInQuad"){			obj.localScale.x=easeInQuad(start.x,end.x,i);			obj.localScale.y=easeInQuad(start.y,end.y,i);			obj.localScale.z=easeInQuad(start.z,end.z,i);		}		if(easing=="easeOutQuad"){			obj.localScale.x=easeOutQuad(start.x,end.x,i);			obj.localScale.y=easeOutQuad(start.y,end.y,i);			obj.localScale.z=easeOutQuad(start.z,end.z,i);		}		if(easing=="easeInOutQuad"){			obj.localScale.x=easeInOutQuad(start.x,end.x,i);			obj.localScale.y=easeInOutQuad(start.y,end.y,i);			obj.localScale.z=easeInOutQuad(start.z,end.z,i);		}		if(easing=="easeInCubic"){			obj.localScale.x=easeInCubic(start.x,end.x,i);			obj.localScale.y=easeInCubic(start.y,end.y,i);			obj.localScale.z=easeInCubic(start.z,end.z,i);		}		if(easing=="easeOutCubic"){			obj.localScale.x=easeOutCubic(start.x,end.x,i);			obj.localScale.y=easeOutCubic(start.y,end.y,i);			obj.localScale.z=easeOutCubic(start.z,end.z,i);		}		if(easing=="easeInOutCubic"){			obj.localScale.x=easeInOutCubic(start.x,end.x,i);			obj.localScale.y=easeInOutCubic(start.y,end.y,i);			obj.localScale.z=easeInOutCubic(start.z,end.z,i);		}
 		if(easing=="easeInQuart"){			obj.localScale.x=easeInQuart(start.x,end.x,i);			obj.localScale.y=easeInQuart(start.y,end.y,i);			obj.localScale.z=easeInQuart(start.z,end.z,i);		}		if(easing=="easeOutQuart"){			obj.localScale.x=easeOutQuart(start.x,end.x,i);			obj.localScale.y=easeOutQuart(start.y,end.y,i);			obj.localScale.z=easeOutQuart(start.z,end.z,i);		}		if(easing=="easeInOutQuart"){			obj.localScale.x=easeInOutQuart(start.x,end.x,i);			obj.localScale.y=easeInOutQuart(start.y,end.y,i);			obj.localScale.z=easeInOutQuart(start.z,end.z,i);		}	
@@ -158,53 +215,53 @@ private function rotateBy(x : float, y: float, z: float, duration: float, delay:
 		if(easing=="bounce"){			obj.localRotation=Quaternion.Euler(bounce(start.x,end.x,i),bounce(start.y,end.y,i),bounce(start.z,end.z,i));		}
 		if(easing=="easeInBack"){			obj.localRotation=Quaternion.Euler(easeInBack(start.x,end.x,i),easeInBack(start.y,end.y,i),easeInBack(start.z,end.z,i));		}
 		if(easing=="easeOutBack"){			obj.localRotation=Quaternion.Euler(easeOutBack(start.x,end.x,i),easeOutBack(start.y,end.y,i),easeOutBack(start.z,end.z,i));		}
-		if(easing=="easeInOutBack"){			obj.localRotation=Quaternion.Euler(easeInOutBack(start.x,end.x,i),easeInOutBack(start.y,end.y,i),easeInOutBack(start.z,end.z,i));		}		yield;	}	obj.localRotation=Quaternion.Euler(end.x,end.y,end.z);		}//Registers ID lookup:private function findRegister(){	for(i = 0; i < registers.length; i++){		if(registers[i]==gameObject){			id =  i;		}	}}//Curvesprivate function linear(start : float, end : float, value : float) : float{	return Mathf.Lerp(start, end, value);}private function clerp(start : float, end : float, value : float) : float {   var min = 0.0;   var max = 360.0;   var half = Mathf.Abs((max - min)/2.0);   var retval = 0.0;   var diff = 0.0;      if((end - start) < -half){       diff = ((max - start)+end)*value;       retval =  start+diff;   }   else if((end - start) > half){       diff = -((max - end)+start)*value;       retval =  start+diff;   }   else retval =  start+(end-start)*value;   return retval;}function spring(start : float, end : float, value : float) : float{    value = Mathf.Clamp01(value);    value = (Mathf.Sin(value * Mathf.PI * (0.2 + 2.5 * value * value * value)) * Mathf.Pow(1 - value, 2.2) + value) * (1 + (1.2 * (1 - value)));    return start + (end - start) * value;}function easeInQuad(start : float, end : float, value : float) : float {	value /= 1;	end -= start;	return end*value*value + start;}function easeOutQuad(start : float, end : float, value : float) : float{	value /= 1;	end -= start;	return -end * value*(value-2) + start;}function easeInOutQuad(start : float, end : float, value : float) : float {	value /= .5;	end -= start;	if (value < 1) return end/2*value*value + start;	value--;	return -end/2 * (value*(value-2) - 1) + start;};function easeInCubic (start : float, end : float, value : float) : float {	value /= 1;	end -= start;	return end*value*value*value + start;};function easeOutCubic (start : float, end : float, value : float) : float {	value /= 1;	value--;	end -= start;	return end*(value*value*value + 1) + start;};function easeInOutCubic (start : float, end : float, value : float) : float {	value /= .5;	end -= start;	if (value < 1) return end/2*value*value*value + start;	value -= 2;	return end/2*(value*value*value + 2) + start;};function easeInQuart (start : float, end : float, value : float) : float {	value /= 1;	end -= start;	return end*value*value*value*value + start;};function easeOutQuart(start : float, end : float, value : float) : float {	value /= 1;	value--;	end -= start;	return -end * (value*value*value*value - 1) + start;};function easeInOutQuart(start : float, end : float, value : float) : float {	value /= .5;	end -= start;	if (value < 1) return end/2*value*value*value*value + start;	value -= 2;	return -end/2 * (value*value*value*value - 2) + start;};
+		if(easing=="easeInOutBack"){			obj.localRotation=Quaternion.Euler(easeInOutBack(start.x,end.x,i),easeInOutBack(start.y,end.y,i),easeInOutBack(start.z,end.z,i));		}		yield;	}	obj.localRotation=Quaternion.Euler(end.x,end.y,end.z);		}//Registers ID lookup:private function findRegister(){	for(i = 0; i < registers.length; i++){		if(registers[i]==gameObject){			id =  i;		}	}}//Curvesprivate function linear(start : float, end : float, value : float) : float{	return Mathf.Lerp(start, end, value);}private function clerp(start : float, end : float, value : float) : float {   var min = 0.0;   var max = 360.0;   var half = Mathf.Abs((max - min)/2.0);   var retval = 0.0;   var diff = 0.0;      if((end - start) < -half){       diff = ((max - start)+end)*value;       retval =  start+diff;   }   else if((end - start) > half){       diff = -((max - end)+start)*value;       retval =  start+diff;   }   else retval =  start+(end-start)*value;   return retval;}private function spring(start : float, end : float, value : float) : float{    value = Mathf.Clamp01(value);    value = (Mathf.Sin(value * Mathf.PI * (0.2 + 2.5 * value * value * value)) * Mathf.Pow(1 - value, 2.2) + value) * (1 + (1.2 * (1 - value)));    return start + (end - start) * value;}private function easeInQuad(start : float, end : float, value : float) : float {	value /= 1;	end -= start;	return end*value*value + start;}private function easeOutQuad(start : float, end : float, value : float) : float{	value /= 1;	end -= start;	return -end * value*(value-2) + start;}private function easeInOutQuad(start : float, end : float, value : float) : float {	value /= .5;	end -= start;	if (value < 1) return end/2*value*value + start;	value--;	return -end/2 * (value*(value-2) - 1) + start;};private function easeInCubic (start : float, end : float, value : float) : float {	value /= 1;	end -= start;	return end*value*value*value + start;};private function easeOutCubic (start : float, end : float, value : float) : float {	value /= 1;	value--;	end -= start;	return end*(value*value*value + 1) + start;};private function easeInOutCubic (start : float, end : float, value : float) : float {	value /= .5;	end -= start;	if (value < 1) return end/2*value*value*value + start;	value -= 2;	return end/2*(value*value*value + 2) + start;};private function easeInQuart (start : float, end : float, value : float) : float {	value /= 1;	end -= start;	return end*value*value*value*value + start;};private function easeOutQuart(start : float, end : float, value : float) : float {	value /= 1;	value--;	end -= start;	return -end * (value*value*value*value - 1) + start;};private function easeInOutQuart(start : float, end : float, value : float) : float {	value /= .5;	end -= start;	if (value < 1) return end/2*value*value*value*value + start;	value -= 2;	return -end/2 * (value*value*value*value - 2) + start;};
 
-function easeInQuint(start : float, end : float, value : float) : float {
+private function easeInQuint(start : float, end : float, value : float) : float {
 	value /= 1;
 	end -= start;
 	return end*value*value*value*value*value + start;
 };
-function easeOutQuint(start : float, end : float, value : float) : float {
+private function easeOutQuint(start : float, end : float, value : float) : float {
 	value /= 1;
 	value--;
 	end -= start;
 	return end*(value*value*value*value*value + 1) + start;
 };
 
-function easeInOutQuint(start : float, end : float, value : float) : float {
+private function easeInOutQuint(start : float, end : float, value : float) : float {
 	value /= .5;	end -= start;
 	if (value < 1) return end/2*value*value*value*value*value + start;
 	value -= 2;
 	return end/2*(value*value*value*value*value + 2) + start;
 };
 
-function easeInSine(start : float, end : float, value : float) : float {
+private function easeInSine(start : float, end : float, value : float) : float {
 	end -= start;
 	return -end * Mathf.Cos(value/1 * (Mathf.PI/2)) + end + start;
 };
 
-function easeOutSine(start : float, end : float, value : float) : float {
+private function easeOutSine(start : float, end : float, value : float) : float {
 	end -= start;
 	return end * Mathf.Sin(value/1 * (Mathf.PI/2)) + start;
 };
 
-function easeInOutSine(start : float, end : float, value : float) : float {
+private function easeInOutSine(start : float, end : float, value : float) : float {
 	end -= start;
 	return -end/2 * (Mathf.Cos(Mathf.PI*value/1) - 1) + start;
 };
 
-function easeInExpo(start : float, end : float, value : float) : float {
+private function easeInExpo(start : float, end : float, value : float) : float {
 	end -= start;
 	return end * Mathf.Pow(2, 10 * (value/1 - 1) ) + start;
 };
 
-function easeOutExpo(start : float, end : float, value : float) : float {
+private function easeOutExpo(start : float, end : float, value : float) : float {
 	end -= start;
 	return end * ( -Mathf.Pow( 2, -10 * value/1 ) + 1 ) + start;
 };
 
-function easeInOutExpo(start : float, end : float, value : float) : float {
+private function easeInOutExpo(start : float, end : float, value : float) : float {
 	value /= .5;
 	end -= start;
 	if (value < 1) return end/2 * Mathf.Pow( 2, 10 * (value - 1) ) + start;
@@ -212,20 +269,20 @@ function easeInOutExpo(start : float, end : float, value : float) : float {
 	return end/2 * ( -Mathf.Pow( 2, -10 * value) + 2 ) + start;
 };
 
-function easeInCirc(start : float, end : float, value : float) : float {
+private function easeInCirc(start : float, end : float, value : float) : float {
 	value /= 1;
 	end -= start;
 	return -end * (Mathf.Sqrt(1 - value*value) - 1) + start;
 };
 
-function easeOutCirc(start : float, end : float, value : float) : float {
+private function easeOutCirc(start : float, end : float, value : float) : float {
 	value /= 1;
 	value--;
 	end -= start;
 	return end * Mathf.Sqrt(1 - value*value) + start;
 };
 
-function easeInOutCirc(start : float, end : float, value : float) : float {
+private function easeInOutCirc(start : float, end : float, value : float) : float {
 	value /= .5;
 	end -= start;
 	if (value < 1) return -end/2 * (Mathf.Sqrt(1 - value*value) - 1) + start;
@@ -233,7 +290,7 @@ function easeInOutCirc(start : float, end : float, value : float) : float {
 	return end/2 * (Mathf.Sqrt(1 - value*value) + 1) + start;
 };
 
-function bounce (start : float, end : float, value : float) : float {
+private function bounce (start : float, end : float, value : float) : float {
 	value /= 1;
 	end -= start;
 	if (value < (1/2.75)) {
@@ -275,4 +332,28 @@ function easeInOutBack (start : float, end : float, value : float) : float {
 	value-=2;
 	s*=(1.525);
 	return end/2*((value)*value*(((s)+1)*value + s) + 2) + start;
+}
+
+function punch (start : float, end : float, value : float, amplitude : float, period : float) : float {	
+	var s : float;
+	
+	if (value==0){
+		return start; 
+	}
+	
+	value /= 1;
+	
+	if (value==1){
+		return start+end;  
+	}
+	
+	period=1*.3;
+	
+	if (amplitude < Mathf.Abs(end)) { 
+		amplitude=end; 
+		s=period/4;
+	}else {
+		s = period/(2*Mathf.PI) * Mathf.Asin (end/amplitude);
+		return (amplitude*Mathf.Pow(2,-10*value) * Mathf.Sin((value*1-s)*(2*Mathf.PI)/period) + end + start);
+	}
 }
