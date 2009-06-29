@@ -1,14 +1,9 @@
-//FPS: Utilizes a GUIText object to display rough frames per second.
-//Author: Aras Pranckevicius
-//Usage: Component
-//Methods: None
-
 #pragma strict
 
-//Init vars:
-var updateInterval = 0.5;
-private var accum = 0.0;
-private var frames = 0;
+//Vars:
+var updateInterval : float = 0.5;
+private var accum : float;
+private var frames : float;
 private var timeleft : float;
 
 //Verify GUIText and initialize:

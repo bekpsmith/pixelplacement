@@ -1,21 +1,6 @@
-//iTouchGUI: Global button method for GUITextures and rectangle objects.
-//Author: Pixelplacement
-//Usage: Component, Static
-//Methods: OnFingerDown, OnFingerHeld
-
-//Example:
-/*
-if(iTouchGUI.OnFingerHeld(guiTexture.GetScreenRect())){
-	print("Down");
-	guiTexture.color=Color(.2,.2,.2,.5);
-}else{
-	guiTexture.color=Color(.5,.5,.5,.5);	
-}
-*/
-
 #pragma strict
 
-//Init vars:
+//Vars:
 static var phase : iPhoneTouch;
 static var touch : iPhoneTouch;
 static var touchLocation : Vector2;
@@ -28,7 +13,7 @@ function Update () {
 }
 
 //Check for single hit:
-static function OnFingerDown(rect:Rect):boolean{
+static function onFingerDown(rect:Rect):boolean{
 	if(phase.phase==iPhoneTouchPhase.Began && iPhoneInput.touchCount>0){
 		if (rect.Contains(phase.position)){
 			touchLocation=phase.position;
@@ -43,9 +28,9 @@ static function OnFingerDown(rect:Rect):boolean{
 }
 
 //Check for held/dragged over hit:
-static function OnFingerHeld(rect:Rect):boolean{
+static function onFingerHeld(rect:Rect):boolean{
 	if (rect.Contains(phase.position)){
-		if(phase.phase==iPhoneTouchPhase.Stationary || phase.phase==iPhoneTouchPhase.Moved){
+		if(phase.phase==iPhoneTouchPhase.Stationary || phase.phase==iPhoneTouchPhase.Moved && iPhoneInput.touchCount>0){
 			touchLocation=phase.position;
 			return(true);
 		}

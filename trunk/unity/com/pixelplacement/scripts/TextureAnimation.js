@@ -1,8 +1,4 @@
-//iTextureAnimatorEventSheet: Simple component to cycle through a sprite sheet to allow texture animations.
-//Current version requires the sheet to have an equal number of rows and columns.  
-//Author: Pixelplacement
-//Usage: Component
-//Methods: None
+#pragma strict
 
 private var tileSize : Vector2;
 var columns : float = 6;
