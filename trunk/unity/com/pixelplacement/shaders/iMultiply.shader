@@ -1,5 +1,6 @@
 Shader "iPhone/Multiply" {
 Properties {
+	_Color ("Main Color", Color) = (1,1,1,1)
 	_MainTex ("Particle Texture", 2D) = "white" {}
 }
 
@@ -13,24 +14,10 @@ Category {
 		Bind "TexCoord", texcoord
 	}
 	
-	// ---- Dual texture cards
 	SubShader {
 		Pass {
 			SetTexture [_MainTex] {
-				combine texture * primary
-			}
-			SetTexture [_MainTex] {
-				constantColor (1,1,1,1)
-				combine previous lerp (previous) constant
-			}
-		}
-	}
-	
-	// ---- Single texture cards (does not do particle colors)
-	SubShader {
-		Pass {
-			SetTexture [_MainTex] {
-				constantColor (1,1,1,1)
+				constantColor [_Color]
 				combine texture lerp(texture) constant
 			}
 		}
