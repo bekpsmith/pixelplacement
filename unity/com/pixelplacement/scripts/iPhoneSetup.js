@@ -1,13 +1,8 @@
-//iPhoneSetup: Sets iPhone environemnt.
-//Author: Pixelplacement
-//Usage: Component
-//Methods: None
-
 #pragma strict
 
-//Init vars:
+//Vars:
 var verticalOrientation:boolean=false;
-var screenCanDarken:boolean=false;
+var screenCanDarken:boolean=true;
 
 //Modify iPhone settings:
 function Start (){
