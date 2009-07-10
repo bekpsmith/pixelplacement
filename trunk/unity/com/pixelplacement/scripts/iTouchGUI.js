@@ -3,7 +3,7 @@
 //Vars:
 static var phase : iPhoneTouch;
 static var touch : iPhoneTouch;
-static var touchLocation : Vector2;
+static var position : Vector2;
 
 //Check for touch:
 function Update () {
@@ -14,12 +14,12 @@ function Update () {
 
 //Check for single hit:
 static function onFingerDown(rect:Rect):boolean{
-	if(phase.phase==iPhoneTouchPhase.Began && iPhoneInput.touchCount>0){
+	if(phase.phase==iPhoneTouchPhase.Began && iPhoneInput.touchCount>0 && phase.position.x >0 && phase.position.y >0){
 		if (rect.Contains(phase.position)){
-			touchLocation=phase.position;
+			position=phase.position;
         	return(true);
 		}else{
-			touchLocation=Vector2(-1,-1);
+			position=Vector2(-1,-1);
 			return(false);	
 		}
 	}else{
@@ -31,11 +31,11 @@ static function onFingerDown(rect:Rect):boolean{
 static function onFingerHeld(rect:Rect):boolean{
 	if (rect.Contains(phase.position)){
 		if(phase.phase==iPhoneTouchPhase.Stationary || phase.phase==iPhoneTouchPhase.Moved && iPhoneInput.touchCount>0){
-			touchLocation=phase.position;
+			position=phase.position;
 			return(true);
 		}
 	}else{
-		touchLocation=Vector2(-1,-1);
+		position=Vector2(-1,-1);
 		return(false);	
 	}
 }
