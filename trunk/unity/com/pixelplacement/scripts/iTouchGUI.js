@@ -9,17 +9,28 @@ static var position : Vector2;
 function Update () {
 	for (touch in iPhoneInput.touches) {
 		phase = iPhoneInput.touches[0];
+		position=phase.position;
 	}
 }
 
 //Check for single hit:
+static function onFingerTouch(rect:Rect):boolean{
+	if(phase.phase==iPhoneTouchPhase.Began && iPhoneInput.touchCount>0 && phase.position.x >0 && phase.position.y >0){
+		if (rect.Contains(phase.position)){
+        	return(true);
+		}else{
+			return(false);	
+		}
+	}else{
+		return(false);
+	}
+}
+
 static function onFingerDown(rect:Rect):boolean{
 	if(phase.phase==iPhoneTouchPhase.Began && iPhoneInput.touchCount>0 && phase.position.x >0 && phase.position.y >0){
 		if (rect.Contains(phase.position)){
-			position=phase.position;
         	return(true);
 		}else{
-			position=Vector2(-1,-1);
 			return(false);	
 		}
 	}else{
@@ -31,11 +42,18 @@ static function onFingerDown(rect:Rect):boolean{
 static function onFingerHeld(rect:Rect):boolean{
 	if (rect.Contains(phase.position)){
 		if(phase.phase==iPhoneTouchPhase.Stationary || phase.phase==iPhoneTouchPhase.Moved && iPhoneInput.touchCount>0){
-			position=phase.position;
 			return(true);
 		}
 	}else{
-		position=Vector2(-1,-1);
+		return(false);	
+	}
+}
+
+//Check for released:
+static function onFingerUp():boolean{
+	if(phase.phase==iPhoneTouchPhase.Ended){
+		return(true);
+	}else{
 		return(false);	
 	}
 }
