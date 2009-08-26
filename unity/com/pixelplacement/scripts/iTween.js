@@ -10,7 +10,7 @@ static function moveFrom(obj: GameObject,x: float,y: float,z: float,duration: fl
 	obj.transform.position.x=x;
 	obj.transform.position.y=y;
 	obj.transform.position.z=z;
-	moveTo(obj,startX,startY,startY,duration,delay,easing,loop);
+	moveTo(obj,startX,startY,startZ,duration,delay,easing,loop);
 }
 static function moveTo(obj: GameObject,x: float,y: float,z: float,duration: float,delay: float, easing: String, loop: int){	obj.AddComponent ("iTween");	registers.push(obj);	params.push(new Array(x,y,z,duration,delay,easing,loop,"moveTo"));}
 
