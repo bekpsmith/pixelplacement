@@ -43,6 +43,15 @@ function Update () {
 	}else{
 		position = new Vector2();
 		count=0;
+		fingers=0;
+	}
+	
+	//Clean up:
+	if(count == 0){
+		touched=false;
+		position = new Vector2();
+		count=0;
+		fingers=0;		
 	}
 }
 
