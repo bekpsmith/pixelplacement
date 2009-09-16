@@ -1,62 +1,62 @@
-//iTouch: Global iPhone touch manager for single touch handling on meshes with colliders.
-//If you fail to get a response, ensure the mesh has a collider attached.
-//Author: Pixelplacement
-//Usage: Component, Static
-//Methods: OnFingerDown, OnFingerHeld
+static var count : int = 0;
+static var touched : boolean;
+static var released : boolean;
+static var position : Vector2;
 
-//Example:
-/*
-if(iTouch.OnFingerDown("GasPedal")){
-	print("Down!");
-}
+private static var lastPosition : Vector2;
+private static var touchInfo : iPhoneTouch;
+
+function Update () {
+	//Prevent false release reporting:
+	released=false;
 	
-if(iTouch.onFingerHeld(gameObject.name)){
-	print("Held");
-}
-*/
-
-#pragma strict
-
-//Init vars:
-static var touching : String;
-static var phase : iPhoneTouchPhase;
-var rayLength : Number = 10;
-
-//Seek single touch and set 'touching' to actively touched object:
-function Update(){
+	//Touch checking:
+	var fingers : int = 0;
 	for (var touch : iPhoneTouch in iPhoneInput.touches) {
-		phase = iPhoneInput.touches[0].phase;
-		var ray : Ray = Camera.main.ScreenPointToRay (iPhoneInput.touches[0].position);
-		Debug.DrawRay (ray.origin, ray.direction, Color.yellow);
-		var hit : RaycastHit;
-		if (Physics.Raycast (ray, hit, rayLength)){
-			touching = hit.collider.gameObject.name;
-		}else{
-			touching=null;	
+		if (touch.phase != iPhoneTouchPhase.Ended && touch.phase != iPhoneTouchPhase.Canceled){
+			fingers++;
+			touchInfo = touch;
 		}
-		if(iPhoneInput.touches[0].phase==iPhoneTouchPhase.Ended){
-			touching = null;
+		if(touch.phase == iPhoneTouchPhase.Ended && fingers==0){
+			released=true;
+			lastPosition=touch.position;
 		}
 	}
-	if(iPhoneInput.touchCount==0){
-		touching = null;
+	
+	//Handle touches:
+	if(fingers > 0){
+		//Keep track of total touches:
+		count=fingers;
+		//Fullscreen checking:
+		if(count==1){
+			if(touchInfo.phase == iPhoneTouchPhase.Began){
+				touched=true;
+				position=touchInfo.position;
+				
+				//clear lastPosition:
+				lastPosition=new Vector2();
+			}else{
+				touched=false;	
+			}
+		}
+		
+	}else{
+		position = new Vector2();
+		count=0;
 	}
 }
 
-//Check for single hit:
-static function OnFingerDown(target:String):boolean{
-	if(phase==iPhoneTouchPhase.Began){
-		if(touching==target){
-			return true;
-		}else{
-			return false;
-		}
+
+static function touchedIn(area : Rect):boolean{
+	if(area.Contains(position) && touched){
+		return true;
+	}else{
+		return false;	
 	}
 }
 
-//Check for held/dragged over hit:
-static function OnFingerHeld(target:String):boolean{
-	if(touching == target && iPhoneInput.touchCount>0){
+static function releasedIn(area : Rect):boolean{
+	if(area.Contains(lastPosition) && released){
 		return true;
 	}else{
 		return false;	
