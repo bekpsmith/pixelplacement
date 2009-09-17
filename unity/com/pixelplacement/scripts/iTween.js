@@ -8,6 +8,13 @@ static var registers : Array = new Array();
 static var params : Array = new Array();
 var id : int = 0;
 
+//Environment init (running this in a GO's Awake that is going to have dynamic iTweens added significantly lessens performance impacts):
+static function init(obj: GameObject){
+	obj.AddComponent ("iTween");
+	registers.push(obj);
+	params.push(new Array("init"));
+}
+
 //Stop tweening
 static function stop(obj: GameObject){
 	var scripts = obj.GetComponents (iTween);
@@ -150,6 +157,9 @@ function Start(){
 	var paramList : Array = params[id];
 	registers.RemoveAt(id);
 	params.RemoveAt(id);
+	if(paramList[paramList.length-1]=="init"){
+		initMe();
+	}
 	if(paramList[paramList.length-1]=="moveTo"){
 		while (true){
 			yield moveTo(paramList[0],paramList[1],paramList[2],paramList[3],paramList[4],paramList[5],paramList[6]);
@@ -197,6 +207,11 @@ function Start(){
 	}	
 }
 
+//Init:
+private function initMe(){
+	Destroy (this);
+}
+
 //Loops
 private function punchRotation(x : float, y: float, z: float, duration: float, delay: float) {
 	if(delay > 0){
@@ -228,6 +243,7 @@ private function punchRotation(x : float, y: float, z: float, duration: float, d
 		yield;
 	}
 	obj.localRotation=Quaternion.Euler(pos.x,pos.y,pos.z);
+	Destroy (this);
 }
 
 private function punchPosition(x : float, y: float, z: float, duration: float, delay: float) {
