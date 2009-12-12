@@ -25,13 +25,13 @@ function Update () {
 	
 	//Handle touches:
 	if(fingers > 0){
+		position=touchInfo.position;
 		//Keep track of total touches:
 		count=fingers;
 		//Fullscreen checking:
 		if(count==1){
 			if(touchInfo.phase == iPhoneTouchPhase.Began){
 				touched=true;
-				position=touchInfo.position;
 				
 				//clear lastPosition:
 				lastPosition=new Vector2();
