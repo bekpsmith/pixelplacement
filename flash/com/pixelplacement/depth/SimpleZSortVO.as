@@ -1,1 +1,0 @@
-﻿package com.pixelplacement.depth {	import flash.display.DisplayObject;					public class SimpleZSortVO	{		public var object : DisplayObject;		public var screenZ:Number;				public function SimpleZSortVO(object : DisplayObject, screenZ:Number){			this.object = object;			this.screenZ = screenZ;		}	}}
