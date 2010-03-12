@@ -33,24 +33,23 @@ static function getTweenCount(obj: GameObject) : int{
 	return scriptCount;
 }
 
-//Registration functions, loopable:
-static function moveFrom(obj: GameObject,x: float,y: float,z: float,duration: float,delay: float, easing: String, loop: String){
+static function moveFrom(obj: GameObject,x: float,y: float,z: float,duration: float,delay: float, easing: String){
 	startX=obj.transform.position.x;
 	startY=obj.transform.position.y;
 	startZ=obj.transform.position.z;
 	obj.transform.position.x=x;
 	obj.transform.position.y=y;
 	obj.transform.position.z=z;
-	moveTo(obj,startX,startY,startZ,duration,delay,easing,loop);
+	moveTo(obj,startX,startY,startZ,duration,delay,easing);
 }
 
-static function moveTo(obj: GameObject,x: float,y: float,z: float,duration: float,delay: float, easing: String, loop: String){
+static function moveTo(obj: GameObject,x: float,y: float,z: float,duration: float,delay: float, easing: String){
 	obj.AddComponent ("iTween");
 	registers.push(obj);
-	params.push(new Array(x,y,z,duration,delay,easing,loop,"moveTo"));
+	params.push(new Array(x,y,z,duration,delay,easing,"moveTo"));
 }
 
-static function fadeFrom(obj: GameObject,endA: float,duration: float,delay: float, easing: String, loop: String){
+static function fadeFrom(obj: GameObject,endA: float,duration: float,delay: float, easing: String){
 	if(obj.guiTexture){
 		startA = obj.guiTexture.color.a;
 		obj.guiTexture.color.a=endA;
@@ -58,44 +57,44 @@ static function fadeFrom(obj: GameObject,endA: float,duration: float,delay: floa
 		startA = obj.renderer.material.color.a;
 		obj.renderer.material.color.a=endA;	
 	}
-	fadeTo(obj,startA,duration,delay,easing,loop);	
+	fadeTo(obj,startA,duration,delay,easing);	
 }
 
-static function fadeTo(obj: GameObject,endA: float,duration: float,delay: float, easing: String, loop: String){
+static function fadeTo(obj: GameObject,endA: float,duration: float,delay: float, easing: String){
 	obj.AddComponent ("iTween");
 	registers.push(obj);
-	params.push(new Array(endA,duration,delay,easing,loop,"fadeTo"));
+	params.push(new Array(endA,duration,delay,easing,"fadeTo"));
 }
 
-static function rotateTo(obj: GameObject,x: float,y: float,z: float,duration: float,delay: float, easing: String, loop: String){
+static function rotateTo(obj: GameObject,x: float,y: float,z: float,duration: float,delay: float, easing: String){
 	obj.AddComponent ("iTween");
 	registers.push(obj);
-	params.push(new Array(x,y,z,duration,delay,easing,loop,"rotateTo"));
+	params.push(new Array(x,y,z,duration,delay,easing,"rotateTo"));
 }
 
-static function rotateBy(obj: GameObject,x: float,y: float,z: float,duration: float,delay: float, easing: String, loop:String){
+static function rotateBy(obj: GameObject,x: float,y: float,z: float,duration: float,delay: float, easing: String){
 	obj.AddComponent ("iTween");
 	registers.push(obj);
-	params.push(new Array(x,y,z,duration,delay,easing,loop,"rotateBy"));
+	params.push(new Array(x,y,z,duration,delay,easing,"rotateBy"));
 }
 
-static function scaleFrom(obj: GameObject,x: float,y: float,z: float,duration: float,delay: float, easing: String, loop:String){
+static function scaleFrom(obj: GameObject,x: float,y: float,z: float,duration: float,delay: float, easing: String){
 	targetX=obj.transform.localScale.x;
 	targetY=obj.transform.localScale.y;
 	targetZ=obj.transform.localScale.z;
 	obj.transform.localScale.x=x;
 	obj.transform.localScale.y=y;
 	obj.transform.localScale.z=z;
-	iTween.scaleTo(obj,targetX,targetY,targetZ,duration,delay,easing,loop);
+	iTween.scaleTo(obj,targetX,targetY,targetZ,duration,delay,easing);
 }
 
-static function scaleTo(obj: GameObject,x: float,y: float,z: float,duration: float,delay: float, easing: String, loop:String){
+static function scaleTo(obj: GameObject,x: float,y: float,z: float,duration: float,delay: float, easing: String){
 	obj.AddComponent ("iTween");
 	registers.push(obj);
-	params.push(new Array(x,y,z,duration,delay,easing,loop,"scaleTo"));
+	params.push(new Array(x,y,z,duration,delay,easing,"scaleTo"));
 }
 
-static function colorFrom(obj: GameObject,r: float,g: float,b: float,duration: float,delay: float, easing: String, loop:String){
+static function colorFrom(obj: GameObject,r: float,g: float,b: float,duration: float,delay: float, easing: String){
 	if(obj.guiTexture){
 		startR = obj.guiTexture.color.r;
 		startG = obj.guiTexture.color.g;
@@ -111,16 +110,15 @@ static function colorFrom(obj: GameObject,r: float,g: float,b: float,duration: f
 		obj.renderer.material.color.g=g;	
 		obj.renderer.material.color.b=b;	
 	}
-	colorTo(obj,startR,startG,startB,duration,delay,easing,loop);		
+	colorTo(obj,startR,startG,startB,duration,delay,easing);		
 }
 
-static function colorTo(obj: GameObject,r: float,g: float,b: float,duration: float,delay: float, easing: String, loop:String){
+static function colorTo(obj: GameObject,r: float,g: float,b: float,duration: float,delay: float, easing: String){
 	obj.AddComponent ("iTween");
 	registers.push(obj);
-	params.push(new Array(r,g,b,duration,delay,easing,loop,"colorTo"));
+	params.push(new Array(r,g,b,duration,delay,easing,"colorTo"));
 }
 
-//Registration functions, non-loopable:
 static function punchRotation(obj: GameObject,x: float,y: float,z: float,duration: float,delay: float){
 	obj.AddComponent ("iTween");
 	registers.push(obj);
@@ -162,32 +160,32 @@ function Start(){
 	}
 	if(paramList[paramList.length-1]=="moveTo"){
 		while (true){
-			yield moveTo(paramList[0],paramList[1],paramList[2],paramList[3],paramList[4],paramList[5],paramList[6]);
+			yield moveTo(paramList[0],paramList[1],paramList[2],paramList[3],paramList[4],paramList[5]);
 		}
 	}
 	if(paramList[paramList.length-1]=="fadeTo"){
 		while (true){
-			yield fadeTo(paramList[0],paramList[1],paramList[2],paramList[3],paramList[4]);
+			yield fadeTo(paramList[0],paramList[1],paramList[2],paramList[3]);
 		}
 	}
 	if(paramList[paramList.length-1]=="rotateTo"){
 		while (true){
-			yield rotateTo(paramList[0],paramList[1],paramList[2],paramList[3],paramList[4],paramList[5],paramList[6]);
+			yield rotateTo(paramList[0],paramList[1],paramList[2],paramList[3],paramList[4],paramList[5]);
 		}
 	}
 	if(paramList[paramList.length-1]=="rotateBy"){
 		while (true){
-			yield rotateBy(paramList[0],paramList[1],paramList[2],paramList[3],paramList[4],paramList[5],paramList[6]);
+			yield rotateBy(paramList[0],paramList[1],paramList[2],paramList[3],paramList[4],paramList[5]);
 		}
 	}
 	if(paramList[paramList.length-1]=="scaleTo"){
 		while (true){
-			yield scaleTo(paramList[0],paramList[1],paramList[2],paramList[3],paramList[4],paramList[5],paramList[6]);
+			yield scaleTo(paramList[0],paramList[1],paramList[2],paramList[3],paramList[4],paramList[5]);
 		}
 	}
 	if(paramList[paramList.length-1]=="colorTo"){
 		while (true){
-			yield colorTo(paramList[0],paramList[1],paramList[2],paramList[3],paramList[4],paramList[5],paramList[6]);
+			yield colorTo(paramList[0],paramList[1],paramList[2],paramList[3],paramList[4],paramList[5]);
 		}
 	}
 	if(paramList[paramList.length-1]=="punchRotation"){
@@ -397,7 +395,7 @@ private function audioTo(sound: AudioSource, volume : float, pitch: float, durat
 	sound.pitch = endP;
 }
 
-private function scaleTo(x : float, y: float, z: float, duration: float, delay: float, easing: String,loop: String) {
+private function scaleTo(x : float, y: float, z: float, duration: float, delay: float, easing: String) {
 	if(delay > 0){
 		yield WaitForSeconds (delay);
 	}
@@ -542,16 +540,8 @@ private function scaleTo(x : float, y: float, z: float, duration: float, delay: 
 		}
 		yield;
 	}
-	if(loop == "loop"){
-		obj.localScale=start;	
-	} else if(loop == "pingpong"){
-		obj.localScale=end;	
-		iTween.scaleTo(obj.gameObject,start.x,start.y,start.z,duration,delay,easing,loop);
-		Destroy (this);
-	} else {
-		obj.localScale=end;	
-		Destroy (this);
-	}	
+	obj.localScale=end;	
+	Destroy (this);	
 }
 
 function stab(sound: AudioSource,volume: float,pitch: float,delay: float){
@@ -593,7 +583,7 @@ function shake(x : float, y: float, z: float, duration: float, delay: float){
 	obj.position=start;
 }
 
-private function fadeTo(endA: float, duration: float, delay: float, easing: String, loop:String) {
+private function fadeTo(endA: float, duration: float, delay: float, easing: String) {
 	if(delay > 0){
 		yield WaitForSeconds (delay);
 	}
@@ -684,16 +674,8 @@ private function fadeTo(endA: float, duration: float, delay: float, easing: Stri
 			}				
 			yield;
 		}
-		if(loop == "loop"){
-			guiTexture.color.a=start;
-		} else if(loop == "pingpong"){
-			guiTexture.color.a= endA;
-			iTween.fadeTo(obj.gameObject,start,duration,delay,easing,loop);
-			Destroy (this);
-		} else {
-			guiTexture.color.a= endA;
-			Destroy (this);
-		}	
+		guiTexture.color.a= endA;
+		Destroy (this);	
 	}else{
 		start=obj.renderer.material.color.a;
 		for (i = 0.0; i < 1.0; i += Time.deltaTime*(1/duration)) {
@@ -780,20 +762,12 @@ private function fadeTo(endA: float, duration: float, delay: float, easing: Stri
 			}			
 			yield;
 		}
-		if(loop == "loop"){
-			obj.renderer.material.color.a=start;
-		} else if(loop == "pingpong"){
-			obj.renderer.material.color.a=endA;
-			iTween.fadeTo(obj.gameObject,start,duration,delay,easing,loop);
-			Destroy (this);
-		} else {
-			obj.renderer.material.color.a= endA;
-			Destroy (this);
-		}
+		obj.renderer.material.color.a= endA;
+		Destroy (this);
 	}
 }
 
-private function moveTo(x : float, y: float, z: float, duration: float, delay: float, easing: String, loop: String) {
+private function moveTo(x : float, y: float, z: float, duration: float, delay: float, easing: String) {
 	if(delay > 0){
 		yield WaitForSeconds (delay);
 	}
@@ -938,19 +912,11 @@ private function moveTo(x : float, y: float, z: float, duration: float, delay: f
 		}
 		yield;
 	}
-	if(loop == "loop"){
-		obj.position=start;
-	} else if(loop == "pingpong"){
-		obj.position=end;
-		iTween.moveTo(obj.gameObject,start.x,start.y,start.z,duration,delay,easing,loop);
-		Destroy (this);
-	} else {
-		obj.position=end;
-		Destroy (this);
-	}	
+	obj.position=end;
+	Destroy (this);
 }
 
-private function rotateBy(x : float, y: float, z: float, duration: float, delay: float, easing: String,loop: String) {
+private function rotateBy(x : float, y: float, z: float, duration: float, delay: float, easing: String) {
 	if(guiTexture){
 		Debug.LogError("ERROR: GUITextures cannot be rotated!");
         return;		
@@ -1046,19 +1012,11 @@ private function rotateBy(x : float, y: float, z: float, duration: float, delay:
 		}
 		yield;
 	}
-	if(loop == "loop"){
-		obj.localRotation=Quaternion.Euler(start.x,start.y,start.z);
-	} else if(loop == "pingpong"){
-		obj.localRotation=Quaternion.Euler(end.x,end.y,end.z);
-		iTween.rotateBy(obj.gameObject,-x,-y,-z,duration,delay,easing,loop);
-		Destroy (this);
-	} else {
-		obj.localRotation=Quaternion.Euler(end.x,end.y,end.z);
-		Destroy (this);
-	}
+	obj.localRotation=Quaternion.Euler(end.x,end.y,end.z);
+	Destroy (this);
 }
 
-private function rotateTo(x : float, y: float, z: float, duration: float, delay: float, easing: String,loop:String) {
+private function rotateTo(x : float, y: float, z: float, duration: float, delay: float, easing: String) {
 	if(guiTexture){
 		Debug.LogError("ERROR: GUITextures cannot be rotated!");
         return;		
@@ -1154,19 +1112,11 @@ private function rotateTo(x : float, y: float, z: float, duration: float, delay:
 		}
 		yield;
 	}
-	if(loop == "loop"){
-		obj.localRotation=Quaternion.Euler(start.x,start.y,start.z);
-	} else if(loop == "pingpong"){
-		obj.localRotation=Quaternion.Euler(end.x,end.y,end.z);
-		iTween.rotateTo(obj.gameObject,start.x,start.y,start.z,duration,delay,easing,loop);
-		Destroy (this);
-	} else {
-		obj.localRotation=Quaternion.Euler(end.x,end.y,end.z);
-		Destroy (this);
-	}	
+	obj.localRotation=Quaternion.Euler(end.x,end.y,end.z);
+	Destroy (this);
 }
 
-private function colorTo(r: float,g: float,b: float,duration: float, delay: float, easing: String, loop:String) {
+private function colorTo(r: float,g: float,b: float,duration: float, delay: float, easing: String) {
 	if(delay > 0){
 		yield WaitForSeconds (delay);
 	}
@@ -1312,22 +1262,10 @@ private function colorTo(r: float,g: float,b: float,duration: float, delay: floa
 			}			
 			yield;
 		}
-		if(loop == "loop"){
-			obj.guiTexture.color.r=start.r;
-			obj.guiTexture.color.g=start.g;
-			obj.guiTexture.color.b=start.b;	
-		} else if(loop == "pingpong"){
-			obj.guiTexture.color.r=end.r;
-			obj.guiTexture.color.g=end.g;
-			obj.guiTexture.color.b=end.b;
-			iTween.colorTo(obj.gameObject,start.r,start.g,start.b,duration,delay,easing,loop);
-			Destroy (this);
-		} else {
-			obj.guiTexture.color.r=end.r;
-			obj.guiTexture.color.g=end.g;
-			obj.guiTexture.color.b=end.b;
-			Destroy (this);
-		}	
+		obj.guiTexture.color.r=end.r;
+		obj.guiTexture.color.g=end.g;
+		obj.guiTexture.color.b=end.b;
+		Destroy (this);	
 	}else{
 		start=obj.renderer.material.color;
 		end = Color (r,g,b);
@@ -1469,22 +1407,10 @@ private function colorTo(r: float,g: float,b: float,duration: float, delay: floa
 			}			
 			yield;
 		}
-		if(loop == "loop"){
-			obj.renderer.material.color.r=start.r;
-			obj.renderer.material.color.g=start.g;
-			obj.renderer.material.color.b=start.b;	
-		} else if(loop == "pingpong"){
-			obj.renderer.material.color.r=end.r;
-			obj.renderer.material.color.g=end.g;
-			obj.renderer.material.color.b=end.b;
-			iTween.colorTo(obj.gameObject,start.r,start.g,start.b,duration,delay,easing,loop);
-			Destroy (this);
-		} else {
-			obj.renderer.material.color.r=end.r;
-			obj.renderer.material.color.g=end.g;
-			obj.renderer.material.color.b=end.b;
-			Destroy (this);
-		}		
+		obj.renderer.material.color.r=end.r;
+		obj.renderer.material.color.g=end.g;
+		obj.renderer.material.color.b=end.b;
+		Destroy (this);		
 	}
 }
 
