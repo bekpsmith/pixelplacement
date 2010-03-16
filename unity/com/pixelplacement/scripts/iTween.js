@@ -1,12 +1,13 @@
 #pragma strict
 
 //Rotation functions need work
-//Add moveBy?
+//Add moveBy
 
 //Init vars:
 static var registers : Array = new Array();
 static var params : Array = new Array();
 var id : int = 0;
+private var tweenType: String;
 
 //Environment init (running this in a GO's Awake that is going to have dynamic iTweens added significantly lessens performance impacts):
 static function init(obj: GameObject){
@@ -23,8 +24,18 @@ static function stop(obj: GameObject){
 	}
 }
 
+//Stop tweening of type
+static function stopType(obj: GameObject, twnType: String){
+	var scripts = obj.GetComponents (iTween);
+	for (var script : iTween in scripts) {
+		if(script.tweenType==twnType){
+			Destroy(script);
+		}
+	}
+}
+
 //Tween count retrieval
-static function getTweenCount(obj: GameObject) : int{
+static function tweenCount(obj: GameObject) : int{
 	var scripts = obj.GetComponents (iTween);
 	var scriptCount : int;
 	for (var script : iTween in scripts) {
@@ -155,52 +166,53 @@ function Start(){
 	var paramList : Array = params[id];
 	registers.RemoveAt(id);
 	params.RemoveAt(id);
-	if(paramList[paramList.length-1]=="init"){
+	tweenType = paramList[paramList.length-1];
+	if(tweenType=="init"){
 		initMe();
 	}
-	if(paramList[paramList.length-1]=="moveTo"){
+	if(tweenType=="moveTo"){
 		while (true){
 			yield moveTo(paramList[0],paramList[1],paramList[2],paramList[3],paramList[4],paramList[5]);
 		}
 	}
-	if(paramList[paramList.length-1]=="fadeTo"){
+	if(tweenType=="fadeTo"){
 		while (true){
 			yield fadeTo(paramList[0],paramList[1],paramList[2],paramList[3]);
 		}
 	}
-	if(paramList[paramList.length-1]=="rotateTo"){
+	if(tweenType=="rotateTo"){
 		while (true){
 			yield rotateTo(paramList[0],paramList[1],paramList[2],paramList[3],paramList[4],paramList[5]);
 		}
 	}
-	if(paramList[paramList.length-1]=="rotateBy"){
+	if(tweenType=="rotateBy"){
 		while (true){
 			yield rotateBy(paramList[0],paramList[1],paramList[2],paramList[3],paramList[4],paramList[5]);
 		}
 	}
-	if(paramList[paramList.length-1]=="scaleTo"){
+	if(tweenType=="scaleTo"){
 		while (true){
 			yield scaleTo(paramList[0],paramList[1],paramList[2],paramList[3],paramList[4],paramList[5]);
 		}
 	}
-	if(paramList[paramList.length-1]=="colorTo"){
+	if(tweenType=="colorTo"){
 		while (true){
 			yield colorTo(paramList[0],paramList[1],paramList[2],paramList[3],paramList[4],paramList[5]);
 		}
 	}
-	if(paramList[paramList.length-1]=="punchRotation"){
+	if(tweenType=="punchRotation"){
 		yield punchRotation(paramList[0],paramList[1],paramList[2],paramList[3],paramList[4]);
 	}
-	if(paramList[paramList.length-1]=="punchPosition"){
+	if(tweenType=="punchPosition"){
 		yield punchPosition(paramList[0],paramList[1],paramList[2],paramList[3],paramList[4]);
 	}		
-	if(paramList[paramList.length-1]=="shake"){
+	if(tweenType=="shake"){
 		yield shake(paramList[0],paramList[1],paramList[2],paramList[3],paramList[4]);
 	}
-	if(paramList[paramList.length-1]=="stab"){
+	if(tweenType=="stab"){
 		yield stab(paramList[0],paramList[1],paramList[2],paramList[3]);
 	}	
-	if(paramList[paramList.length-1]=="audioTo"){
+	if(tweenType=="audioTo"){
 		yield audioTo(paramList[0],paramList[1],paramList[2],paramList[3],paramList[4],paramList[5]);
 	}	
 }
