@@ -1,8 +1,12 @@
+//Developed by Bob Berkebile - http://www.pixelplacement.com
+//for support check out http://www.pixelplacement.com/iTween
+
+
 /*
-Verificatinos:
+verifications:
 Ensure rotational solutions are accurate (I'm 99% ceratin they are)
 
-//Hopeful additions:
+hopeful additions:
 stopAll()
 pause()
 resume()
