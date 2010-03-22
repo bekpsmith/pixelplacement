@@ -1,10 +1,10 @@
-Introduction
+= Introduction =
 
 iTween is free open source software, licensed under the MIT License. iTween also makes use of Robert Penner's easing equations, which is also free open source software, licensed under the BSD License.
 
 What does this all mean? Well, in practice, it means you can reuse iTween on every project you have - commercial or otherwise - with no restriction other than the fact that you should not remove the license text that's featured on the original code (the same as below).
 
-iTween License
+= iTween License =
 
 Copyright (c) 2010 Bob Berkebile
 
@@ -15,7 +15,7 @@ The above copyright notice and this permission notice shall be included in all c
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 Robert Penner Easing equations
 
-TERMS OF USE - EASING EQUATIONS
+= TERMS OF USE - EASING EQUATIONS =
 
 Open source under the BSD License.
 
