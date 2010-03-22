@@ -1,11 +1,11 @@
-/**
- * iTween
- * Movement made ease for Unity3D
- *
- * @author		Bob Berkebile
- * @version		1.0
- */
+/*
+iTween
+An animation tool for Unity3D geared towards animating visual objects (GameObject, GUIText, GUITexture, etc...)
 
+Author: Bob Berkebile
+Version: 1.0
+*/
+ 
 /*
 Licensed under the MIT License
 
@@ -28,6 +28,7 @@ COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
 IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+Documentation and further information:
 http://www.pixelplacement.com/iTween
 http://code.google.com/p/pixelplacement/wiki/iTweenLicense
 */
@@ -214,6 +215,11 @@ static function rotateTo(target: GameObject,args: Hashtable):void{
 
 //Rotate from static register:
 static function rotateFrom(target: GameObject,args: Hashtable){
+	if(target.guiTexture || target.guiText){
+		Debug.LogError("ERROR: GUITextures cannot be rotated!");
+        return;		
+	}
+	
 	var destinationHold : float;
 
 	if(args.Contains("x")){
@@ -694,7 +700,7 @@ function shake(args:Hashtable){
 
 //Punch rotation application:
 private function punchRotation(args:Hashtable) {
-	if(guiTexture){
+	if(guiTexture || guiText){
 		Debug.LogError("ERROR: GUITextures cannot be rotated!");
 		Destroy(this);
         return;		
@@ -1443,7 +1449,7 @@ private function scaleTo(args:Hashtable){
 
 //Rotate to application:
 private function rotateTo(args:Hashtable) {
-	if(guiTexture){
+	if(guiTexture || guiText){
 		Debug.LogError("ERROR: GUITextures cannot be rotated!");
 		Destroy(this);
         return;		
@@ -1586,7 +1592,7 @@ private function rotateTo(args:Hashtable) {
 
 //Rotate by application:
 private function rotateBy(args:Hashtable) {
-	if(guiTexture){
+	if(guiTexture || guiText){
 		Debug.LogError("ERROR: GUITextures cannot be rotated!");
 		Destroy(this);
         return;		
@@ -2068,7 +2074,7 @@ private function colorTo(args:Hashtable) {
 	}
 }
 
-//Easing curves - credits: Robert Penner and a few other that I can't recall right now:
+//Easing curves - credits: Robert Penner and a few other that I can't recall right now with a few additions and tweaks:
 private function linear(start : float, end : float, value : float) : float{
 	return Mathf.Lerp(start, end, value);
 }
