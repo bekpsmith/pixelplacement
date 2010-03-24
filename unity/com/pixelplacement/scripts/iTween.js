@@ -3,7 +3,7 @@ iTween
 An animation tool for Unity3D geared towards animating visual objects (GameObject, GUIText, GUITexture, etc...)
 
 Author: Bob Berkebile
-Version: 1.0
+Version: 1.0.2
 */
  
 /*
@@ -446,7 +446,8 @@ private function audioTo(args:Hashtable) {
 	}
 	
 	//delay:
-	if(args["delay"] > 0){
+	var delay : float = args["delay"];
+	if(delay > 0){
 		yield WaitForSeconds (args["delay"]);
 	}
 	
@@ -611,7 +612,8 @@ function stab(args:Hashtable){
 	}
 	
 	//delay:
-	if(args["delay"] > 0){
+	var delay : float = args["delay"];
+	if(delay > 0){
 		yield WaitForSeconds (args["delay"]);
 	}
 	
@@ -642,7 +644,8 @@ function shake(args:Hashtable){
 	}
 	
 	//delay:
-	if(args["delay"] > 0){
+	var delay : float = args["delay"];
+	if(delay > 0){
 		yield WaitForSeconds (args["delay"]);
 	}
 	
@@ -671,6 +674,10 @@ function shake(args:Hashtable){
 	var impact : boolean=true;
 	
 	//run tween:
+	var xValue : float = args["x"];
+	var yValue : float = args["y"];
+	var zValue : float = args["z"];
+	
 	for (i = 0.0; i < 1.0; i += Time.deltaTime*(1/runTime)) {
 		if(!impact){
 			obj.position.x =start.x + Random.Range(-shakeMagnitude.x, shakeMagnitude.x);
@@ -683,9 +690,9 @@ function shake(args:Hashtable){
 			obj.position.y += shakeMagnitude.y;
 			obj.position.z += shakeMagnitude.z;
 		}
-		shakeMagnitude.x=args["x"]-(i*args["x"]);
-		shakeMagnitude.y=args["y"]-(i*args["y"]);
-		shakeMagnitude.z=args["z"]-(i*args["z"]);
+		shakeMagnitude.x=xValue-(i*xValue);
+		shakeMagnitude.y=yValue-(i*yValue);
+		shakeMagnitude.z=zValue-(i*zValue);
 		yield;
 	}
 	if(args["onComplete"]){
@@ -715,7 +722,8 @@ private function punchRotation(args:Hashtable) {
 	}
 	
 	//delay:
-	if(args["delay"] > 0){
+	var delay : float = args["delay"];
+	if(delay > 0){
 		yield WaitForSeconds (args["delay"]);
 	}
 	
@@ -729,22 +737,26 @@ private function punchRotation(args:Hashtable) {
 	var posAug : Vector3;	
 	
 	//coordiantes:
-	if(args["x"]==null){
+	var xValue : float = args["x"];
+	var yValue : float = args["y"];
+	var zValue : float = args["z"];
+	
+	if(xValue==null){
 		args.Add("x",0);
 	}else{
-		args["x"]*=360;
+		xValue*=360;
 	}
 	
-	if(args["y"]==null){
+	if(yValue==null){
 		args.Add("y",0);
 	}else{
-		args["y"]*=360;
+		yValue*=360;
 	}
 	
-	if(args["z"]==null){
+	if(zValue==null){
 		args.Add("z",0);
 	}else{
-		args["z"]*=360;
+		zValue*=360;
 	}
 	
 	//define targets:
@@ -752,20 +764,20 @@ private function punchRotation(args:Hashtable) {
 	
 	//run tween:
 	for (i = 0.0; i < 1.0; i += Time.deltaTime*(1/runTime)) {
-		if(args["x"]>0){
-			posAug.x = punch(args["x"],i) + pos.x;
-		}else if(args["x"]<0){
-			posAug.x=-punch(Mathf.Abs(args["x"]),i) + pos.x;	
+		if(xValue>0){
+			posAug.x = punch(xValue,i) + pos.x;
+		}else if(xValue<0){
+			posAug.x=-punch(Mathf.Abs(xValue),i) + pos.x;	
 		}
-		if(args["y"]>0){
-			posAug.y=punch(args["y"],i) + pos.y;
-		}else if(args["y"]<0){
-			posAug.y=-punch(Mathf.Abs(args["y"]),i) + pos.y;	
+		if(yValue>0){
+			posAug.y=punch(yValue,i) + pos.y;
+		}else if(yValue<0){
+			posAug.y=-punch(Mathf.Abs(yValue),i) + pos.y;	
 		}
-		if(args["z"]>0){
-			posAug.z=punch(args["z"],i) + pos.z;
-		}else if(args["z"]<0){
-			posAug.z=-punch(Mathf.Abs(args["z"]),i) + pos.z;	
+		if(zValue>0){
+			posAug.z=punch(zValue,i) + pos.z;
+		}else if(zValue<0){
+			posAug.z=-punch(Mathf.Abs(zValue),i) + pos.z;	
 		}
 		obj.localRotation=Quaternion.Euler(posAug.x,posAug.y,posAug.z);
 		yield;
@@ -788,7 +800,8 @@ private function punchPosition(args:Hashtable) {
 	}
 	
 	//delay:
-	if(args["delay"] > 0){
+	var delay : float = args["delay"];
+	if(delay > 0){
 		yield WaitForSeconds (args["delay"]);
 	}
 	
@@ -815,21 +828,25 @@ private function punchPosition(args:Hashtable) {
 	var runTime : float = args["time"];
 	
 	//run tween:
+	var xValue : float = args["x"];
+	var yValue : float = args["y"];
+	var zValue : float = args["z"];
+	
 	for (i = 0.0; i < 1.0; i += Time.deltaTime*(1/runTime)) {
-		if(args["x"]>0){
-			obj.position.x=punch(args["x"],i) + pos.x;
-		}else if(args["x"]<0){
-			obj.position.x=-punch(Mathf.Abs(args["x"]),i) + pos.x;	
+		if(xValue>0){
+			obj.position.x=punch(xValue,i) + pos.x;
+		}else if(xValue<0){
+			obj.position.x=-punch(Mathf.Abs(xValue),i) + pos.x;	
 		}
-		if(args["y"]>0){
-			obj.position.y=punch(args["y"],i) + pos.y;
-		}else if(args["y"]<0){
-			obj.position.y=-punch(Mathf.Abs(args["y"]),i) + pos.y;	
+		if(yValue>0){
+			obj.position.y=punch(yValue,i) + pos.y;
+		}else if(yValue<0){
+			obj.position.y=-punch(Mathf.Abs(yValue),i) + pos.y;	
 		}
-		if(args["z"]>0){
-			obj.position.z=punch(args["z"],i) + pos.z;
-		}else if(args["z"]<0){
-			obj.position.z=-punch(Mathf.Abs(args["z"]),i) + pos.z;	
+		if(zValue>0){
+			obj.position.z=punch(zValue,i) + pos.z;
+		}else if(zValue<0){
+			obj.position.z=-punch(Mathf.Abs(zValue),i) + pos.z;	
 		}
 		yield;
 	}
@@ -858,7 +875,8 @@ private function fadeTo(args:Hashtable){
 	}
 	
 	//delay:
-	if(args["delay"] > 0){
+	var delay : float = args["delay"];
+	if(delay > 0){
 		yield WaitForSeconds (args["delay"]);
 	}
 	
@@ -1082,7 +1100,8 @@ private function moveTo(args:Hashtable){
 	}
 	
 	//delay:
-	if(args["delay"] > 0){
+	var delay : float = args["delay"];
+	if(delay > 0){
 		yield WaitForSeconds (args["delay"]);
 	}
 	
@@ -1273,7 +1292,8 @@ private function scaleTo(args:Hashtable){
 	}
 	
 	//delay:
-	if(args["delay"] > 0){
+	var delay : float = args["delay"];
+	if(delay > 0){
 		yield WaitForSeconds (args["delay"]);
 	}
 	
@@ -1470,7 +1490,8 @@ private function rotateTo(args:Hashtable) {
 	}	
 	
 	//delay:
-	if(args["delay"] > 0){
+	var delay : float = args["delay"];
+	if(delay > 0){
 		yield WaitForSeconds (args["delay"]);
 	}
 	
@@ -1613,7 +1634,8 @@ private function rotateBy(args:Hashtable) {
 	}	
 	
 	//delay:
-	if(args["delay"] > 0){
+	var delay : float = args["delay"];
+	if(delay > 0){
 		yield WaitForSeconds (args["delay"]);
 	}
 	
@@ -1637,7 +1659,11 @@ private function rotateBy(args:Hashtable) {
 	}
 	
 	//define targets:
-	var	end = Vector3(360*args["x"] + obj.localEulerAngles.x, 360*args["y"] + obj.localEulerAngles.y, 360 *args["z"] + obj.localEulerAngles.x);
+	var xValue : float = args["x"];
+	var yValue : float = args["y"];
+	var zValue : float = args["z"];
+	
+	var	end = Vector3(360*xValue + obj.localEulerAngles.x, 360*yValue + obj.localEulerAngles.y, 360 *zValue + obj.localEulerAngles.x);
 	var easing : String = args["transition"];
 	var runTime : float = args["time"];
 		
@@ -1750,7 +1776,8 @@ private function colorTo(args:Hashtable) {
 	}
 	
 	//delay:
-	if(args["delay"] > 0){
+	var delay : float = args["delay"];
+	if(delay > 0){
 		yield WaitForSeconds (args["delay"]);
 	}
 	
