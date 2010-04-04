@@ -1,36 +1,29 @@
-/*
-iTween
-An animation tool for Unity3D geared towards animating visual objects (GameObject, GUIText, GUITexture, etc...)
+//VERSION: 1.0.7
 
-Author: Bob Berkebile
-Version: 1.0.2
-*/
+/*
+ Copyright (c) 2010 Bob Berkebile(http://www.pixelplacement.com), C# port by Patrick Corkum(http://www.insquare.com)
+
+ Permission is hereby granted, free of charge, to any person  obtaining a copy of this software and associated documentation  files (the "Software"), to deal in the Software without  restriction, including without limitation the rights to use,  copy, modify, merge, publish, distribute, sublicense, and/or sell  copies of the Software, and to permit persons to whom the  Software is furnished to do so, subject to the following conditions:
+ The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+/* 
  
 /*
-Licensed under the MIT License
+TERMS OF USE - EASING EQUATIONS
 
-Copyright (c) 2009-2010 Bob Berkebile
+Open source under the BSD License.
 
-Permission is hereby granted, free of charge, to any person obtaining a copy of
-this software and associated documentation files (the "Software"), to deal in
-the Software without restriction, including without limitation the rights to
-use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
-the Software, and to permit persons to whom the Software is furnished to do so,
-subject to the following conditions:
+Copyright © 2001 Robert Penner
+All rights reserved.
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
-FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
-COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
-IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
-CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+    * Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
+    * Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
+    * Neither the name of the author nor the names of contributors may be used to endorse or promote products derived from this software without specific prior written permission.
 
-Documentation and further information:
-http://www.pixelplacement.com/iTween
-http://code.google.com/p/pixelplacement/wiki/iTweenLicense
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 static var registers : Array = new Array();
@@ -44,7 +37,7 @@ public static var rotateToDefaults : Hashtable = {"time":1,"delay":0,"transition
 public static var rotateByDefaults : Hashtable = {"time":1,"delay":0,"transition":"easeInOutCubic"};
 public static var stabDefaults : Hashtable = {"volume":1,"pitch":1,"delay":0};
 public static var shakeDefaults : Hashtable = {"time":1,"delay":0};
-public static var audioDefaults : Hashtable = {"time":1,"delay":0,"transition":"linear"};
+public static var audioDefaults : Hashtable = {"time":1,"delay":0,"volume":1,"pitch":1,"transition":"linear"};
 public static var scaleDefaults : Hashtable = {"time":1,"delay":0,"transition":"easeInOutCubic"};
 public static var fadeDefaults : Hashtable = {"time":1,"delay":0,"transition":"linear"};
 public static var moveDefaults : Hashtable = {"time":1,"delay":0,"transition":"easeInOutCubic"};
@@ -133,6 +126,29 @@ static function fadeFrom(target: GameObject,args: Hashtable):void{
 	init(target,args);
 }
 
+//Move by static register:
+static function moveBy(target: GameObject,args: Hashtable):void{
+	args.Add("type","moveTo");
+	
+	var xValue : float = args["x"];
+	var yValue : float = args["y"];
+	var zValue : float = args["z"];
+	
+	if(args.Contains("x")){
+		xValue+=target.transform.localPosition.x;
+		args["x"]=xValue;
+	}
+	if(args.Contains("y")){
+		yValue+=target.transform.localPosition.y;
+		args["y"]=yValue;
+	}
+	if(args.Contains("z")){
+		zValue+=target.transform.localPosition.z;
+		args["z"]=zValue;
+	}
+	init(target,args);
+}
+
 //Move to static register:
 static function moveTo(target: GameObject,args: Hashtable):void{
 	args.Add("type","moveTo");	
@@ -144,29 +160,52 @@ static function moveFrom(target: GameObject,args: Hashtable):void{
 	var destinationHold : float;
 	
 	if(args.Contains("x")){
-		destinationHold = target.transform.position.x;
-		target.transform.position.x=args["x"];
+		destinationHold = target.transform.localPosition.x;
+		target.transform.localPosition.x=args["x"];
 		args["x"]=destinationHold;
 	}else{
-		args["x"]=target.transform.position.x;
+		args["x"]=target.transform.localPosition.x;
 	}
 
 	if(args.Contains("y")){
-		destinationHold = target.transform.position.y;
-		target.transform.position.y=args["y"];
+		destinationHold = target.transform.localPosition.y;
+		target.transform.localPosition.y=args["y"];
 		args["y"]=destinationHold;
 	}else{
-		args["y"]=target.transform.position.y;
+		args["y"]=target.transform.localPosition.y;
 	}
 
 	if(args.Contains("z")){
-		destinationHold = target.transform.position.z;
+		destinationHold = target.transform.localPosition.z;
 		target.transform.position.z=args["z"];
 		args["z"]=destinationHold;
 	}else{
-		args["z"]=target.transform.position.z;
+		args["z"]=target.transform.localPosition.z;
 	}
 	args.Add("type","moveTo");
+	init(target,args);
+}
+
+//Scale by static register:
+static function scaleBy(target: GameObject,args: Hashtable):void{
+	args.Add("type","scaleTo");
+	
+	var xValue : float = args["x"];
+	var yValue : float = args["y"];
+	var zValue : float = args["z"];
+	
+	if(args.Contains("x")){
+		xValue*=target.transform.localScale.x;
+		args["x"]=xValue;
+	}
+	if(args.Contains("y")){
+		yValue*=target.transform.localScale.y;
+		args["y"]=yValue;
+	}
+	if(args.Contains("z")){
+		zValue*=target.transform.localScale.z;
+		args["z"]=zValue;
+	}
 	init(target,args);
 }
 
@@ -335,10 +374,10 @@ static function audioFrom(target: GameObject,args: Hashtable):void{
 		args["audioSource"]=target.audio;
 	}
 	if(args["volume"]==null){
-		args.Add("volume",stabDefaults["volume"]);
+		args.Add("volume",audioDefaults["volume"]);
 	}
 	if(args["pitch"]==null){
-		args.Add("pitch",stabDefaults["pitch"]);
+		args.Add("pitch",audioDefaults["pitch"]);
 	}
 	
 	var sound : AudioSource = args["audioSource"];
@@ -469,114 +508,116 @@ private function audioTo(args:Hashtable) {
 	
 	//run tween:
 	for (i = 0.0; i < 1.0; i += Time.deltaTime*(1/runTime)) {
-		if(easing=="easeInQuad"){
-			sound.volume =easeInQuad(startV,endV,i);
-			sound.pitch =easeInQuad(startP,endP,i);
-		}
-		if(easing=="easeOutQuad"){
-			sound.volume =easeOutQuad(startV,endV,i);
-			sound.pitch =easeOutQuad(startP,endP,i);
-		}
-		if(easing=="easeInOutQuad"){
-			sound.volume =easeInOutQuad(startV,endV,i);
-			sound.pitch =easeInOutQuad(startP,endP,i);
-		}
-		if(easing=="easeInCubic"){
-			sound.volume =easeInCubic(startV,endV,i);
-			sound.pitch =easeInCubic(startP,endP,i);
-		}
-		if(easing=="easeOutCubic"){
-			sound.volume =easeOutCubic(startV,endV,i);
-			sound.pitch =easeOutCubic(startP,endP,i);
-		}
-		if(easing=="easeInOutCubic"){
-			sound.volume =easeInOutCubic(startV,endV,i);
-			sound.pitch =easeInOutCubic(startP,endP,i);
-		}
-		if(easing=="easeInQuart"){
-			sound.volume =easeInQuart(startV,endV,i);
-			sound.pitch =easeInQuart(startP,endP,i);
-		}
-		if(easing=="easeOutQuart"){
-			sound.volume =easeOutQuart(startV,endV,i);
-			sound.pitch =easeOutQuart(startP,endP,i);
-		}
-		if(easing=="easeInOutQuart"){
-			sound.volume =easeInOutQuart(startV,endV,i);
-			sound.pitch =easeInOutQuart(startP,endP,i);
-		}	
-		if(easing=="easeInQuint"){
-			sound.volume =easeInQuint(startV,endV,i);
-			sound.pitch =easeInQuint(startP,endP,i);
-		}
-		if(easing=="easeOutQuint"){
-			sound.volume =easeOutQuint(startV,endV,i);
-			sound.pitch =easeOutQuint(startP,endP,i);
-		}
-		if(easing=="easeInOutQuint"){
-			sound.volume =easeInOutQuint(startV,endV,i);
-			sound.pitch =easeInOutQuint(startP,endP,i);
-		}	
-		if(easing=="easeInSine"){
-			sound.volume =easeInSine(startV,endV,i);
-			sound.pitch =easeInSine(startP,endP,i);
-		}
-		if(easing=="easeOutSine"){
-			sound.volume =easeOutSine(startV,endV,i);
-			sound.pitch =easeOutSine(startP,endP,i);
-		}
-		if(easing=="easeInOutSine"){
-			sound.volume =easeInOutSine(startV,endV,i);
-			sound.pitch =easeInOutSine(startP,endP,i);
-		}
-		if(easing=="easeInExpo"){
-			sound.volume =easeInExpo(startV,endV,i);
-			sound.pitch =easeInExpo(startP,endP,i);
-		}
-		if(easing=="easeOutExpo"){
-			sound.volume =easeOutExpo(startV,endV,i);
-			sound.pitch =easeOutExpo(startP,endP,i);
-		}
-		if(easing=="easeInOutExpo"){
-			sound.volume =easeInOutExpo(startV,endV,i);
-			sound.pitch =easeInOutExpo(startP,endP,i);
-		}
-		if(easing=="easeInCirc"){
-			sound.volume =easeInCirc(startV,endV,i);
-			sound.pitch =easeInCirc(startP,endP,i);
-		}
-		if(easing=="easeOutCirc"){
-			sound.volume =easeOutCirc(startV,endV,i);
-			sound.pitch =easeOutCirc(startP,endP,i);
-		}
-		if(easing=="easeInOutCirc"){
-			sound.volume =easeInOutCirc(startV,endV,i);
-			sound.pitch =easeInOutCirc(startP,endP,i);
-		}
-		if(easing=="linear"){
-			sound.volume =linear(startV,endV,i);
-			sound.pitch =linear(startP,endP,i);
-		}
-		if(easing=="spring"){
-			sound.volume =spring(startV,endV,i);
-			sound.pitch =spring(startP,endP,i);
-		}
-		if(easing=="bounce"){
-			sound.volume =bounce(startV,endV,i);
-			sound.pitch =bounce(startP,endP,i);
-		}
-		if(easing=="easeInBack"){
-			sound.volume =easeInBack(startV,endV,i);
-			sound.pitch =easeInBack(startP,endP,i);
-		}
-		if(easing=="easeOutBack"){
-			sound.volume =easeOutBack(startV,endV,i);
-			sound.pitch =easeOutBack(startP,endP,i);
-		}
-		if(easing=="easeInOutBack"){
-			sound.volume =easeInOutBack(startV,endV,i);
-			sound.pitch =easeInOutBack(startP,endP,i);
-		}
+		switch (easing){
+			case "easeInQuad":
+				sound.volume =easeInQuad(startV,endV,i);
+				sound.pitch =easeInQuad(startP,endP,i);
+				break;
+			case "easeOutQuad":
+				sound.volume =easeOutQuad(startV,endV,i);
+				sound.pitch =easeOutQuad(startP,endP,i);
+				break;
+			case "easeInOutQuad":
+				sound.volume =easeInOutQuad(startV,endV,i);
+				sound.pitch =easeInOutQuad(startP,endP,i);
+				break;
+			case "easeInCubic":
+				sound.volume =easeInCubic(startV,endV,i);
+				sound.pitch =easeInCubic(startP,endP,i);			
+				break;
+			case "easeOutCubic":
+				sound.volume =easeOutCubic(startV,endV,i);
+				sound.pitch =easeOutCubic(startP,endP,i);			
+				break;
+			case "easeInOutCubic":
+				sound.volume =easeInOutCubic(startV,endV,i);
+				sound.pitch =easeInOutCubic(startP,endP,i);			
+				break;
+			case "easeInQuart":
+				sound.volume =easeInQuart(startV,endV,i);
+				sound.pitch =easeInQuart(startP,endP,i);			
+				break;
+			case "easeOutQuart":
+				sound.volume =easeOutQuart(startV,endV,i);
+				sound.pitch =easeOutQuart(startP,endP,i);
+				break;
+			case "easeInOutQuart":
+				sound.volume =easeInOutQuart(startV,endV,i);
+				sound.pitch =easeInOutQuart(startP,endP,i);
+				break;
+			case "easeInQuint":
+				sound.volume =easeInQuint(startV,endV,i);
+				sound.pitch =easeInQuint(startP,endP,i);
+				break;
+			case "easeOutQuint":
+				sound.volume =easeOutQuint(startV,endV,i);
+				sound.pitch =easeOutQuint(startP,endP,i);			
+				break;
+			case "easeInOutQuint":
+				sound.volume =easeInOutQuint(startV,endV,i);
+				sound.pitch =easeInOutQuint(startP,endP,i);
+				break;
+			case "easeInSine":
+				sound.volume =easeInSine(startV,endV,i);
+				sound.pitch =easeInSine(startP,endP,i);
+				break;
+			case "easeOutSine":
+				sound.volume =easeOutSine(startV,endV,i);
+				sound.pitch =easeOutSine(startP,endP,i);
+				break;
+			case "easeInOutSine":
+				sound.volume =easeInOutSine(startV,endV,i);
+				sound.pitch =easeInOutSine(startP,endP,i);
+				break;
+			case "easeInExpo":
+				sound.volume =easeInExpo(startV,endV,i);
+				sound.pitch =easeInExpo(startP,endP,i);
+				break;
+			case "easeOutExpo":
+				sound.volume =easeOutExpo(startV,endV,i);
+				sound.pitch =easeOutExpo(startP,endP,i);
+				break;
+			case "easeInOutExpo":
+				sound.volume =easeInOutExpo(startV,endV,i);
+				sound.pitch =easeInOutExpo(startP,endP,i);
+				break;
+			case "easeInCirc":
+				sound.volume =easeInCirc(startV,endV,i);
+				sound.pitch =easeInCirc(startP,endP,i);
+				break;	
+			case "easeOutCirc":
+				sound.volume =easeOutCirc(startV,endV,i);
+				sound.pitch =easeOutCirc(startP,endP,i);
+				break;
+			case "easeInOutCirc":
+				sound.volume =easeInOutCirc(startV,endV,i);
+				sound.pitch =easeInOutCirc(startP,endP,i);
+				break;
+			case "easeInBack":
+				sound.volume =easeInBack(startV,endV,i);
+				sound.pitch =easeInBack(startP,endP,i);
+				break;
+			case "easeOutBack":
+				sound.volume =easeOutBack(startV,endV,i);
+				sound.pitch =easeOutBack(startP,endP,i);
+				break;
+			case "easeInOutBack":
+				sound.volume =easeInOutBack(startV,endV,i);
+				sound.pitch =easeInOutBack(startP,endP,i);
+				break;				
+			case "spring":
+				sound.volume =spring(startV,endV,i);
+				sound.pitch =spring(startP,endP,i);
+				break;
+			case "bounce":
+				sound.volume =bounce(startV,endV,i);
+				sound.pitch =bounce(startP,endP,i);
+				break;	
+			case "linear":
+				sound.volume =linear(startV,endV,i);
+				sound.pitch =linear(startP,endP,i);
+				break;
+		}		
 		yield;
 	}
 	sound.volume = endV;
@@ -595,9 +636,6 @@ function stab(args:Hashtable){
 	}
 	
 	//construct args:
-	if(args["time"]==null){
-		args.Add("time",stabDefaults["time"]);
-	}
 	if(args["delay"]==null){
 		args.Add("delay",stabDefaults["delay"]);
 	}
@@ -617,6 +655,9 @@ function stab(args:Hashtable){
 		yield WaitForSeconds (args["delay"]);
 	}
 	
+	//
+	inProgress=true;
+	
 	//target:
 	obj = gameObject.audio;
 	obj.clip=args["clip"];
@@ -625,8 +666,10 @@ function stab(args:Hashtable){
 	obj.PlayOneShot(args["clip"]);
 	
 	if(args["onComplete"]){
-		yield WaitForSeconds(obj.clip.length);
+		var pitchArg : float = args["pitch"];
+		yield WaitForSeconds(obj.clip.length/pitchArg);
 		SendMessage(args["onComplete"], args["onCompleteParams"], SendMessageOptions.DontRequireReceiver);
+		Destroy (this);
 	}else{
 		Destroy (this);	
 	}
@@ -719,6 +762,17 @@ private function punchRotation(args:Hashtable) {
 	}
 	if(args["delay"]==null){
 		args.Add("delay",punchRotationDefaults["delay"]);
+	}
+	
+	//coordiantes:
+	if(args["x"]==null){
+		args.Add("x",0);
+	}
+	if(args["y"]==null){
+		args.Add("y",0);
+	}
+	if(args["z"]==null){
+		args.Add("z",0);
 	}
 	
 	//delay:
@@ -901,87 +955,89 @@ private function fadeTo(args:Hashtable){
 	if(obj.guiTexture){
 		start=obj.guiTexture.color.a;
 		for (i = 0.0; i < 1.0; i += Time.deltaTime*(1/runTime)) {
-			if(easing=="easeInQuad"){
-				obj.guiTexture.color.a=easeInQuad(start,endA,i);
-			}
-			if(easing=="easeOutQuad"){
-				obj.guiTexture.color.a=easeOutQuad(start,endA,i);
-			}
-			if(easing=="easeInOutQuad"){
-				obj.guiTexture.color.a=easeInOutQuad(start,endA,i);
-			}
-			if(easing=="easeInCubic"){
-				obj.guiTexture.color.a=easeInCubic(start,endA,i);
-			}
-			if(easing=="easeOutCubic"){
-				obj.guiTexture.color.a=easeOutCubic(start,endA,i);
-			}
-			if(easing=="easeInOutCubic"){
-				obj.guiTexture.color.a=easeInOutCubic(start,endA,i);
-			}	
-			if(easing=="easeInQuart"){
-				obj.guiTexture.color.a=easeInQuart(start,endA,i);
-			}
-			if(easing=="easeOutQuart"){
-				obj.guiTexture.color.a=easeOutQuart(start,endA,i);
-			}
-			if(easing=="easeInOutQuart"){
-				obj.guiTexture.color.a=easeInOutQuart(start,endA,i);
-			}
-			if(easing=="easeInQuint"){
-				obj.guiTexture.color.a=easeInQuint(start,endA,i);
-			}
-			if(easing=="easeOutQuint"){
-				obj.guiTexture.color.a=easeOutQuint(start,endA,i);
-			}
-			if(easing=="easeInOutQuint"){
-				obj.guiTexture.color.a=easeInOutQuint(start,endA,i);
-			}	
-			if(easing=="easeInSine"){
-				obj.guiTexture.color.a=easeInSine(start,endA,i);
-			}
-			if(easing=="easeOutSine"){
-				obj.guiTexture.color.a=easeOutSine(start,endA,i);
-			}
-			if(easing=="easeInOutSine"){
-				obj.guiTexture.color.a=easeInOutSine(start,endA,i);
-			}
-			if(easing=="easeInExpo"){
-				obj.guiTexture.color.a=easeInExpo(start,endA,i);
-			}
-			if(easing=="easeOutExpo"){
-				obj.guiTexture.color.a=easeOutExpo(start,endA,i);
-			}
-			if(easing=="easeInOutExpo"){
-				obj.guiTexture.color.a=easeInOutExpo(start,endA,i);
-			}
-			if(easing=="easeInCirc"){
-				obj.guiTexture.color.a=easeInCirc(start,endA,i);
-			}
-			if(easing=="easeOutCirc"){
-				obj.guiTexture.color.a=easeOutCirc(start,endA,i);
-			}
-			if(easing=="easeInOutCirc"){
-				obj.guiTexture.color.a=easeInOutCirc(start,endA,i);
+			switch (easing){
+				case "easeInQuad":
+					obj.guiTexture.color.a=easeInQuad(start,endA,i);
+					break;
+				case "easeOutQuad":
+					obj.guiTexture.color.a=easeOutQuad(start,endA,i);
+					break;
+				case "easeInOutQuad":
+					obj.guiTexture.color.a=easeInOutQuad(start,endA,i);
+					break;
+				case "easeInCubic":
+					obj.guiTexture.color.a=easeInCubic(start,endA,i);
+					break;
+				case "easeOutCubic":
+					obj.guiTexture.color.a=easeOutCubic(start,endA,i);
+					break;
+				case "easeInOutCubic":
+					obj.guiTexture.color.a=easeInOutCubic(start,endA,i);
+					break;
+				case "easeInQuart":
+					obj.guiTexture.color.a=easeInQuart(start,endA,i);
+					break;
+				case "easeOutQuart":
+					obj.guiTexture.color.a=easeOutQuart(start,endA,i);
+					break;
+				case "easeInOutQuart":
+					obj.guiTexture.color.a=easeOutQuart(start,endA,i);
+					break;
+				case "easeInQuint":
+					obj.guiTexture.color.a=easeInQuint(start,endA,i);
+					break;
+				case "easeOutQuint":
+					obj.guiTexture.color.a=easeOutQuint(start,endA,i);
+					break;
+				case "easeInOutQuint":
+					obj.guiTexture.color.a=easeInOutQuint(start,endA,i);
+					break;
+				case "easeInSine":
+					obj.guiTexture.color.a=easeInSine(start,endA,i);
+					break;
+				case "easeOutSine":
+					obj.guiTexture.color.a=easeOutSine(start,endA,i);
+					break;
+				case "easeInOutSine":
+					obj.guiTexture.color.a=easeInOutSine(start,endA,i);
+					break;
+				case "easeInExpo":
+					obj.guiTexture.color.a=easeInExpo(start,endA,i);
+					break;
+				case "easeOutExpo":
+					obj.guiTexture.color.a=easeOutExpo(start,endA,i);
+					break;
+				case "easeInOutExpo":
+					obj.guiTexture.color.a=easeInOutExpo(start,endA,i);
+					break;
+				case "easeInCirc":
+					obj.guiTexture.color.a=easeInCirc(start,endA,i);
+					break;
+				case "easeOutCirc":
+					obj.guiTexture.color.a=easeOutCirc(start,endA,i);
+					break;
+				case "easeInOutCirc":
+					obj.guiTexture.color.a=easeInOutCirc(start,endA,i);
+					break;
+				case "linear":
+					obj.guiTexture.color.a=linear(start,endA,i);
+					break;
+				case "spring":
+					obj.guiTexture.color.a=spring(start,endA,i);
+					break;
+				case "bounce":
+					obj.guiTexture.color.a=bounce(start,endA,i);
+					break;
+				case "easeInBack":
+					obj.guiTexture.color.a=easeInBack(start,endA,i);
+					break;
+				case "easeOutBack":
+					obj.guiTexture.color.a=easeOutBack(start,endA,i);
+					break;
+				case "easeInOutBack":
+					obj.guiTexture.color.a=easeInOutBack(start,endA,i);
+					break;
 			}		
-			if(easing=="linear"){
-				obj.guiTexture.color.a=linear(start,endA,i);
-			}
-			if(easing=="spring"){
-				obj.guiTexture.color.a=spring(start,endA,i);
-			}
-			if(easing=="bounce"){
-				obj.guiTexture.color.a=bounce(start,endA,i);
-			}
-			if(easing=="easeInBack"){
-				obj.guiTexture.color.a=easeInBack(start,endA,i);
-			}
-			if(easing=="easeOutBack"){
-				obj.guiTexture.color.a=easeOutBack(start,endA,i);
-			}	
-			if(easing=="easeInOutBack"){
-				obj.guiTexture.color.a=easeInOutBack(start,endA,i);
-			}				
 			yield;
 		}
 		guiTexture.color.a= endA;
@@ -992,87 +1048,90 @@ private function fadeTo(args:Hashtable){
 	}else{
 		start=obj.renderer.material.color.a;
 		for (i = 0.0; i < 1.0; i += Time.deltaTime*(1/runTime)) {
-			if(easing=="easeInQuad"){
-				obj.renderer.material.color.a=easeInQuad(start,endA,i);
-			}
-			if(easing=="easeOutQuad"){
-				obj.renderer.material.color.a=easeOutQuad(start,endA,i);
-			}
-			if(easing=="easeInOutQuad"){
-				obj.renderer.material.color.a=easeInOutQuad(start,endA,i);
-			}
-			if(easing=="easeInCubic"){
-				obj.renderer.material.color.a=easeInCubic(start,endA,i);
-			}
-			if(easing=="easeOutCubic"){
-				obj.renderer.material.color.a=easeOutCubic(start,endA,i);
-			}
-			if(easing=="easeInOutCubic"){
-				obj.renderer.material.color.a=easeInOutCubic(start,endA,i);
-			}	
-			if(easing=="easeInQuart"){
-				obj.renderer.material.color.a=easeInQuart(start,endA,i);
-			}
-			if(easing=="easeOutQuart"){
-				obj.renderer.material.color.a=easeOutQuart(start,endA,i);
-			}
-			if(easing=="easeInOutQuart"){
-				obj.renderer.material.color.a=easeInOutQuart(start,endA,i);
-			}
-			if(easing=="easeInQuint"){
-				obj.renderer.material.color.a=easeInQuint(start,endA,i);
-			}
-			if(easing=="easeOutQuint"){
-				obj.renderer.material.color.a=easeOutQuint(start,endA,i);
-			}
-			if(easing=="easeInOutQuint"){
-				obj.renderer.material.color.a=easeInOutQuint(start,endA,i);
-			}	
-			if(easing=="easeInSine"){
-				obj.renderer.material.color.a=easeInSine(start,endA,i);
-			}
-			if(easing=="easeOutSine"){
-				obj.renderer.material.color.a=easeOutSine(start,endA,i);
-			}
-			if(easing=="easeInOutSine"){
-				obj.renderer.material.color.a=easeInOutSine(start,endA,i);
-			}
-			if(easing=="easeInExpo"){
-				obj.renderer.material.color.a=easeInExpo(start,endA,i);
-			}
-			if(easing=="easeOutExpo"){
-				obj.renderer.material.color.a=easeOutExpo(start,endA,i);
-			}
-			if(easing=="easeInOutExpo"){
-				obj.renderer.material.color.a=easeInOutExpo(start,endA,i);
-			}
-			if(easing=="easeInCirc"){
-				obj.renderer.material.color.a=easeInCirc(start,endA,i);
-			}
-			if(easing=="easeOutCirc"){
-				obj.renderer.material.color.a=easeOutCirc(start,endA,i);
-			}
-			if(easing=="easeInOutCirc"){
-				obj.renderer.material.color.a=easeInOutCirc(start,endA,i);
+			switch (easing){
+				case "easeInQuad":
+					obj.renderer.material.color.a=easeInQuad(start,endA,i);
+					break;
+				case "easeOutQuad":
+					obj.renderer.material.color.a=easeOutQuad(start,endA,i);
+					break;
+				case "easeInOutQuad":
+					obj.renderer.material.color.a=easeInOutQuad(start,endA,i);
+					break;
+				case "easeInCubic":
+					obj.renderer.material.color.a=easeInCubic(start,endA,i);
+					break;
+				case "easeOutCubic":
+					obj.renderer.material.color.a=easeOutCubic(start,endA,i);
+					break;
+				case "easeInOutCubic":
+					obj.renderer.material.color.a=easeInOutCubic(start,endA,i);
+					break;
+				case "easeInQuart":
+					obj.renderer.material.color.a=easeInQuart(start,endA,i);
+					break;
+				case "easeOutQuart":
+					obj.renderer.material.color.a=easeOutQuart(start,endA,i);
+					break;
+				case "easeInOutQuart":
+					obj.renderer.material.color.a=easeInOutQuart(start,endA,i);
+					break;
+				case "easeInQuint":
+					obj.renderer.material.color.a=easeInQuint(start,endA,i);
+					break;
+				case "easeOutQuint":
+					obj.renderer.material.color.a=easeOutQuint(start,endA,i);
+					break;
+				case "easeInOutQuint":
+					obj.renderer.material.color.a=easeInOutQuint(start,endA,i);
+					break;
+				case "easeInSine":
+					obj.renderer.material.color.a=easeInSine(start,endA,i);
+					break;
+				case "easeOutSine":
+					obj.renderer.material.color.a=easeOutSine(start,endA,i);
+					break;
+				case "easeInOutSine":
+					obj.renderer.material.color.a=easeInOutSine(start,endA,i);
+					break;
+				case "easeInExpo":
+					obj.renderer.material.color.a=easeInExpo(start,endA,i);
+					break;
+				case "easeOutExpo":
+					obj.renderer.material.color.a=easeOutExpo(start,endA,i);
+					break;
+				case "easeInOutExpo":
+					obj.renderer.material.color.a=easeInOutExpo(start,endA,i);
+					break;
+				case "easeInCirc":
+					obj.renderer.material.color.a=easeInCirc(start,endA,i);
+					break;
+				case "easeOutCirc":
+					obj.renderer.material.color.a=easeOutCirc(start,endA,i);
+					break;
+				case "easeInOutCirc":
+					obj.renderer.material.color.a=easeInOutCirc(start,endA,i);
+					break;
+				case "linear":
+					obj.renderer.material.color.a=linear(start,endA,i);
+					break;
+				case "spring":
+					obj.renderer.material.color.a=spring(start,endA,i);
+					break;
+				case "bounce":
+					obj.renderer.material.color.a=bounce(start,endA,i);
+					break;
+				case "easeInBack":
+					obj.renderer.material.color.a=easeInBack(start,endA,i);
+					break;
+				case "easeOutBack":
+					obj.renderer.material.color.a=easeOutBack(start,endA,i);
+					break;
+				case "easeInOutBack":
+					obj.renderer.material.color.a=easeInOutBack(start,endA,i);
+					break;
+				
 			}		
-			if(easing=="linear"){
-				obj.renderer.material.color.a=linear(start,endA,i);
-			}
-			if(easing=="spring"){
-				obj.renderer.material.color.a=spring(start,endA,i);
-			}
-			if(easing=="bounce"){
-				obj.renderer.material.color.a=bounce(start,endA,i);
-			}
-			if(easing=="easeInBack"){
-				obj.renderer.material.color.a=easeInBack(start,endA,i);
-			}
-			if(easing=="easeOutBack"){
-				obj.renderer.material.color.a=easeOutBack(start,endA,i);
-			}
-			if(easing=="easeInOutBack"){
-				obj.renderer.material.color.a=easeInOutBack(start,endA,i);
-			}			
 			yield;
 		}
 		obj.renderer.material.color.a= endA;
@@ -1111,7 +1170,7 @@ private function moveTo(args:Hashtable){
 	
 	//define object:
 	var obj : Transform = gameObject.transform;
-	var start : Vector3 = obj.position;
+	var start : Vector3 = obj.localPosition;
 	
 	//coordiantes:
 	if(args["x"]==null){
@@ -1131,144 +1190,146 @@ private function moveTo(args:Hashtable){
 	
 	//run tween:
 	for (i = 0.0; i < 1.0; i += Time.deltaTime*(1/runTime)) {
-		if(easing=="easeInQuad"){
-			obj.position.x=easeInQuad(start.x,end.x,i);
-			obj.position.y=easeInQuad(start.y,end.y,i);
-			obj.position.z=easeInQuad(start.z,end.z,i);
-		}
-		if(easing=="easeOutQuad"){
-			obj.position.x=easeOutQuad(start.x,end.x,i);
-			obj.position.y=easeOutQuad(start.y,end.y,i);
-			obj.position.z=easeOutQuad(start.z,end.z,i);
-		}
-		if(easing=="easeInOutQuad"){
-			obj.position.x=easeInOutQuad(start.x,end.x,i);
-			obj.position.y=easeInOutQuad(start.y,end.y,i);
-			obj.position.z=easeInOutQuad(start.z,end.z,i);
-		}
-		if(easing=="easeInCubic"){
-			obj.position.x=easeInCubic(start.x,end.x,i);
-			obj.position.y=easeInCubic(start.y,end.y,i);
-			obj.position.z=easeInCubic(start.z,end.z,i);
-		}
-		if(easing=="easeOutCubic"){
-			obj.position.x=easeOutCubic(start.x,end.x,i);
-			obj.position.y=easeOutCubic(start.y,end.y,i);
-			obj.position.z=easeOutCubic(start.z,end.z,i);
-		}
-		if(easing=="easeInOutCubic"){
-			obj.position.x=easeInOutCubic(start.x,end.x,i);
-			obj.position.y=easeInOutCubic(start.y,end.y,i);
-			obj.position.z=easeInOutCubic(start.z,end.z,i);
-		}
-		if(easing=="easeInQuart"){
-			obj.position.x=easeInQuart(start.x,end.x,i);
-			obj.position.y=easeInQuart(start.y,end.y,i);
-			obj.position.z=easeInQuart(start.z,end.z,i);
-		}
-		if(easing=="easeOutQuart"){
-			obj.position.x=easeOutQuart(start.x,end.x,i);
-			obj.position.y=easeOutQuart(start.y,end.y,i);
-			obj.position.z=easeOutQuart(start.z,end.z,i);
-		}
-		if(easing=="easeInOutQuart"){
-			obj.position.x=easeInOutQuart(start.x,end.x,i);
-			obj.position.y=easeInOutQuart(start.y,end.y,i);
-			obj.position.z=easeInOutQuart(start.z,end.z,i);
-		}	
-		if(easing=="easeInQuint"){
-			obj.position.x=easeInQuint(start.x,end.x,i);
-			obj.position.y=easeInQuint(start.y,end.y,i);
-			obj.position.z=easeInQuint(start.z,end.z,i);
-		}
-		if(easing=="easeOutQuint"){
-			obj.position.x=easeOutQuint(start.x,end.x,i);
-			obj.position.y=easeOutQuint(start.y,end.y,i);
-			obj.position.z=easeOutQuint(start.z,end.z,i);
-		}
-		if(easing=="easeInOutQuint"){
-			obj.position.x=easeInOutQuint(start.x,end.x,i);
-			obj.position.y=easeInOutQuint(start.y,end.y,i);
-			obj.position.z=easeInOutQuint(start.z,end.z,i);
-		}	
-		if(easing=="easeInSine"){
-			obj.position.x=easeInSine(start.x,end.x,i);
-			obj.position.y=easeInSine(start.y,end.y,i);
-			obj.position.z=easeInSine(start.z,end.z,i);
-		}
-		if(easing=="easeOutSine"){
-			obj.position.x=easeOutSine(start.x,end.x,i);
-			obj.position.y=easeOutSine(start.y,end.y,i);
-			obj.position.z=easeOutSine(start.z,end.z,i);
-		}
-		if(easing=="easeInOutSine"){
-			obj.position.x=easeInOutSine(start.x,end.x,i);
-			obj.position.y=easeInOutSine(start.y,end.y,i);
-			obj.position.z=easeInOutSine(start.z,end.z,i);
-		}
-		if(easing=="easeInExpo"){
-			obj.position.x=easeInExpo(start.x,end.x,i);
-			obj.position.y=easeInExpo(start.y,end.y,i);
-			obj.position.z=easeInExpo(start.z,end.z,i);
-		}
-		if(easing=="easeOutExpo"){
-			obj.position.x=easeOutExpo(start.x,end.x,i);
-			obj.position.y=easeOutExpo(start.y,end.y,i);
-			obj.position.z=easeOutExpo(start.z,end.z,i);
-		}
-		if(easing=="easeInOutExpo"){
-			obj.position.x=easeInOutExpo(start.x,end.x,i);
-			obj.position.y=easeInOutExpo(start.y,end.y,i);
-			obj.position.z=easeInOutExpo(start.z,end.z,i);
-		}
-		if(easing=="easeInCirc"){
-			obj.position.x=easeInCirc(start.x,end.x,i);
-			obj.position.y=easeInCirc(start.y,end.y,i);
-			obj.position.z=easeInCirc(start.z,end.z,i);
-		}
-		if(easing=="easeOutCirc"){
-			obj.position.x=easeOutCirc(start.x,end.x,i);
-			obj.position.y=easeOutCirc(start.y,end.y,i);
-			obj.position.z=easeOutCirc(start.z,end.z,i);
-		}
-		if(easing=="easeInOutCirc"){
-			obj.position.x=easeInOutCirc(start.x,end.x,i);
-			obj.position.y=easeInOutCirc(start.y,end.y,i);
-			obj.position.z=easeInOutCirc(start.z,end.z,i);
-		}
-		if(easing=="linear"){
-			obj.position.x=linear(start.x,end.x,i);
-			obj.position.y=linear(start.y,end.y,i);
-			obj.position.z=linear(start.z,end.z,i);
-		}
-		if(easing=="spring"){
-			obj.position.x=spring(start.x,end.x,i);
-			obj.position.y=spring(start.y,end.y,i);
-			obj.position.z=spring(start.z,end.z,i);
-		}
-		if(easing=="bounce"){
-			obj.position.x=bounce(start.x,end.x,i);
-			obj.position.y=bounce(start.y,end.y,i);
-			obj.position.z=bounce(start.z,end.z,i);
-		}
-		if(easing=="easeInBack"){
-			obj.position.x=easeInBack(start.x,end.x,i);
-			obj.position.y=easeInBack(start.y,end.y,i);
-			obj.position.z=easeInBack(start.z,end.z,i);
-		}
-		if(easing=="easeOutBack"){
-			obj.position.x=easeOutBack(start.x,end.x,i);
-			obj.position.y=easeOutBack(start.y,end.y,i);
-			obj.position.z=easeOutBack(start.z,end.z,i);
-		}
-		if(easing=="easeInOutBack"){
-			obj.position.x=easeInOutBack(start.x,end.x,i);
-			obj.position.y=easeInOutBack(start.y,end.y,i);
-			obj.position.z=easeInOutBack(start.z,end.z,i);
+		switch(easing){
+			case "easeInQuad":
+				obj.localPosition.x=easeInQuad(start.x,end.x,i);
+				obj.localPosition.y=easeInQuad(start.y,end.y,i);
+				obj.localPosition.z=easeInQuad(start.z,end.z,i);
+				break;
+			case "easeOutQuad":
+				obj.localPosition.x=easeOutQuad(start.x,end.x,i);
+				obj.localPosition.y=easeOutQuad(start.y,end.y,i);
+				obj.localPosition.z=easeOutQuad(start.z,end.z,i);
+				break;
+			case "easeInOutQuad":
+				obj.localPosition.x=easeInOutQuad(start.x,end.x,i);
+				obj.localPosition.y=easeInOutQuad(start.y,end.y,i);
+				obj.localPosition.z=easeInOutQuad(start.z,end.z,i);
+				break;
+			case "easeInCubic":
+				obj.localPosition.x=easeInCubic(start.x,end.x,i);
+				obj.localPosition.y=easeInCubic(start.y,end.y,i);
+				obj.localPosition.z=easeInCubic(start.z,end.z,i);
+				break;
+			case "easeOutCubic":
+				obj.localPosition.x=easeOutCubic(start.x,end.x,i);
+				obj.localPosition.y=easeOutCubic(start.y,end.y,i);
+				obj.localPosition.z=easeOutCubic(start.z,end.z,i);
+				break;
+			case "easeInOutCubic":
+				obj.localPosition.x=easeInOutCubic(start.x,end.x,i);
+				obj.localPosition.y=easeInOutCubic(start.y,end.y,i);
+				obj.localPosition.z=easeInOutCubic(start.z,end.z,i);
+				break;
+			case "easeInQuart":
+				obj.localPosition.x=easeInQuart(start.x,end.x,i);
+				obj.localPosition.y=easeInQuart(start.y,end.y,i);
+				obj.localPosition.z=easeInQuart(start.z,end.z,i);
+				break;
+			case "easeOutQuart":
+				obj.localPosition.x=easeOutQuart(start.x,end.x,i);
+				obj.localPosition.y=easeOutQuart(start.y,end.y,i);
+				obj.localPosition.z=easeOutQuart(start.z,end.z,i);
+				break;
+			case "easeInOutQuart":
+				obj.localPosition.x=easeInOutQuart(start.x,end.x,i);
+				obj.localPosition.y=easeInOutQuart(start.y,end.y,i);
+				obj.localPosition.z=easeInOutQuart(start.z,end.z,i);
+				break;
+			case "easeInQuint":
+				obj.localPosition.x=easeInQuint(start.x,end.x,i);
+				obj.localPosition.y=easeInQuint(start.y,end.y,i);
+				obj.localPosition.z=easeInQuint(start.z,end.z,i);
+				break;
+			case "easeOutQuint":
+				obj.position.x=easeOutQuint(start.x,end.x,i);
+				obj.position.y=easeOutQuint(start.y,end.y,i);
+				obj.position.z=easeOutQuint(start.z,end.z,i);
+				break;
+			case "easeInOutQuint":
+				obj.localPosition.x=easeInOutQuint(start.x,end.x,i);
+				obj.localPosition.y=easeInOutQuint(start.y,end.y,i);
+				obj.localPosition.z=easeInOutQuint(start.z,end.z,i);
+				break;
+			case "easeInSine":
+				obj.localPosition.x=easeInSine(start.x,end.x,i);
+				obj.localPosition.y=easeInSine(start.y,end.y,i);
+				obj.localPosition.z=easeInSine(start.z,end.z,i);
+				break;
+			case "easeOutSine":
+				obj.localPosition.x=easeOutSine(start.x,end.x,i);
+				obj.localPosition.y=easeOutSine(start.y,end.y,i);
+				obj.localPosition.z=easeOutSine(start.z,end.z,i);
+				break;
+			case "easeInOutSine":
+				obj.localPosition.x=easeInOutSine(start.x,end.x,i);
+				obj.localPosition.y=easeInOutSine(start.y,end.y,i);
+				obj.localPosition.z=easeInOutSine(start.z,end.z,i);
+				break;
+			case "easeInExpo":
+				obj.localPosition.x=easeInExpo(start.x,end.x,i);
+				obj.localPosition.y=easeInExpo(start.y,end.y,i);
+				obj.localPosition.z=easeInExpo(start.z,end.z,i);
+				break;
+			case "easeOutExpo":
+				obj.localPosition.x=easeOutExpo(start.x,end.x,i);
+				obj.localPosition.y=easeOutExpo(start.y,end.y,i);
+				obj.localPosition.z=easeOutExpo(start.z,end.z,i);
+				break;
+			case "easeInOutExpo":
+				obj.localPosition.x=easeInOutExpo(start.x,end.x,i);
+				obj.localPosition.y=easeInOutExpo(start.y,end.y,i);
+				obj.localPosition.z=easeInOutExpo(start.z,end.z,i);
+				break;
+			case "easeInCirc":
+				obj.localPosition.x=easeInCirc(start.x,end.x,i);
+				obj.localPosition.y=easeInCirc(start.y,end.y,i);
+				obj.localPosition.z=easeInCirc(start.z,end.z,i);
+				break;
+			case "easeOutCirc":
+				obj.localPosition.x=easeOutCirc(start.x,end.x,i);
+				obj.localPosition.y=easeOutCirc(start.y,end.y,i);
+				obj.localPosition.z=easeOutCirc(start.z,end.z,i);
+				break;
+			case "easeInOutCirc":
+				obj.localPosition.x=easeInOutCirc(start.x,end.x,i);
+				obj.localPosition.y=easeInOutCirc(start.y,end.y,i);
+				obj.localPosition.z=easeInOutCirc(start.z,end.z,i);
+				break;
+			case "linear":
+				obj.localPosition.x=linear(start.x,end.x,i);
+				obj.localPosition.y=linear(start.y,end.y,i);
+				obj.localPosition.z=linear(start.z,end.z,i);
+				break;
+			case "spring":
+				obj.localPosition.x=spring(start.x,end.x,i);
+				obj.localPosition.y=spring(start.y,end.y,i);
+				obj.localPosition.z=spring(start.z,end.z,i);
+				break;
+			case "bounce":
+				obj.localPosition.x=bounce(start.x,end.x,i);
+				obj.localPosition.y=bounce(start.y,end.y,i);
+				obj.localPosition.z=bounce(start.z,end.z,i);
+				break;
+			case "easeInBack":
+				obj.localPosition.x=easeInBack(start.x,end.x,i);
+				obj.localPosition.y=easeInBack(start.y,end.y,i);
+				obj.localPosition.z=easeInBack(start.z,end.z,i);
+				break;
+			case "easeOutBack":
+				obj.localPosition.x=easeOutBack(start.x,end.x,i);
+				obj.localPosition.y=easeOutBack(start.y,end.y,i);
+				obj.localPosition.z=easeOutBack(start.z,end.z,i);
+				break;
+			case "easeInOutBack":
+				obj.localPosition.x=easeInOutBack(start.x,end.x,i);
+				obj.localPosition.y=easeInOutBack(start.y,end.y,i);
+				obj.localPosition.z=easeInOutBack(start.z,end.z,i);
+				break;			
 		}
 		yield;
 	}
-	obj.position=end;
+	obj.localPosition=end;
 	if(args["onComplete"]){
 		SendMessage(args["onComplete"], args["onCompleteParams"], SendMessageOptions.DontRequireReceiver);
 	}
@@ -1323,140 +1384,142 @@ private function scaleTo(args:Hashtable){
 	
 	//run tween:
 	for (i = 0.0; i < 1.0; i += Time.deltaTime*(1/runTime)) {
-		if(easing=="easeInQuad"){
-			obj.localScale.x=easeInQuad(start.x,end.x,i);
-			obj.localScale.y=easeInQuad(start.y,end.y,i);
-			obj.localScale.z=easeInQuad(start.z,end.z,i);
-		}
-		if(easing=="easeOutQuad"){
-			obj.localScale.x=easeOutQuad(start.x,end.x,i);
-			obj.localScale.y=easeOutQuad(start.y,end.y,i);
-			obj.localScale.z=easeOutQuad(start.z,end.z,i);
-		}
-		if(easing=="easeInOutQuad"){
-			obj.localScale.x=easeInOutQuad(start.x,end.x,i);
-			obj.localScale.y=easeInOutQuad(start.y,end.y,i);
-			obj.localScale.z=easeInOutQuad(start.z,end.z,i);
-		}
-		if(easing=="easeInCubic"){
-			obj.localScale.x=easeInCubic(start.x,end.x,i);
-			obj.localScale.y=easeInCubic(start.y,end.y,i);
-			obj.localScale.z=easeInCubic(start.z,end.z,i);
-		}
-		if(easing=="easeOutCubic"){
-			obj.localScale.x=easeOutCubic(start.x,end.x,i);
-			obj.localScale.y=easeOutCubic(start.y,end.y,i);
-			obj.localScale.z=easeOutCubic(start.z,end.z,i);
-		}
-		if(easing=="easeInOutCubic"){
-			obj.localScale.x=easeInOutCubic(start.x,end.x,i);
-			obj.localScale.y=easeInOutCubic(start.y,end.y,i);
-			obj.localScale.z=easeInOutCubic(start.z,end.z,i);
-		}
-		if(easing=="easeInQuart"){
-			obj.localScale.x=easeInQuart(start.x,end.x,i);
-			obj.localScale.y=easeInQuart(start.y,end.y,i);
-			obj.localScale.z=easeInQuart(start.z,end.z,i);
-		}
-		if(easing=="easeOutQuart"){
-			obj.localScale.x=easeOutQuart(start.x,end.x,i);
-			obj.localScale.y=easeOutQuart(start.y,end.y,i);
-			obj.localScale.z=easeOutQuart(start.z,end.z,i);
-		}
-		if(easing=="easeInOutQuart"){
-			obj.localScale.x=easeInOutQuart(start.x,end.x,i);
-			obj.localScale.y=easeInOutQuart(start.y,end.y,i);
-			obj.localScale.z=easeInOutQuart(start.z,end.z,i);
-		}	
-		if(easing=="easeInQuint"){
-			obj.localScale.x=easeInQuint(start.x,end.x,i);
-			obj.localScale.y=easeInQuint(start.y,end.y,i);
-			obj.localScale.z=easeInQuint(start.z,end.z,i);
-		}
-		if(easing=="easeOutQuint"){
-			obj.localScale.x=easeOutQuint(start.x,end.x,i);
-			obj.localScale.y=easeOutQuint(start.y,end.y,i);
-			obj.localScale.z=easeOutQuint(start.z,end.z,i);
-		}
-		if(easing=="easeInOutQuint"){
-			obj.localScale.x=easeInOutQuint(start.x,end.x,i);
-			obj.localScale.y=easeInOutQuint(start.y,end.y,i);
-			obj.localScale.z=easeInOutQuint(start.z,end.z,i);
-		}	
-		if(easing=="easeInSine"){
-			obj.localScale.x=easeInSine(start.x,end.x,i);
-			obj.localScale.y=easeInSine(start.y,end.y,i);
-			obj.localScale.z=easeInSine(start.z,end.z,i);
-		}
-		if(easing=="easeOutSine"){
-			obj.localScale.x=easeOutSine(start.x,end.x,i);
-			obj.localScale.y=easeOutSine(start.y,end.y,i);
-			obj.localScale.z=easeOutSine(start.z,end.z,i);
-		}
-		if(easing=="easeInOutSine"){
-			obj.localScale.x=easeInOutSine(start.x,end.x,i);
-			obj.localScale.y=easeInOutSine(start.y,end.y,i);
-			obj.localScale.z=easeInOutSine(start.z,end.z,i);
-		}
-		if(easing=="easeInExpo"){
-			obj.localScale.x=easeInExpo(start.x,end.x,i);
-			obj.localScale.y=easeInExpo(start.y,end.y,i);
-			obj.localScale.z=easeInExpo(start.z,end.z,i);
-		}
-		if(easing=="easeOutExpo"){
-			obj.localScale.x=easeOutExpo(start.x,end.x,i);
-			obj.localScale.y=easeOutExpo(start.y,end.y,i);
-			obj.localScale.z=easeOutExpo(start.z,end.z,i);
-		}
-		if(easing=="easeInOutExpo"){
-			obj.localScale.x=easeInOutExpo(start.x,end.x,i);
-			obj.localScale.y=easeInOutExpo(start.y,end.y,i);
-			obj.localScale.z=easeInOutExpo(start.z,end.z,i);
-		}
-		if(easing=="easeInCirc"){
-			obj.localScale.x=easeInCirc(start.x,end.x,i);
-			obj.localScale.y=easeInCirc(start.y,end.y,i);
-			obj.localScale.z=easeInCirc(start.z,end.z,i);
-		}
-		if(easing=="easeOutCirc"){
-			obj.localScale.x=easeOutCirc(start.x,end.x,i);
-			obj.localScale.y=easeOutCirc(start.y,end.y,i);
-			obj.localScale.z=easeOutCirc(start.z,end.z,i);
-		}
-		if(easing=="easeInOutCirc"){
-			obj.localScale.x=easeInOutCirc(start.x,end.x,i);
-			obj.localScale.y=easeInOutCirc(start.y,end.y,i);
-			obj.localScale.z=easeInOutCirc(start.z,end.z,i);
-		}
-		if(easing=="linear"){
-			obj.localScale.x=linear(start.x,end.x,i);
-			obj.localScale.y=linear(start.y,end.y,i);
-			obj.localScale.z=linear(start.z,end.z,i);
-		}
-		if(easing=="spring"){
-			obj.localScale.x=spring(start.x,end.x,i);
-			obj.localScale.y=spring(start.y,end.y,i);
-			obj.localScale.z=spring(start.z,end.z,i);
-		}
-		if(easing=="bounce"){
-			obj.localScale.x=bounce(start.x,end.x,i);
-			obj.localScale.y=bounce(start.y,end.y,i);
-			obj.localScale.z=bounce(start.z,end.z,i);
-		}
-		if(easing=="easeInBack"){
-			obj.localScale.x=easeInBack(start.x,end.x,i);
-			obj.localScale.y=easeInBack(start.y,end.y,i);
-			obj.localScale.z=easeInBack(start.z,end.z,i);
-		}
-		if(easing=="easeOutBack"){
-			obj.localScale.x=easeOutBack(start.x,end.x,i);
-			obj.localScale.y=easeOutBack(start.y,end.y,i);
-			obj.localScale.z=easeOutBack(start.z,end.z,i);
-		}
-		if(easing=="easeInOutBack"){
-			obj.localScale.x=easeInOutBack(start.x,end.x,i);
-			obj.localScale.y=easeInOutBack(start.y,end.y,i);
-			obj.localScale.z=easeInOutBack(start.z,end.z,i);
+		switch(easing){
+			case "easeInQuad":
+				obj.localScale.x=easeInQuad(start.x,end.x,i);
+				obj.localScale.y=easeInQuad(start.y,end.y,i);
+				obj.localScale.z=easeInQuad(start.z,end.z,i);
+				break;
+			case "easeOutQuad":
+				obj.localScale.x=easeOutQuad(start.x,end.x,i);
+				obj.localScale.y=easeOutQuad(start.y,end.y,i);
+				obj.localScale.z=easeOutQuad(start.z,end.z,i);
+				break;
+			case "easeInOutQuad":
+				obj.localScale.x=easeInOutQuad(start.x,end.x,i);
+				obj.localScale.y=easeInOutQuad(start.y,end.y,i);
+				obj.localScale.z=easeInOutQuad(start.z,end.z,i);
+				break;
+			case "easeInCubic":
+				obj.localScale.x=easeInCubic(start.x,end.x,i);
+				obj.localScale.y=easeInCubic(start.y,end.y,i);
+				obj.localScale.z=easeInCubic(start.z,end.z,i);
+				break;
+			case "easeOutCubic":
+				obj.localScale.x=easeOutCubic(start.x,end.x,i);
+				obj.localScale.y=easeOutCubic(start.y,end.y,i);
+				obj.localScale.z=easeOutCubic(start.z,end.z,i);
+				break;
+			case "easeInOutCubic":
+				obj.localScale.x=easeInOutCubic(start.x,end.x,i);
+				obj.localScale.y=easeInOutCubic(start.y,end.y,i);
+				obj.localScale.z=easeInOutCubic(start.z,end.z,i);
+				break;
+			case "easeInQuart":
+				obj.localScale.x=easeInQuart(start.x,end.x,i);
+				obj.localScale.y=easeInQuart(start.y,end.y,i);
+				obj.localScale.z=easeInQuart(start.z,end.z,i);
+				break;
+			case "easeOutQuart":
+				obj.localScale.x=easeOutQuart(start.x,end.x,i);
+				obj.localScale.y=easeOutQuart(start.y,end.y,i);
+				obj.localScale.z=easeOutQuart(start.z,end.z,i);
+				break;
+			case "easeInOutQuart":
+				obj.localScale.x=easeInOutQuart(start.x,end.x,i);
+				obj.localScale.y=easeInOutQuart(start.y,end.y,i);
+				obj.localScale.z=easeInOutQuart(start.z,end.z,i);
+				break;
+			case "easeInQuint":
+				obj.localScale.x=easeInQuint(start.x,end.x,i);
+				obj.localScale.y=easeInQuint(start.y,end.y,i);
+				obj.localScale.z=easeInQuint(start.z,end.z,i);
+				break;
+			case "easeOutQuint":
+				obj.localScale.x=easeOutQuint(start.x,end.x,i);
+				obj.localScale.y=easeOutQuint(start.y,end.y,i);
+				obj.localScale.z=easeOutQuint(start.z,end.z,i);
+				break;
+			case "easeInOutQuint":
+				obj.localScale.x=easeInOutQuint(start.x,end.x,i);
+				obj.localScale.y=easeInOutQuint(start.y,end.y,i);
+				obj.localScale.z=easeInOutQuint(start.z,end.z,i);
+				break;
+			case "easeInSine":
+				obj.localScale.x=easeInSine(start.x,end.x,i);
+				obj.localScale.y=easeInSine(start.y,end.y,i);
+				obj.localScale.z=easeInSine(start.z,end.z,i);
+				break;
+			case "easeOutSine":
+				obj.localScale.x=easeOutSine(start.x,end.x,i);
+				obj.localScale.y=easeOutSine(start.y,end.y,i);
+				obj.localScale.z=easeOutSine(start.z,end.z,i);
+				break;
+			case "easeInOutSine":
+				obj.localScale.x=easeInOutSine(start.x,end.x,i);
+				obj.localScale.y=easeInOutSine(start.y,end.y,i);
+				obj.localScale.z=easeInOutSine(start.z,end.z,i);
+				break;
+			case "easeInExpo":
+				obj.localScale.x=easeInExpo(start.x,end.x,i);
+				obj.localScale.y=easeInExpo(start.y,end.y,i);
+				obj.localScale.z=easeInExpo(start.z,end.z,i);
+				break;
+			case "easeOutExpo":
+				obj.localScale.x=easeOutExpo(start.x,end.x,i);
+				obj.localScale.y=easeOutExpo(start.y,end.y,i);
+				obj.localScale.z=easeOutExpo(start.z,end.z,i);
+				break;
+			case "easeInOutExpo":
+				obj.localScale.x=easeInOutExpo(start.x,end.x,i);
+				obj.localScale.y=easeInOutExpo(start.y,end.y,i);
+				obj.localScale.z=easeInOutExpo(start.z,end.z,i);
+				break;
+			case "easeInCirc":
+				obj.localScale.x=easeInCirc(start.x,end.x,i);
+				obj.localScale.y=easeInCirc(start.y,end.y,i);
+				obj.localScale.z=easeInCirc(start.z,end.z,i);
+				break;
+			case "easeOutCirc":
+				obj.localScale.x=easeOutCirc(start.x,end.x,i);
+				obj.localScale.y=easeOutCirc(start.y,end.y,i);
+				obj.localScale.z=easeOutCirc(start.z,end.z,i);
+				break;
+			case "easeInOutCirc":
+				obj.localScale.x=easeInOutCirc(start.x,end.x,i);
+				obj.localScale.y=easeInOutCirc(start.y,end.y,i);
+				obj.localScale.z=easeInOutCirc(start.z,end.z,i);
+				break;
+			case "linear":
+				obj.localScale.x=linear(start.x,end.x,i);
+				obj.localScale.y=linear(start.y,end.y,i);
+				obj.localScale.z=linear(start.z,end.z,i);
+				break;
+			case "spring":
+				obj.localScale.x=spring(start.x,end.x,i);
+				obj.localScale.y=spring(start.y,end.y,i);
+				obj.localScale.z=spring(start.z,end.z,i);
+				break;
+			case "bounce":
+				obj.localScale.x=bounce(start.x,end.x,i);
+				obj.localScale.y=bounce(start.y,end.y,i);
+				obj.localScale.z=bounce(start.z,end.z,i);
+				break;
+			case "easeInBack":
+				obj.localScale.x=easeInBack(start.x,end.x,i);
+				obj.localScale.y=easeInBack(start.y,end.y,i);
+				obj.localScale.z=easeInBack(start.z,end.z,i);
+				break;
+			case "easeOutBack":
+				obj.localScale.x=easeOutBack(start.x,end.x,i);
+				obj.localScale.y=easeOutBack(start.y,end.y,i);
+				obj.localScale.z=easeOutBack(start.z,end.z,i);
+				break;
+			case "easeInOutBack":
+				obj.localScale.x=easeInOutBack(start.x,end.x,i);
+				obj.localScale.y=easeInOutBack(start.y,end.y,i);
+				obj.localScale.z=easeInOutBack(start.z,end.z,i);
+				break;	
 		}
 		yield;
 	}
@@ -1521,86 +1584,88 @@ private function rotateTo(args:Hashtable) {
 	
 	//run tween:
 	for (i = 0.0; i < 1.0; i += Time.deltaTime*(1/runTime)) {
-		if(easing=="easeInQuad"){
-			obj.localRotation=Quaternion.Euler(easeInQuad(start.x,end.x,i),easeInQuad(start.y,end.y,i),easeInQuad(start.z,end.z,i));
-		}
-		if(easing=="easeOutQuad"){
-			obj.localRotation=Quaternion.Euler(easeOutQuad(start.x,end.x,i),easeOutQuad(start.y,end.y,i),easeOutQuad(start.z,end.z,i));
-		}
-		if(easing=="easeInOutQuad"){
-			obj.localRotation=Quaternion.Euler(easeInOutQuad(start.x,end.x,i),easeInOutQuad(start.y,end.y,i),easeInOutQuad(start.z,end.z,i));
-		}
-		if(easing=="easeInCubic"){
-			obj.localRotation=Quaternion.Euler(easeInCubic(start.x,end.x,i),easeInCubic(start.y,end.y,i),easeInCubic(start.z,end.z,i));
-		}
-		if(easing=="easeOutCubic"){
-			obj.localRotation=Quaternion.Euler(easeOutCubic(start.x,end.x,i),easeOutCubic(start.y,end.y,i),easeOutCubic(start.z,end.z,i));
-		}
-		if(easing=="easeInOutCubic"){
-			obj.localRotation=Quaternion.Euler(easeInOutCubic(start.x,end.x,i),easeInOutCubic(start.y,end.y,i),easeInOutCubic(start.z,end.z,i));
-		}
-		if(easing=="easeInQuart"){
-			obj.localRotation=Quaternion.Euler(easeInQuart(start.x,end.x,i),easeInQuart(start.y,end.y,i),easeInQuart(start.z,end.z,i));
-		}
-		if(easing=="easeOutQuart"){
-			obj.localRotation=Quaternion.Euler(easeOutQuart(start.x,end.x,i),easeOutQuart(start.y,end.y,i),easeOutQuart(start.z,end.z,i));
-		}
-		if(easing=="easeInOutQuart"){
-			obj.localRotation=Quaternion.Euler(easeInOutQuart(start.x,end.x,i),easeInOutQuart(start.y,end.y,i),easeInOutQuart(start.z,end.z,i));
-		}	
-		if(easing=="easeInQuint"){
-			obj.localRotation=Quaternion.Euler(easeInQuint(start.x,end.x,i),easeInQuint(start.y,end.y,i),easeInQuint(start.z,end.z,i));
-		}
-		if(easing=="easeOutQuint"){
-			obj.localRotation=Quaternion.Euler(easeOutQuint(start.x,end.x,i),easeOutQuint(start.y,end.y,i),easeOutQuint(start.z,end.z,i));
-		}
-		if(easing=="easeInOutQuint"){
-			obj.localRotation=Quaternion.Euler(easeInOutQuint(start.x,end.x,i),easeInOutQuint(start.y,end.y,i),easeInOutQuint(start.z,end.z,i));
-		}	
-		if(easing=="easeInSine"){
-			obj.localRotation=Quaternion.Euler(easeInSine(start.x,end.x,i),easeInSine(start.y,end.y,i),easeInSine(start.z,end.z,i));
-		}
-		if(easing=="easeOutSine"){
-			obj.localRotation=Quaternion.Euler(easeOutSine(start.x,end.x,i),easeOutSine(start.y,end.y,i),easeOutSine(start.z,end.z,i));
-		}
-		if(easing=="easeInOutSine"){
-			obj.localRotation=Quaternion.Euler(easeInOutSine(start.x,end.x,i),easeInOutSine(start.y,end.y,i),easeInOutSine(start.z,end.z,i));
-		}	
-		if(easing=="easeInExpo"){
-			obj.localRotation=Quaternion.Euler(easeInExpo(start.x,end.x,i),easeInExpo(start.y,end.y,i),easeInExpo(start.z,end.z,i));
-		}
-		if(easing=="easeOutExpo"){
-			obj.localRotation=Quaternion.Euler(easeOutExpo(start.x,end.x,i),easeOutExpo(start.y,end.y,i),easeOutExpo(start.z,end.z,i));
-		}
-		if(easing=="easeInOutExpo"){
-			obj.localRotation=Quaternion.Euler(easeInOutExpo(start.x,end.x,i),easeInOutExpo(start.y,end.y,i),easeInOutExpo(start.z,end.z,i));
-		}	
-		if(easing=="easeInCirc"){
-			obj.localRotation=Quaternion.Euler(easeInCirc(start.x,end.x,i),easeInCirc(start.y,end.y,i),easeInCirc(start.z,end.z,i));
-		}
-		if(easing=="easeOutCirc"){
-			obj.localRotation=Quaternion.Euler(easeOutCirc(start.x,end.x,i),easeOutCirc(start.y,end.y,i),easeOutCirc(start.z,end.z,i));
-		}
-		if(easing=="easeInOutCirc"){
-			obj.localRotation=Quaternion.Euler(easeInOutCirc(start.x,end.x,i),easeInOutCirc(start.y,end.y,i),easeInOutCirc(start.z,end.z,i));
-		}
-		if(easing=="linear"){
-			obj.localRotation=Quaternion.Euler(clerp(start.x,end.x,i),clerp(start.y,end.y,i),clerp(start.z,end.z,i));
-		}
-		if(easing=="spring"){
-			obj.localRotation=Quaternion.Euler(spring(start.x,end.x,i),spring(start.y,end.y,i),spring(start.z,end.z,i));
-		}
-		if(easing=="bounce"){
-			obj.localRotation=Quaternion.Euler(bounce(start.x,end.x,i),bounce(start.y,end.y,i),bounce(start.z,end.z,i));
-		}
-		if(easing=="easeInBack"){
-			obj.localRotation=Quaternion.Euler(easeInBack(start.x,end.x,i),easeInBack(start.y,end.y,i),easeInBack(start.z,end.z,i));
-		}
-		if(easing=="easeOutBack"){
-			obj.localRotation=Quaternion.Euler(easeOutBack(start.x,end.x,i),easeOutBack(start.y,end.y,i),easeOutBack(start.z,end.z,i));
-		}
-		if(easing=="easeInOutBack"){
-			obj.localRotation=Quaternion.Euler(easeInOutBack(start.x,end.x,i),easeInOutBack(start.y,end.y,i),easeInOutBack(start.z,end.z,i));
+		switch (easing){
+			case "easeInQuad":
+				obj.localRotation=Quaternion.Euler(easeInQuad(start.x,end.x,i),easeInQuad(start.y,end.y,i),easeInQuad(start.z,end.z,i));
+				break;
+			case "easeOutQuad":
+				obj.localRotation=Quaternion.Euler(easeOutQuad(start.x,end.x,i),easeOutQuad(start.y,end.y,i),easeOutQuad(start.z,end.z,i));
+				break;
+			case "easeInOutQuad":
+				obj.localRotation=Quaternion.Euler(easeInOutQuad(start.x,end.x,i),easeInOutQuad(start.y,end.y,i),easeInOutQuad(start.z,end.z,i));
+				break;
+			case "easeInCubic":
+				obj.localRotation=Quaternion.Euler(easeInCubic(start.x,end.x,i),easeInCubic(start.y,end.y,i),easeInCubic(start.z,end.z,i));
+				break;
+			case "easeOutCubic":
+				obj.localRotation=Quaternion.Euler(easeOutCubic(start.x,end.x,i),easeOutCubic(start.y,end.y,i),easeOutCubic(start.z,end.z,i));
+				break;
+			case "easeInOutCubic":
+				obj.localRotation=Quaternion.Euler(easeInOutCubic(start.x,end.x,i),easeInOutCubic(start.y,end.y,i),easeInOutCubic(start.z,end.z,i));
+				break;
+			case "easeInQuart":
+				obj.localRotation=Quaternion.Euler(easeInQuart(start.x,end.x,i),easeInQuart(start.y,end.y,i),easeInQuart(start.z,end.z,i));
+				break;
+			case "easeOutQuart":
+				obj.localRotation=Quaternion.Euler(easeOutQuart(start.x,end.x,i),easeOutQuart(start.y,end.y,i),easeOutQuart(start.z,end.z,i));
+				break;
+			case "easeInOutQuart":
+				obj.localRotation=Quaternion.Euler(easeInOutQuart(start.x,end.x,i),easeInOutQuart(start.y,end.y,i),easeInOutQuart(start.z,end.z,i));
+				break;
+			case "easeInQuint":
+				obj.localRotation=Quaternion.Euler(easeInQuint(start.x,end.x,i),easeInQuint(start.y,end.y,i),easeInQuint(start.z,end.z,i));
+				break;
+			case "easeOutQuint":
+				obj.localRotation=Quaternion.Euler(easeOutQuint(start.x,end.x,i),easeOutQuint(start.y,end.y,i),easeOutQuint(start.z,end.z,i));
+				break;
+			case "easeInOutQuint":
+				obj.localRotation=Quaternion.Euler(easeInOutQuint(start.x,end.x,i),easeInOutQuint(start.y,end.y,i),easeInOutQuint(start.z,end.z,i));
+				break;
+			case "easeInSine":
+				obj.localRotation=Quaternion.Euler(easeInSine(start.x,end.x,i),easeInSine(start.y,end.y,i),easeInSine(start.z,end.z,i));
+				break;
+			case "easeOutSine":
+				obj.localRotation=Quaternion.Euler(easeOutSine(start.x,end.x,i),easeOutSine(start.y,end.y,i),easeOutSine(start.z,end.z,i));
+				break;
+			case "easeInOutSine":
+				obj.localRotation=Quaternion.Euler(easeInOutSine(start.x,end.x,i),easeInOutSine(start.y,end.y,i),easeInOutSine(start.z,end.z,i));
+				break;
+			case "easeInExpo":
+				obj.localRotation=Quaternion.Euler(easeInExpo(start.x,end.x,i),easeInExpo(start.y,end.y,i),easeInExpo(start.z,end.z,i));
+				break;
+			case "easeOutExpo":
+				obj.localRotation=Quaternion.Euler(easeOutExpo(start.x,end.x,i),easeOutExpo(start.y,end.y,i),easeOutExpo(start.z,end.z,i));
+				break;
+			case "easeInOutExpo":
+				obj.localRotation=Quaternion.Euler(easeInOutExpo(start.x,end.x,i),easeInOutExpo(start.y,end.y,i),easeInOutExpo(start.z,end.z,i));
+				break;
+			case "easeInCirc":
+				obj.localRotation=Quaternion.Euler(easeInCirc(start.x,end.x,i),easeInCirc(start.y,end.y,i),easeInCirc(start.z,end.z,i));
+				break;
+			case "easeOutCirc":
+				obj.localRotation=Quaternion.Euler(easeOutCirc(start.x,end.x,i),easeOutCirc(start.y,end.y,i),easeOutCirc(start.z,end.z,i));
+				break;
+			case "easeInOutCirc":
+				obj.localRotation=Quaternion.Euler(easeInOutCirc(start.x,end.x,i),easeInOutCirc(start.y,end.y,i),easeInOutCirc(start.z,end.z,i));
+				break;
+			case "linear":
+				obj.localRotation=Quaternion.Euler(clerp(start.x,end.x,i),clerp(start.y,end.y,i),clerp(start.z,end.z,i));
+				break;
+			case "spring":
+				obj.localRotation=Quaternion.Euler(spring(start.x,end.x,i),spring(start.y,end.y,i),spring(start.z,end.z,i));
+				break;
+			case "bounce":
+				obj.localRotation=Quaternion.Euler(bounce(start.x,end.x,i),bounce(start.y,end.y,i),bounce(start.z,end.z,i));
+				break;
+			case "easeInBack":
+				obj.localRotation=Quaternion.Euler(easeInBack(start.x,end.x,i),easeInBack(start.y,end.y,i),easeInBack(start.z,end.z,i));
+				break;
+			case "easeOutBack":
+				obj.localRotation=Quaternion.Euler(easeOutBack(start.x,end.x,i),easeOutBack(start.y,end.y,i),easeOutBack(start.z,end.z,i));
+				break;
+			case "easeInOutBack":
+				obj.localRotation=Quaternion.Euler(easeInOutBack(start.x,end.x,i),easeInOutBack(start.y,end.y,i),easeInOutBack(start.z,end.z,i));
+				break;
 		}
 		yield;
 	}
@@ -1621,13 +1686,13 @@ private function rotateBy(args:Hashtable) {
 	
 	//construct args:
 	if(args["time"]==null){
-		args.Add("time",rotateToDefaults["time"]);
+		args.Add("time",rotateByDefaults["time"]);
 	}
 	if(args["delay"]==null){
-		args.Add("delay",rotateToDefaults["delay"]);
+		args.Add("delay",rotateByDefaults["delay"]);
 	}
 	if(args["transition"]==null){
-		args.Add("transition",rotateToDefaults["transition"]);
+		args.Add("transition",rotateByDefaults["transition"]);
 	}
 	if(args["onComplete"]==null){
 		args.Add("onComplete","null");
@@ -1669,86 +1734,88 @@ private function rotateBy(args:Hashtable) {
 		
 	//run tween:
 	for (i = 0.0; i < 1.0; i += Time.deltaTime*(1/runTime)) {
-		if(easing=="easeInQuad"){
-			obj.localRotation=Quaternion.Euler(easeInQuad(start.x,end.x,i),easeInQuad(start.y,end.y,i),easeInQuad(start.z,end.z,i));
-		}
-		if(easing=="easeOutQuad"){
-			obj.localRotation=Quaternion.Euler(easeOutQuad(start.x,end.x,i),easeOutQuad(start.y,end.y,i),easeOutQuad(start.z,end.z,i));
-		}
-		if(easing=="easeInOutQuad"){
-			obj.localRotation=Quaternion.Euler(easeInOutQuad(start.x,end.x,i),easeInOutQuad(start.y,end.y,i),easeInOutQuad(start.z,end.z,i));
-		}
-		if(easing=="easeInCubic"){
-			obj.localRotation=Quaternion.Euler(easeInCubic(start.x,end.x,i),easeInCubic(start.y,end.y,i),easeInCubic(start.z,end.z,i));
-		}
-		if(easing=="easeOutCubic"){
-			obj.localRotation=Quaternion.Euler(easeOutCubic(start.x,end.x,i),easeOutCubic(start.y,end.y,i),easeOutCubic(start.z,end.z,i));
-		}
-		if(easing=="easeInOutCubic"){
-			obj.localRotation=Quaternion.Euler(easeInOutCubic(start.x,end.x,i),easeInOutCubic(start.y,end.y,i),easeInOutCubic(start.z,end.z,i));
-		}
-		if(easing=="easeInQuart"){
-			obj.localRotation=Quaternion.Euler(easeInQuart(start.x,end.x,i),easeInQuart(start.y,end.y,i),easeInQuart(start.z,end.z,i));
-		}
-		if(easing=="easeOutQuart"){
-			obj.localRotation=Quaternion.Euler(easeOutQuart(start.x,end.x,i),easeOutQuart(start.y,end.y,i),easeOutQuart(start.z,end.z,i));
-		}
-		if(easing=="easeInOutQuart"){
-			obj.localRotation=Quaternion.Euler(easeInOutQuart(start.x,end.x,i),easeInOutQuart(start.y,end.y,i),easeInOutQuart(start.z,end.z,i));
-		}	
-		if(easing=="easeInQuint"){
-			obj.localRotation=Quaternion.Euler(easeInQuint(start.x,end.x,i),easeInQuint(start.y,end.y,i),easeInQuint(start.z,end.z,i));
-		}
-		if(easing=="easeOutQuint"){
-			obj.localRotation=Quaternion.Euler(easeOutQuint(start.x,end.x,i),easeOutQuint(start.y,end.y,i),easeOutQuint(start.z,end.z,i));
-		}
-		if(easing=="easeInOutQuint"){
-			obj.localRotation=Quaternion.Euler(easeInOutQuint(start.x,end.x,i),easeInOutQuint(start.y,end.y,i),easeInOutQuint(start.z,end.z,i));
-		}	
-		if(easing=="easeInSine"){
-			obj.localRotation=Quaternion.Euler(easeInSine(start.x,end.x,i),easeInSine(start.y,end.y,i),easeInSine(start.z,end.z,i));
-		}
-		if(easing=="easeOutSine"){
-			obj.localRotation=Quaternion.Euler(easeOutSine(start.x,end.x,i),easeOutSine(start.y,end.y,i),easeOutSine(start.z,end.z,i));
-		}
-		if(easing=="easeInOutSine"){
-			obj.localRotation=Quaternion.Euler(easeInOutSine(start.x,end.x,i),easeInOutSine(start.y,end.y,i),easeInOutSine(start.z,end.z,i));
-		}	
-		if(easing=="easeInExpo"){
-			obj.localRotation=Quaternion.Euler(easeInExpo(start.x,end.x,i),easeInExpo(start.y,end.y,i),easeInExpo(start.z,end.z,i));
-		}
-		if(easing=="easeOutExpo"){
-			obj.localRotation=Quaternion.Euler(easeOutExpo(start.x,end.x,i),easeOutExpo(start.y,end.y,i),easeOutExpo(start.z,end.z,i));
-		}
-		if(easing=="easeInOutExpo"){
-			obj.localRotation=Quaternion.Euler(easeInOutExpo(start.x,end.x,i),easeInOutExpo(start.y,end.y,i),easeInOutExpo(start.z,end.z,i));
-		}	
-		if(easing=="easeInCirc"){
-			obj.localRotation=Quaternion.Euler(easeInCirc(start.x,end.x,i),easeInCirc(start.y,end.y,i),easeInCirc(start.z,end.z,i));
-		}
-		if(easing=="easeOutCirc"){
-			obj.localRotation=Quaternion.Euler(easeOutCirc(start.x,end.x,i),easeOutCirc(start.y,end.y,i),easeOutCirc(start.z,end.z,i));
-		}
-		if(easing=="easeInOutCirc"){
-			obj.localRotation=Quaternion.Euler(easeInOutCirc(start.x,end.x,i),easeInOutCirc(start.y,end.y,i),easeInOutCirc(start.z,end.z,i));
-		}
-		if(easing=="linear"){
-			obj.localRotation=Quaternion.Euler(linear(start.x,end.x,i),linear(start.y,end.y,i),linear(start.z,end.z,i));
-		}
-		if(easing=="spring"){
-			obj.localRotation=Quaternion.Euler(spring(start.x,end.x,i),spring(start.y,end.y,i),spring(start.z,end.z,i));
-		}
-		if(easing=="bounce"){
-			obj.localRotation=Quaternion.Euler(bounce(start.x,end.x,i),bounce(start.y,end.y,i),bounce(start.z,end.z,i));
-		}
-		if(easing=="easeInBack"){
-			obj.localRotation=Quaternion.Euler(easeInBack(start.x,end.x,i),easeInBack(start.y,end.y,i),easeInBack(start.z,end.z,i));
-		}
-		if(easing=="easeOutBack"){
-			obj.localRotation=Quaternion.Euler(easeOutBack(start.x,end.x,i),easeOutBack(start.y,end.y,i),easeOutBack(start.z,end.z,i));
-		}
-		if(easing=="easeInOutBack"){
-			obj.localRotation=Quaternion.Euler(easeInOutBack(start.x,end.x,i),easeInOutBack(start.y,end.y,i),easeInOutBack(start.z,end.z,i));
+		switch (easing){
+			case "easeInQuad":
+				obj.localRotation=Quaternion.Euler(easeInQuad(start.x,end.x,i),easeInQuad(start.y,end.y,i),easeInQuad(start.z,end.z,i));
+				break;
+			case "easeOutQuad":
+				obj.localRotation=Quaternion.Euler(easeOutQuad(start.x,end.x,i),easeOutQuad(start.y,end.y,i),easeOutQuad(start.z,end.z,i));
+				break;
+			case "easeInOutQuad":
+				obj.localRotation=Quaternion.Euler(easeInOutQuad(start.x,end.x,i),easeInOutQuad(start.y,end.y,i),easeInOutQuad(start.z,end.z,i));
+				break;
+			case "easeInCubic":
+				obj.localRotation=Quaternion.Euler(easeInCubic(start.x,end.x,i),easeInCubic(start.y,end.y,i),easeInCubic(start.z,end.z,i));
+				break;
+			case "easeOutCubic":
+				obj.localRotation=Quaternion.Euler(easeOutCubic(start.x,end.x,i),easeOutCubic(start.y,end.y,i),easeOutCubic(start.z,end.z,i));
+				break;
+			case "easeInOutCubic":
+				obj.localRotation=Quaternion.Euler(easeInOutCubic(start.x,end.x,i),easeInOutCubic(start.y,end.y,i),easeInOutCubic(start.z,end.z,i));
+				break;
+			case "easeInQuart":
+				obj.localRotation=Quaternion.Euler(easeInQuart(start.x,end.x,i),easeInQuart(start.y,end.y,i),easeInQuart(start.z,end.z,i));
+				break;
+			case "easeOutQuart":
+				obj.localRotation=Quaternion.Euler(easeOutQuart(start.x,end.x,i),easeOutQuart(start.y,end.y,i),easeOutQuart(start.z,end.z,i));
+				break;
+			case "easeInOutQuart":
+				obj.localRotation=Quaternion.Euler(easeInOutQuart(start.x,end.x,i),easeInOutQuart(start.y,end.y,i),easeInOutQuart(start.z,end.z,i));
+				break;
+			case "easeInQuint":
+				obj.localRotation=Quaternion.Euler(easeInQuint(start.x,end.x,i),easeInQuint(start.y,end.y,i),easeInQuint(start.z,end.z,i));
+				break;
+			case "easeOutQuint":
+				obj.localRotation=Quaternion.Euler(easeOutQuint(start.x,end.x,i),easeOutQuint(start.y,end.y,i),easeOutQuint(start.z,end.z,i));
+				break;
+			case "easeInOutQuint":
+				obj.localRotation=Quaternion.Euler(easeInOutQuint(start.x,end.x,i),easeInOutQuint(start.y,end.y,i),easeInOutQuint(start.z,end.z,i));
+				break;
+			case "easeInSine":
+				obj.localRotation=Quaternion.Euler(easeInSine(start.x,end.x,i),easeInSine(start.y,end.y,i),easeInSine(start.z,end.z,i));
+				break;
+			case "easeOutSine":
+				obj.localRotation=Quaternion.Euler(easeOutSine(start.x,end.x,i),easeOutSine(start.y,end.y,i),easeOutSine(start.z,end.z,i));
+				break;
+			case "easeInOutSine":
+				obj.localRotation=Quaternion.Euler(easeInOutSine(start.x,end.x,i),easeInOutSine(start.y,end.y,i),easeInOutSine(start.z,end.z,i));
+				break;
+			case "easeInExpo":
+				obj.localRotation=Quaternion.Euler(easeInExpo(start.x,end.x,i),easeInExpo(start.y,end.y,i),easeInExpo(start.z,end.z,i));
+				break;
+			case "easeOutExpo":
+				obj.localRotation=Quaternion.Euler(easeOutExpo(start.x,end.x,i),easeOutExpo(start.y,end.y,i),easeOutExpo(start.z,end.z,i));
+				break;
+			case "easeInOutExpo":
+				obj.localRotation=Quaternion.Euler(easeInOutExpo(start.x,end.x,i),easeInOutExpo(start.y,end.y,i),easeInOutExpo(start.z,end.z,i));
+				break;
+			case "easeInCirc":
+				obj.localRotation=Quaternion.Euler(easeInCirc(start.x,end.x,i),easeInCirc(start.y,end.y,i),easeInCirc(start.z,end.z,i));
+				break;
+			case "easeOutCirc":
+				obj.localRotation=Quaternion.Euler(easeOutCirc(start.x,end.x,i),easeOutCirc(start.y,end.y,i),easeOutCirc(start.z,end.z,i));
+				break;
+			case "easeInOutCirc":
+				obj.localRotation=Quaternion.Euler(easeInOutCirc(start.x,end.x,i),easeInOutCirc(start.y,end.y,i),easeInOutCirc(start.z,end.z,i));
+				break;
+			case "linear":
+				obj.localRotation=Quaternion.Euler(clerp(start.x,end.x,i),clerp(start.y,end.y,i),clerp(start.z,end.z,i));
+				break;
+			case "spring":
+				obj.localRotation=Quaternion.Euler(spring(start.x,end.x,i),spring(start.y,end.y,i),spring(start.z,end.z,i));
+				break;
+			case "bounce":
+				obj.localRotation=Quaternion.Euler(bounce(start.x,end.x,i),bounce(start.y,end.y,i),bounce(start.z,end.z,i));
+				break;
+			case "easeInBack":
+				obj.localRotation=Quaternion.Euler(easeInBack(start.x,end.x,i),easeInBack(start.y,end.y,i),easeInBack(start.z,end.z,i));
+				break;
+			case "easeOutBack":
+				obj.localRotation=Quaternion.Euler(easeOutBack(start.x,end.x,i),easeOutBack(start.y,end.y,i),easeOutBack(start.z,end.z,i));
+				break;
+			case "easeInOutBack":
+				obj.localRotation=Quaternion.Euler(easeInOutBack(start.x,end.x,i),easeInOutBack(start.y,end.y,i),easeInOutBack(start.z,end.z,i));
+				break;
 		}
 		yield;
 	}
@@ -1763,13 +1830,13 @@ private function rotateBy(args:Hashtable) {
 private function colorTo(args:Hashtable) {
 	//construct args:
 	if(args["time"]==null){
-		args.Add("time",fadeDefaults["time"]);
+		args.Add("time",colorDefaults["time"]);
 	}
 	if(args["delay"]==null){
-		args.Add("delay",fadeDefaults["delay"]);
+		args.Add("delay",colorDefaults["delay"]);
 	}
 	if(args["transition"]==null){
-		args.Add("transition",fadeDefaults["transition"]);
+		args.Add("transition",colorDefaults["transition"]);
 	}
 	if(args["onComplete"]==null){
 		args.Add("onComplete","null");
@@ -1793,10 +1860,10 @@ private function colorTo(args:Hashtable) {
 		args.Add("r",0);
 	}
 	if(args["g"]==null){
-		args.Add("r",0);
+		args.Add("g",0);
 	}
 	if(args["b"]==null){
-		args.Add("r",0);
+		args.Add("b",0);
 	}
 	
 	//define targets:
@@ -1807,141 +1874,143 @@ private function colorTo(args:Hashtable) {
 	if(obj.guiTexture){
 		start=obj.guiTexture.color;
 		for (i = 0.0; i < 1.0; i += Time.deltaTime*(1/runTime)) {
-			if(easing=="easeInQuad"){
-				obj.guiTexture.color.r=easeInQuad(start.r,end.r,i);
-				obj.guiTexture.color.g=easeInQuad(start.g,end.g,i);
-				obj.guiTexture.color.b=easeInQuad(start.b,end.b,i);
-			}
-			if(easing=="easeOutQuad"){
-				obj.guiTexture.color.r=easeOutQuad(start.r,end.r,i);
-				obj.guiTexture.color.g=easeOutQuad(start.g,end.g,i);
-				obj.guiTexture.color.b=easeOutQuad(start.b,end.b,i);
-			}
-			if(easing=="easeInOutQuad"){
-				obj.guiTexture.color.r=easeInOutQuad(start.r,end.r,i);
-				obj.guiTexture.color.g=easeInOutQuad(start.g,end.g,i);
-				obj.guiTexture.color.b=easeInOutQuad(start.b,end.b,i);
-			}
-			if(easing=="easeInCubic"){
-				obj.guiTexture.color.r=easeInCubic(start.r,end.r,i);
-				obj.guiTexture.color.g=easeInCubic(start.g,end.g,i);
-				obj.guiTexture.color.b=easeInCubic(start.b,end.b,i);
-			}
-			if(easing=="easeOutCubic"){
-				obj.guiTexture.color.r=easeOutCubic(start.r,end.r,i);
-				obj.guiTexture.color.g=easeOutCubic(start.g,end.g,i);
-				obj.guiTexture.color.b=easeOutCubic(start.b,end.b,i);
-			}
-			if(easing=="easeInOutCubic"){
-				obj.guiTexture.color.r=easeInOutCubic(start.r,end.r,i);
-				obj.guiTexture.color.g=easeInOutCubic(start.g,end.g,i);
-				obj.guiTexture.color.b=easeInOutCubic(start.b,end.b,i);
-			}	
-			if(easing=="easeInQuart"){
-				obj.guiTexture.color.r=easeInQuart(start.r,end.r,i);
-				obj.guiTexture.color.g=easeInQuart(start.g,end.g,i);
-				obj.guiTexture.color.b=easeInQuart(start.b,end.b,i);
-			}
-			if(easing=="easeOutQuart"){
-				obj.guiTexture.color.r=easeOutQuart(start.r,end.r,i);
-				obj.guiTexture.color.g=easeOutQuart(start.g,end.g,i);
-				obj.guiTexture.color.b=easeOutQuart(start.b,end.b,i);
-			}
-			if(easing=="easeInOutQuart"){
-				obj.guiTexture.color.r=easeInOutQuart(start.r,end.r,i);
-				obj.guiTexture.color.g=easeInOutQuart(start.g,end.g,i);
-				obj.guiTexture.color.b=easeInOutQuart(start.b,end.b,i);
-			}
-			if(easing=="easeInQuint"){
-				obj.guiTexture.color.r=easeInQuint(start.r,end.r,i);
-				obj.guiTexture.color.g=easeInQuint(start.g,end.g,i);
-				obj.guiTexture.color.b=easeInQuint(start.b,end.b,i);
-			}
-			if(easing=="easeOutQuint"){
-				obj.guiTexture.color.r=easeOutQuint(start.r,end.r,i);
-				obj.guiTexture.color.g=easeOutQuint(start.g,end.g,i);
-				obj.guiTexture.color.b=easeOutQuint(start.b,end.b,i);
-			}
-			if(easing=="easeInOutQuint"){
-				obj.guiTexture.color.r=easeInOutQuint(start.r,end.r,i);
-				obj.guiTexture.color.g=easeInOutQuint(start.g,end.g,i);
-				obj.guiTexture.color.b=easeInOutQuint(start.b,end.b,i);
-			}	
-			if(easing=="easeInSine"){
-				obj.guiTexture.color.r=easeInSine(start.r,end.r,i);
-				obj.guiTexture.color.g=easeInSine(start.g,end.g,i);
-				obj.guiTexture.color.b=easeInSine(start.b,end.b,i);
-			}
-			if(easing=="easeOutSine"){
-				obj.guiTexture.color.r=easeOutSine(start.r,end.r,i);
-				obj.guiTexture.color.g=easeOutSine(start.g,end.g,i);
-				obj.guiTexture.color.b=easeOutSine(start.b,end.b,i);
-			}
-			if(easing=="easeInOutSine"){
-				obj.guiTexture.color.r=easeInOutSine(start.r,end.r,i);
-				obj.guiTexture.color.g=easeInOutSine(start.g,end.g,i);
-				obj.guiTexture.color.b=easeInOutSine(start.b,end.b,i);
-			}
-			if(easing=="easeInExpo"){
-				obj.guiTexture.color.r=easeInExpo(start.r,end.r,i);
-				obj.guiTexture.color.g=easeInExpo(start.g,end.g,i);
-				obj.guiTexture.color.b=easeInExpo(start.b,end.b,i);
-			}
-			if(easing=="easeOutExpo"){
-				obj.guiTexture.color.r=easeOutExpo(start.r,end.r,i);
-				obj.guiTexture.color.g=easeOutExpo(start.g,end.g,i);
-				obj.guiTexture.color.b=easeOutExpo(start.b,end.b,i);
-			}
-			if(easing=="easeInOutExpo"){
-				obj.guiTexture.color.r=easeInOutExpo(start.r,end.r,i);
-				obj.guiTexture.color.g=easeInOutExpo(start.g,end.g,i);
-				obj.guiTexture.color.b=easeInOutExpo(start.b,end.b,i);
-			}
-			if(easing=="easeInCirc"){
-				obj.guiTexture.color.r=easeInCirc(start.r,end.r,i);
-				obj.guiTexture.color.g=easeInCirc(start.g,end.g,i);
-				obj.guiTexture.color.b=easeInCirc(start.b,end.b,i);
-			}
-			if(easing=="easeOutCirc"){
-				obj.guiTexture.color.r=easeOutCirc(start.r,end.r,i);
-				obj.guiTexture.color.g=easeOutCirc(start.g,end.g,i);
-				obj.guiTexture.color.b=easeOutCirc(start.b,end.b,i);
-			}
-			if(easing=="easeInOutCirc"){
-				obj.guiTexture.color.r=easeInOutCirc(start.r,end.r,i);
-				obj.guiTexture.color.g=easeInOutCirc(start.g,end.g,i);
-				obj.guiTexture.color.b=easeInOutCirc(start.b,end.b,i);
+			switch (easing){
+				case "easeInQuad":
+					obj.guiTexture.color.r=easeInQuad(start.r,end.r,i);
+					obj.guiTexture.color.g=easeInQuad(start.g,end.g,i);
+					obj.guiTexture.color.b=easeInQuad(start.b,end.b,i);
+					break;
+				case "easeOutQuad":
+					obj.guiTexture.color.r=easeOutQuad(start.r,end.r,i);
+					obj.guiTexture.color.g=easeOutQuad(start.g,end.g,i);
+					obj.guiTexture.color.b=easeOutQuad(start.b,end.b,i);
+					break;
+				case "easeInOutQuad":
+					obj.guiTexture.color.r=easeInOutQuad(start.r,end.r,i);
+					obj.guiTexture.color.g=easeInOutQuad(start.g,end.g,i);
+					obj.guiTexture.color.b=easeInOutQuad(start.b,end.b,i);
+					break;
+				case "easeInCubic":
+					obj.guiTexture.color.r=easeInCubic(start.r,end.r,i);
+					obj.guiTexture.color.g=easeInCubic(start.g,end.g,i);
+					obj.guiTexture.color.b=easeInCubic(start.b,end.b,i);
+					break;
+				case "easeOutCubic":
+					obj.guiTexture.color.r=easeOutCubic(start.r,end.r,i);
+					obj.guiTexture.color.g=easeOutCubic(start.g,end.g,i);
+					obj.guiTexture.color.b=easeOutCubic(start.b,end.b,i);
+					break;
+				case "easeInOutCubic":
+					obj.guiTexture.color.r=easeInOutCubic(start.r,end.r,i);
+					obj.guiTexture.color.g=easeInOutCubic(start.g,end.g,i);
+					obj.guiTexture.color.b=easeInOutCubic(start.b,end.b,i);
+					break;
+				case "easeInQuart":
+					obj.guiTexture.color.r=easeInQuart(start.r,end.r,i);
+					obj.guiTexture.color.g=easeInQuart(start.g,end.g,i);
+					obj.guiTexture.color.b=easeInQuart(start.b,end.b,i);
+					break;
+				case "easeOutQuart":
+					obj.guiTexture.color.r=easeOutQuart(start.r,end.r,i);
+					obj.guiTexture.color.g=easeOutQuart(start.g,end.g,i);
+					obj.guiTexture.color.b=easeOutQuart(start.b,end.b,i);
+					break;
+				case "easeInOutQuart":
+					obj.guiTexture.color.r=easeInOutQuart(start.r,end.r,i);
+					obj.guiTexture.color.g=easeInOutQuart(start.g,end.g,i);
+					obj.guiTexture.color.b=easeInOutQuart(start.b,end.b,i);
+					break;
+				case "easeInQuint":
+					obj.guiTexture.color.r=easeInQuint(start.r,end.r,i);
+					obj.guiTexture.color.g=easeInQuint(start.g,end.g,i);
+					obj.guiTexture.color.b=easeInQuint(start.b,end.b,i);
+					break;
+				case "easeOutQuint":
+					obj.guiTexture.color.r=easeOutQuint(start.r,end.r,i);
+					obj.guiTexture.color.g=easeOutQuint(start.g,end.g,i);
+					obj.guiTexture.color.b=easeOutQuint(start.b,end.b,i);
+					break;
+				case "easeInOutQuint":
+					obj.guiTexture.color.r=easeInOutQuint(start.r,end.r,i);
+					obj.guiTexture.color.g=easeInOutQuint(start.g,end.g,i);
+					obj.guiTexture.color.b=easeInOutQuint(start.b,end.b,i);
+					break;
+				case "easeInSine":
+					obj.guiTexture.color.r=easeInSine(start.r,end.r,i);
+					obj.guiTexture.color.g=easeInSine(start.g,end.g,i);
+					obj.guiTexture.color.b=easeInSine(start.b,end.b,i);
+					break;
+				case "easeOutSine":
+					obj.guiTexture.color.r=easeOutSine(start.r,end.r,i);
+					obj.guiTexture.color.g=easeOutSine(start.g,end.g,i);
+					obj.guiTexture.color.b=easeOutSine(start.b,end.b,i);
+					break;
+				case "easeInOutSine":
+					obj.guiTexture.color.r=easeInOutSine(start.r,end.r,i);
+					obj.guiTexture.color.g=easeInOutSine(start.g,end.g,i);
+					obj.guiTexture.color.b=easeInOutSine(start.b,end.b,i);
+					break;
+				case "easeInExpo":
+					obj.guiTexture.color.r=easeInExpo(start.r,end.r,i);
+					obj.guiTexture.color.g=easeInExpo(start.g,end.g,i);
+					obj.guiTexture.color.b=easeInExpo(start.b,end.b,i);
+					break;
+				case "easeOutExpo":
+					obj.guiTexture.color.r=easeOutExpo(start.r,end.r,i);
+					obj.guiTexture.color.g=easeOutExpo(start.g,end.g,i);
+					obj.guiTexture.color.b=easeOutExpo(start.b,end.b,i);
+					break;
+				case "easeInOutExpo":
+					obj.guiTexture.color.r=easeInOutExpo(start.r,end.r,i);
+					obj.guiTexture.color.g=easeInOutExpo(start.g,end.g,i);
+					obj.guiTexture.color.b=easeInOutExpo(start.b,end.b,i);
+					break;
+				case "easeInCirc":
+					obj.guiTexture.color.r=easeInCirc(start.r,end.r,i);
+					obj.guiTexture.color.g=easeInCirc(start.g,end.g,i);
+					obj.guiTexture.color.b=easeInCirc(start.b,end.b,i);
+					break;
+				case "easeOutCirc":
+					obj.guiTexture.color.r=easeOutCirc(start.r,end.r,i);
+					obj.guiTexture.color.g=easeOutCirc(start.g,end.g,i);
+					obj.guiTexture.color.b=easeOutCirc(start.b,end.b,i);
+					break;
+				case "easeInOutCirc":
+					obj.guiTexture.color.r=easeInOutCirc(start.r,end.r,i);
+					obj.guiTexture.color.g=easeInOutCirc(start.g,end.g,i);
+					obj.guiTexture.color.b=easeInOutCirc(start.b,end.b,i);
+					break;
+				case "linear":
+					obj.guiTexture.color.r=linear(start.r,end.r,i);
+					obj.guiTexture.color.g=linear(start.g,end.g,i);
+					obj.guiTexture.color.b=linear(start.b,end.b,i);
+					break;
+				case "spring":
+					obj.guiTexture.color.r=spring(start.r,end.r,i);
+					obj.guiTexture.color.g=spring(start.g,end.g,i);
+					obj.guiTexture.color.b=spring(start.b,end.b,i);
+					break;
+				case "bounce":
+					obj.guiTexture.color.r=bounce(start.r,end.r,i);
+					obj.guiTexture.color.g=bounce(start.g,end.g,i);
+					obj.guiTexture.color.b=bounce(start.b,end.b,i);
+					break;
+				case "easeInBack":
+					obj.guiTexture.color.r=easeInBack(start.r,end.r,i);
+					obj.guiTexture.color.g=easeInBack(start.g,end.g,i);
+					obj.guiTexture.color.b=easeInBack(start.b,end.b,i);
+					break;
+				case "easeOutBack":
+					obj.guiTexture.color.r=easeOutBack(start.r,end.r,i);
+					obj.guiTexture.color.g=easeOutBack(start.g,end.g,i);
+					obj.guiTexture.color.b=easeOutBack(start.b,end.b,i);
+					break;
+				case "easeInOutBack":
+					obj.guiTexture.color.r=easeInOutBack(start.r,end.r,i);
+					obj.guiTexture.color.g=easeInOutBack(start.g,end.g,i);
+					obj.guiTexture.color.b=easeInOutBack(start.b,end.b,i);
+					break;
 			}		
-			if(easing=="linear"){
-				obj.guiTexture.color.r=linear(start.r,end.r,i);
-				obj.guiTexture.color.g=linear(start.g,end.g,i);
-				obj.guiTexture.color.b=linear(start.b,end.b,i);
-			}
-			if(easing=="spring"){
-				obj.guiTexture.color.r=spring(start.r,end.r,i);
-				obj.guiTexture.color.g=spring(start.g,end.g,i);
-				obj.guiTexture.color.b=spring(start.b,end.b,i);
-			}
-			if(easing=="bounce"){
-				obj.guiTexture.color.r=bounce(start.r,end.r,i);
-				obj.guiTexture.color.g=bounce(start.g,end.g,i);
-				obj.guiTexture.color.b=bounce(start.b,end.b,i);
-			}
-			if(easing=="easeInBack"){
-				obj.guiTexture.color.r=easeInBack(start.r,end.r,i);
-				obj.guiTexture.color.g=easeInBack(start.g,end.g,i);
-				obj.guiTexture.color.b=easeInBack(start.b,end.b,i);
-			}
-			if(easing=="easeOutBack"){
-				obj.guiTexture.color.r=easeOutBack(start.r,end.r,i);
-				obj.guiTexture.color.g=easeOutBack(start.g,end.g,i);
-				obj.guiTexture.color.b=easeOutBack(start.b,end.b,i);
-			}	
-			if(easing=="easeInOutBack"){
-				obj.guiTexture.color.r=easeInOutBack(start.r,end.r,i);
-				obj.guiTexture.color.g=easeInOutBack(start.g,end.g,i);
-				obj.guiTexture.color.b=easeInOutBack(start.b,end.b,i);
-			}			
 			yield;
 		}
 		obj.guiTexture.color.r=end.r;
@@ -1954,6 +2023,144 @@ private function colorTo(args:Hashtable) {
 	}else{
 		start=obj.renderer.material.color;
 		for (i = 0.0; i < 1.0; i += Time.deltaTime*(1/runTime)) {
+			switch(easing){
+								case "easeInQuad":
+					obj.renderer.material.color.r=easeInQuad(start.r,end.r,i);
+					obj.renderer.material.color.g=easeInQuad(start.g,end.g,i);
+					obj.renderer.material.color.b=easeInQuad(start.b,end.b,i);
+					break;
+				case "easeOutQuad":
+					obj.renderer.material.color.r=easeOutQuad(start.r,end.r,i);
+					obj.renderer.material.color.g=easeOutQuad(start.g,end.g,i);
+					obj.renderer.material.color.b=easeOutQuad(start.b,end.b,i);
+					break;
+				case "easeInOutQuad":
+					obj.renderer.material.color.r=easeInOutQuad(start.r,end.r,i);
+					obj.renderer.material.color.g=easeInOutQuad(start.g,end.g,i);
+					obj.renderer.material.color.b=easeInOutQuad(start.b,end.b,i);
+					break;
+				case "easeInCubic":
+					obj.renderer.material.color.r=easeInCubic(start.r,end.r,i);
+					obj.renderer.material.color.g=easeInCubic(start.g,end.g,i);
+					obj.renderer.material.color.b=easeInCubic(start.b,end.b,i);
+					break;
+				case "easeOutCubic":
+					obj.renderer.material.color.r=easeOutCubic(start.r,end.r,i);
+					obj.renderer.material.color.g=easeOutCubic(start.g,end.g,i);
+					obj.renderer.material.color.b=easeOutCubic(start.b,end.b,i);
+					break;
+				case "easeInOutCubic":
+					obj.renderer.material.color.r=easeInOutCubic(start.r,end.r,i);
+					obj.renderer.material.color.g=easeInOutCubic(start.g,end.g,i);
+					obj.renderer.material.color.b=easeInOutCubic(start.b,end.b,i);
+					break;
+				case "easeInQuart":
+					obj.renderer.material.color.r=easeInQuart(start.r,end.r,i);
+					obj.renderer.material.color.g=easeInQuart(start.g,end.g,i);
+					obj.renderer.material.color.b=easeInQuart(start.b,end.b,i);
+					break;
+				case "easeOutQuart":
+					obj.renderer.material.color.r=easeOutQuart(start.r,end.r,i);
+					obj.renderer.material.color.g=easeOutQuart(start.g,end.g,i);
+					obj.renderer.material.color.b=easeOutQuart(start.b,end.b,i);
+					break;
+				case "easeInOutQuart":
+					obj.renderer.material.color.r=easeInOutQuart(start.r,end.r,i);
+					obj.renderer.material.color.g=easeInOutQuart(start.g,end.g,i);
+					obj.renderer.material.color.b=easeInOutQuart(start.b,end.b,i);
+					break;
+				case "easeInQuint":
+					obj.renderer.material.color.r=easeInQuint(start.r,end.r,i);
+					obj.renderer.material.color.g=easeInQuint(start.g,end.g,i);
+					obj.renderer.material.color.b=easeInQuint(start.b,end.b,i);
+					break;
+				case "easeOutQuint":
+					obj.renderer.material.color.r=easeOutQuint(start.r,end.r,i);
+					obj.renderer.material.color.g=easeOutQuint(start.g,end.g,i);
+					obj.renderer.material.color.b=easeOutQuint(start.b,end.b,i);
+					break;
+				case "easeInOutQuint":
+					obj.renderer.material.color.r=easeInOutQuint(start.r,end.r,i);
+					obj.renderer.material.color.g=easeInOutQuint(start.g,end.g,i);
+					obj.renderer.material.color.b=easeInOutQuint(start.b,end.b,i);
+					break;
+				case "easeInSine":
+					obj.renderer.material.color.r=easeInSine(start.r,end.r,i);
+					obj.renderer.material.color.g=easeInSine(start.g,end.g,i);
+					obj.renderer.material.color.b=easeInSine(start.b,end.b,i);
+					break;
+				case "easeOutSine":
+					obj.renderer.material.color.r=easeOutSine(start.r,end.r,i);
+					obj.renderer.material.color.g=easeOutSine(start.g,end.g,i);
+					obj.renderer.material.color.b=easeOutSine(start.b,end.b,i);
+					break;
+				case "easeInOutSine":
+					obj.renderer.material.color.r=easeInOutSine(start.r,end.r,i);
+					obj.renderer.material.color.g=easeInOutSine(start.g,end.g,i);
+					obj.renderer.material.color.b=easeInOutSine(start.b,end.b,i);
+					break;
+				case "easeInExpo":
+					obj.renderer.material.color.r=easeInExpo(start.r,end.r,i);
+					obj.renderer.material.color.g=easeInExpo(start.g,end.g,i);
+					obj.renderer.material.color.b=easeInExpo(start.b,end.b,i);
+					break;
+				case "easeOutExpo":
+					obj.renderer.material.color.r=easeOutExpo(start.r,end.r,i);
+					obj.renderer.material.color.g=easeOutExpo(start.g,end.g,i);
+					obj.renderer.material.color.b=easeOutExpo(start.b,end.b,i);
+					break;
+				case "easeInOutExpo":
+					obj.renderer.material.color.r=easeInOutExpo(start.r,end.r,i);
+					obj.renderer.material.color.g=easeInOutExpo(start.g,end.g,i);
+					obj.renderer.material.color.b=easeInOutExpo(start.b,end.b,i);
+					break;
+				case "easeInCirc":
+					obj.renderer.material.color.r=easeInCirc(start.r,end.r,i);
+					obj.renderer.material.color.g=easeInCirc(start.g,end.g,i);
+					obj.renderer.material.color.b=easeInCirc(start.b,end.b,i);
+					break;
+				case "easeOutCirc":
+					obj.renderer.material.color.r=easeOutCirc(start.r,end.r,i);
+					obj.renderer.material.color.g=easeOutCirc(start.g,end.g,i);
+					obj.renderer.material.color.b=easeOutCirc(start.b,end.b,i);
+					break;
+				case "easeInOutCirc":
+					obj.renderer.material.color.r=easeInOutCirc(start.r,end.r,i);
+					obj.renderer.material.color.g=easeInOutCirc(start.g,end.g,i);
+					obj.renderer.material.color.b=easeInOutCirc(start.b,end.b,i);
+					break;
+				case "linear":
+					obj.renderer.material.color.r=linear(start.r,end.r,i);
+					obj.renderer.material.color.g=linear(start.g,end.g,i);
+					obj.renderer.material.color.b=linear(start.b,end.b,i);
+					break;
+				case "spring":
+					obj.renderer.material.color.r=spring(start.r,end.r,i);
+					obj.renderer.material.color.g=spring(start.g,end.g,i);
+					obj.renderer.material.color.b=spring(start.b,end.b,i);
+					break;
+				case "bounce":
+					obj.renderer.material.color.r=bounce(start.r,end.r,i);
+					obj.renderer.material.color.g=bounce(start.g,end.g,i);
+					obj.renderer.material.color.b=bounce(start.b,end.b,i);
+					break;
+				case "easeInBack":
+					obj.renderer.material.color.r=easeInBack(start.r,end.r,i);
+					obj.renderer.material.color.g=easeInBack(start.g,end.g,i);
+					obj.renderer.material.color.b=easeInBack(start.b,end.b,i);
+					break;
+				case "easeOutBack":
+					obj.renderer.material.color.r=easeOutBack(start.r,end.r,i);
+					obj.renderer.material.color.g=easeOutBack(start.g,end.g,i);
+					obj.renderer.material.color.b=easeOutBack(start.b,end.b,i);
+					break;
+				case "easeInOutBack":
+					obj.renderer.material.color.r=easeInOutBack(start.r,end.r,i);
+					obj.renderer.material.color.g=easeInOutBack(start.g,end.g,i);
+					obj.renderer.material.color.b=easeInOutBack(start.b,end.b,i);
+					break;
+			}
+			/*
 			if(easing=="easeInQuad"){
 				obj.renderer.material.color.r=easeInQuad(start.r,end.r,i);
 				obj.renderer.material.color.g=easeInQuad(start.g,end.g,i);
@@ -2088,7 +2295,8 @@ private function colorTo(args:Hashtable) {
 				obj.renderer.material.color.r=easeInOutBack(start.r,end.r,i);
 				obj.renderer.material.color.g=easeInOutBack(start.g,end.g,i);
 				obj.renderer.material.color.b=easeInOutBack(start.b,end.b,i);
-			}			
+			}	
+			*/		
 			yield;
 		}
 		obj.renderer.material.color.r=end.r;
