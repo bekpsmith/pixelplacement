@@ -1,12 +1,12 @@
-//VERSION: 1.0.7
+//VERSION: 1.0.8
 
 /*
- Copyright (c) 2010 Bob Berkebile(http://www.pixelplacement.com), C# port by Patrick Corkum(http://www.insquare.com)
+Copyright ©2010 Bob Berkebile(http://www.pixelplacement.com), C# port by Patrick Corkum(http://www.insquare.com)
 
- Permission is hereby granted, free of charge, to any person  obtaining a copy of this software and associated documentation  files (the "Software"), to deal in the Software without  restriction, including without limitation the rights to use,  copy, modify, merge, publish, distribute, sublicense, and/or sell  copies of the Software, and to permit persons to whom the  Software is furnished to do so, subject to the following conditions:
- The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+Permission is hereby granted, free of charge, to any person  obtaining a copy of this software and associated documentation  files (the "Software"), to deal in the Software without  restriction, including without limitation the rights to use,  copy, modify, merge, publish, distribute, sublicense, and/or sell  copies of the Software, and to permit persons to whom the  Software is furnished to do so, subject to the following conditions:
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
- THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 /* 
  
 /*
@@ -14,7 +14,7 @@ TERMS OF USE - EASING EQUATIONS
 
 Open source under the BSD License.
 
-Copyright Â© 2001 Robert Penner
+Copyright ©2001 Robert Penner
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
@@ -126,36 +126,88 @@ static function fadeFrom(target: GameObject,args: Hashtable):void{
 	init(target,args);
 }
 
-//Move by static register:
+//MoveBy static register:
 static function moveBy(target: GameObject,args: Hashtable):void{
 	args.Add("type","moveTo");
 	
-	var xValue : float = args["x"];
-	var yValue : float = args["y"];
-	var zValue : float = args["z"];
+	var xValue : float;
+	var yValue : float;
+	var zValue : float;
 	
 	if(args.Contains("x")){
+		xValue = args["x"];
 		xValue+=target.transform.localPosition.x;
 		args["x"]=xValue;
+	}else{
+		xValue=target.transform.localPosition.x;
 	}
+	
 	if(args.Contains("y")){
+		yValue=args["y"];
 		yValue+=target.transform.localPosition.y;
 		args["y"]=yValue;
+	}else{
+		yValue=target.transform.localPosition.y;	
 	}
+	
 	if(args.Contains("z")){
+		zValue=args["z"];
 		zValue+=target.transform.localPosition.z;
 		args["z"]=zValue;
+	}else{
+		zValue=target.transform.localPosition.z;	
 	}
 	init(target,args);
 }
 
-//Move to static register:
+//MoveByWorld static register:
+static function moveByWorld(target: GameObject,args: Hashtable):void{
+	args.Add("type","moveToWorld");
+	
+	var xValue : float;
+	var yValue : float;
+	var zValue : float;
+	
+	if(args.Contains("x")){
+		xValue=args["x"];
+		xValue+=target.transform.position.x;
+		args["x"]=xValue;
+	}else{
+		xValue=target.transform.position.x;
+	}
+	
+	if(args.Contains("y")){
+		yValue=args["y"];
+		yValue+=target.transform.position.y;
+		args["y"]=yValue;
+	}else{
+		yValue=target.transform.position.y;
+	}
+	
+	if(args.Contains("z")){
+		zValue=args["z"];
+		zValue+=target.transform.position.z;
+		args["z"]=zValue;
+	}else{
+		zValue=target.transform.position.z;
+	}
+	
+	init(target,args);
+}
+
+//MoveTo static register:
 static function moveTo(target: GameObject,args: Hashtable):void{
 	args.Add("type","moveTo");	
 	init(target,args);
 }
 
-//Move from static register:
+//MoveToWorld static register:
+static function moveToWorld(target: GameObject,args: Hashtable):void{
+	args.Add("type","moveToWorld");	
+	init(target,args);
+}
+
+//MoveFrom static register:
 static function moveFrom(target: GameObject,args: Hashtable):void{
 	var destinationHold : float;
 	
@@ -177,12 +229,43 @@ static function moveFrom(target: GameObject,args: Hashtable):void{
 
 	if(args.Contains("z")){
 		destinationHold = target.transform.localPosition.z;
-		target.transform.position.z=args["z"];
+		target.transform.localPosition.z=args["z"];
 		args["z"]=destinationHold;
 	}else{
 		args["z"]=target.transform.localPosition.z;
 	}
 	args.Add("type","moveTo");
+	init(target,args);
+}
+
+//MoveFromWorld static register:
+static function moveFromWorld(target: GameObject,args: Hashtable):void{
+	var destinationHold : float;
+	
+	if(args.Contains("x")){
+		destinationHold = target.transform.position.x;
+		target.transform.position.x=args["x"];
+		args["x"]=destinationHold;
+	}else{
+		args["x"]=target.transform.position.x;
+	}
+
+	if(args.Contains("y")){
+		destinationHold = target.transform.position.y;
+		target.transform.position.y=args["y"];
+		args["y"]=destinationHold;
+	}else{
+		args["y"]=target.transform.position.y;
+	}
+
+	if(args.Contains("z")){
+		destinationHold = target.transform.position.z;
+		target.transform.position.z=args["z"];
+		args["z"]=destinationHold;
+	}else{
+		args["z"]=target.transform.position.z;
+	}
+	args.Add("type","moveToWorld");
 	init(target,args);
 }
 
@@ -410,6 +493,11 @@ function Start(){
 		case "moveTo":
 			while (true){
 				yield moveTo(args);
+			}
+			break;
+		case "moveToWorld":
+			while (true){
+				yield moveToWorld(args);
 			}
 			break;
 		case "scaleTo":
@@ -1335,6 +1423,201 @@ private function moveTo(args:Hashtable){
 	}
 	Destroy (this);
 }
+
+//Move to application:
+private function moveToWorld(args:Hashtable){	
+	//construct args:
+	if(args["time"]==null){
+		args.Add("time",moveDefaults["time"]);
+	}
+	if(args["delay"]==null){
+		args.Add("delay",moveDefaults["delay"]);
+	}
+	if(args["transition"]==null){
+		args.Add("transition",moveDefaults["transition"]);
+	}
+	if(args["onComplete"]==null){
+		args.Add("onComplete","null");
+	}
+	
+	//delay:
+	var delay : float = args["delay"];
+	if(delay > 0){
+		yield WaitForSeconds (args["delay"]);
+	}
+	
+	//Look for conflicts:
+	checkForConflicts(tweenType);
+	inProgress=true;
+	
+	//define object:
+	var obj : Transform = gameObject.transform;
+	var start : Vector3 = obj.position;
+	
+	//coordiantes:
+	if(args["x"]==null){
+		args.Add("x",start.x);
+	}
+	if(args["y"]==null){
+		args.Add("y",start.y);
+	}
+	if(args["z"]==null){
+		args.Add("z",start.z);
+	}
+	
+	//define targets:
+	var end : Vector3 = Vector3(args["x"], args["y"], args["z"]);
+	var easing : String = args["transition"];
+	var runTime : float = args["time"];
+	
+	//run tween:
+	for (i = 0.0; i < 1.0; i += Time.deltaTime*(1/runTime)) {
+		switch(easing){
+			case "easeInQuad":
+				obj.position.x=easeInQuad(start.x,end.x,i);
+				obj.position.y=easeInQuad(start.y,end.y,i);
+				obj.position.z=easeInQuad(start.z,end.z,i);
+				break;
+			case "easeOutQuad":
+				obj.position.x=easeOutQuad(start.x,end.x,i);
+				obj.position.y=easeOutQuad(start.y,end.y,i);
+				obj.position.z=easeOutQuad(start.z,end.z,i);
+				break;
+			case "easeInOutQuad":
+				obj.position.x=easeInOutQuad(start.x,end.x,i);
+				obj.position.y=easeInOutQuad(start.y,end.y,i);
+				obj.position.z=easeInOutQuad(start.z,end.z,i);
+				break;
+			case "easeInCubic":
+				obj.position.x=easeInCubic(start.x,end.x,i);
+				obj.position.y=easeInCubic(start.y,end.y,i);
+				obj.position.z=easeInCubic(start.z,end.z,i);
+				break;
+			case "easeOutCubic":
+				obj.position.x=easeOutCubic(start.x,end.x,i);
+				obj.position.y=easeOutCubic(start.y,end.y,i);
+				obj.position.z=easeOutCubic(start.z,end.z,i);
+				break;
+			case "easeInOutCubic":
+				obj.position.x=easeInOutCubic(start.x,end.x,i);
+				obj.position.y=easeInOutCubic(start.y,end.y,i);
+				obj.position.z=easeInOutCubic(start.z,end.z,i);
+				break;
+			case "easeInQuart":
+				obj.position.x=easeInQuart(start.x,end.x,i);
+				obj.position.y=easeInQuart(start.y,end.y,i);
+				obj.position.z=easeInQuart(start.z,end.z,i);
+				break;
+			case "easeOutQuart":
+				obj.position.x=easeOutQuart(start.x,end.x,i);
+				obj.position.y=easeOutQuart(start.y,end.y,i);
+				obj.position.z=easeOutQuart(start.z,end.z,i);
+				break;
+			case "easeInOutQuart":
+				obj.position.x=easeInOutQuart(start.x,end.x,i);
+				obj.position.y=easeInOutQuart(start.y,end.y,i);
+				obj.position.z=easeInOutQuart(start.z,end.z,i);
+				break;
+			case "easeInQuint":
+				obj.position.x=easeInQuint(start.x,end.x,i);
+				obj.position.y=easeInQuint(start.y,end.y,i);
+				obj.position.z=easeInQuint(start.z,end.z,i);
+				break;
+			case "easeOutQuint":
+				obj.position.x=easeOutQuint(start.x,end.x,i);
+				obj.position.y=easeOutQuint(start.y,end.y,i);
+				obj.position.z=easeOutQuint(start.z,end.z,i);
+				break;
+			case "easeInOutQuint":
+				obj.position.x=easeInOutQuint(start.x,end.x,i);
+				obj.position.y=easeInOutQuint(start.y,end.y,i);
+				obj.position.z=easeInOutQuint(start.z,end.z,i);
+				break;
+			case "easeInSine":
+				obj.position.x=easeInSine(start.x,end.x,i);
+				obj.position.y=easeInSine(start.y,end.y,i);
+				obj.position.z=easeInSine(start.z,end.z,i);
+				break;
+			case "easeOutSine":
+				obj.position.x=easeOutSine(start.x,end.x,i);
+				obj.position.y=easeOutSine(start.y,end.y,i);
+				obj.position.z=easeOutSine(start.z,end.z,i);
+				break;
+			case "easeInOutSine":
+				obj.position.x=easeInOutSine(start.x,end.x,i);
+				obj.position.y=easeInOutSine(start.y,end.y,i);
+				obj.position.z=easeInOutSine(start.z,end.z,i);
+				break;
+			case "easeInExpo":
+				obj.position.x=easeInExpo(start.x,end.x,i);
+				obj.position.y=easeInExpo(start.y,end.y,i);
+				obj.position.z=easeInExpo(start.z,end.z,i);
+				break;
+			case "easeOutExpo":
+				obj.position.x=easeOutExpo(start.x,end.x,i);
+				obj.position.y=easeOutExpo(start.y,end.y,i);
+				obj.position.z=easeOutExpo(start.z,end.z,i);
+				break;
+			case "easeInOutExpo":
+				obj.position.x=easeInOutExpo(start.x,end.x,i);
+				obj.position.y=easeInOutExpo(start.y,end.y,i);
+				obj.position.z=easeInOutExpo(start.z,end.z,i);
+				break;
+			case "easeInCirc":
+				obj.position.x=easeInCirc(start.x,end.x,i);
+				obj.position.y=easeInCirc(start.y,end.y,i);
+				obj.position.z=easeInCirc(start.z,end.z,i);
+				break;
+			case "easeOutCirc":
+				obj.position.x=easeOutCirc(start.x,end.x,i);
+				obj.position.y=easeOutCirc(start.y,end.y,i);
+				obj.position.z=easeOutCirc(start.z,end.z,i);
+				break;
+			case "easeInOutCirc":
+				obj.position.x=easeInOutCirc(start.x,end.x,i);
+				obj.position.y=easeInOutCirc(start.y,end.y,i);
+				obj.position.z=easeInOutCirc(start.z,end.z,i);
+				break;
+			case "linear":
+				obj.position.x=linear(start.x,end.x,i);
+				obj.position.y=linear(start.y,end.y,i);
+				obj.position.z=linear(start.z,end.z,i);
+				break;
+			case "spring":
+				obj.position.x=spring(start.x,end.x,i);
+				obj.position.y=spring(start.y,end.y,i);
+				obj.position.z=spring(start.z,end.z,i);
+				break;
+			case "bounce":
+				obj.position.x=bounce(start.x,end.x,i);
+				obj.position.y=bounce(start.y,end.y,i);
+				obj.position.z=bounce(start.z,end.z,i);
+				break;
+			case "easeInBack":
+				obj.position.x=easeInBack(start.x,end.x,i);
+				obj.position.y=easeInBack(start.y,end.y,i);
+				obj.position.z=easeInBack(start.z,end.z,i);
+				break;
+			case "easeOutBack":
+				obj.position.x=easeOutBack(start.x,end.x,i);
+				obj.position.y=easeOutBack(start.y,end.y,i);
+				obj.position.z=easeOutBack(start.z,end.z,i);
+				break;
+			case "easeInOutBack":
+				obj.position.x=easeInOutBack(start.x,end.x,i);
+				obj.position.y=easeInOutBack(start.y,end.y,i);
+				obj.position.z=easeInOutBack(start.z,end.z,i);
+				break;			
+		}
+		yield;
+	}
+	obj.position=end;
+	if(args["onComplete"]){
+		SendMessage(args["onComplete"], args["onCompleteParams"], SendMessageOptions.DontRequireReceiver);
+	}
+	Destroy (this);
+}
+
 
 //Scale to application:
 private function scaleTo(args:Hashtable){	
