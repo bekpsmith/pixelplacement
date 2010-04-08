@@ -138,25 +138,20 @@ static function moveBy(target: GameObject,args: Hashtable):void{
 		xValue = args["x"];
 		xValue+=target.transform.localPosition.x;
 		args["x"]=xValue;
-	}else{
-		xValue=target.transform.localPosition.x;
 	}
 	
 	if(args.Contains("y")){
 		yValue=args["y"];
 		yValue+=target.transform.localPosition.y;
 		args["y"]=yValue;
-	}else{
-		yValue=target.transform.localPosition.y;	
 	}
 	
 	if(args.Contains("z")){
 		zValue=args["z"];
 		zValue+=target.transform.localPosition.z;
 		args["z"]=zValue;
-	}else{
-		zValue=target.transform.localPosition.z;	
 	}
+	
 	init(target,args);
 }
 
@@ -172,24 +167,18 @@ static function moveByWorld(target: GameObject,args: Hashtable):void{
 		xValue=args["x"];
 		xValue+=target.transform.position.x;
 		args["x"]=xValue;
-	}else{
-		xValue=target.transform.position.x;
 	}
 	
 	if(args.Contains("y")){
 		yValue=args["y"];
 		yValue+=target.transform.position.y;
 		args["y"]=yValue;
-	}else{
-		yValue=target.transform.position.y;
 	}
 	
 	if(args.Contains("z")){
 		zValue=args["z"];
 		zValue+=target.transform.position.z;
 		args["z"]=zValue;
-	}else{
-		zValue=target.transform.position.z;
 	}
 	
 	init(target,args);
