@@ -560,6 +560,9 @@ private function audioTo(args:Hashtable) {
 	if(args["pitch"]==null){
 		args.Add("pitch",stabDefaults["pitch"]);
 	}
+	if(args["onCompleteTarget"]==null){
+		args.Add("onCompleteTarget",gameObject);
+	}
 	
 	//delay:
 	var delay : float = args["delay"];
@@ -700,7 +703,7 @@ private function audioTo(args:Hashtable) {
 	sound.volume = endV;
 	sound.pitch = endP;
 	if(args["onComplete"]){
-		SendMessage(args["onComplete"], args["onCompleteParams"], SendMessageOptions.DontRequireReceiver);
+		args["onCompleteTarget"].SendMessage(args["onComplete"], args["onCompleteParams"], SendMessageOptions.DontRequireReceiver);
 	}
 	Destroy (this);
 }
@@ -725,6 +728,9 @@ function stab(args:Hashtable){
 	if(args["clip"]==null){
 		args.Add("clip",gameObject.audio.clip);
 	}
+	if(args["onCompleteTarget"]==null){
+		args.Add("onCompleteTarget",gameObject);
+	}
 	
 	//delay:
 	var delay : float = args["delay"];
@@ -745,7 +751,7 @@ function stab(args:Hashtable){
 	if(args["onComplete"]){
 		var pitchArg : float = args["pitch"];
 		yield WaitForSeconds(obj.clip.length/pitchArg);
-		SendMessage(args["onComplete"], args["onCompleteParams"], SendMessageOptions.DontRequireReceiver);
+		args["onCompleteTarget"].SendMessage(args["onComplete"], args["onCompleteParams"], SendMessageOptions.DontRequireReceiver);
 		Destroy (this);
 	}else{
 		Destroy (this);	
@@ -761,6 +767,9 @@ function shake(args:Hashtable){
 	}
 	if(args["delay"]==null){
 		args.Add("delay",shakeDefaults["delay"]);
+	}
+	if(args["onCompleteTarget"]==null){
+		args.Add("onCompleteTarget",gameObject);
 	}
 	
 	//delay:
@@ -816,7 +825,7 @@ function shake(args:Hashtable){
 		yield;
 	}
 	if(args["onComplete"]){
-		SendMessage(args["onComplete"], args["onCompleteParams"], SendMessageOptions.DontRequireReceiver);
+		args["onCompleteTarget"].SendMessage(args["onComplete"], args["onCompleteParams"], SendMessageOptions.DontRequireReceiver);
 	}
 	obj.position=start;
 	
@@ -839,6 +848,9 @@ private function punchRotation(args:Hashtable) {
 	}
 	if(args["delay"]==null){
 		args.Add("delay",punchRotationDefaults["delay"]);
+	}
+	if(args["onCompleteTarget"]==null){
+		args.Add("onCompleteTarget",gameObject);
 	}
 	
 	//coordiantes:
@@ -915,7 +927,7 @@ private function punchRotation(args:Hashtable) {
 	}
 	obj.localRotation=Quaternion.Euler(pos.x,pos.y,pos.z);
 	if(args["onComplete"]){
-		SendMessage(args["onComplete"], args["onCompleteParams"], SendMessageOptions.DontRequireReceiver);
+		args["onCompleteTarget"].SendMessage(args["onComplete"], args["onCompleteParams"], SendMessageOptions.DontRequireReceiver);
 	}
 	Destroy (this);
 }
@@ -928,6 +940,9 @@ private function punchPosition(args:Hashtable) {
 	}
 	if(args["delay"]==null){
 		args.Add("delay",punchPositionDefaults["delay"]);
+	}
+	if(args["onCompleteTarget"]==null){
+		args.Add("onCompleteTarget",gameObject);
 	}
 	
 	//delay:
@@ -983,7 +998,7 @@ private function punchPosition(args:Hashtable) {
 	}
 	obj.position=pos;
 	if(args["onComplete"]){
-		SendMessage(args["onComplete"], args["onCompleteParams"], SendMessageOptions.DontRequireReceiver);
+		args["onCompleteTarget"].SendMessage(args["onComplete"], args["onCompleteParams"], SendMessageOptions.DontRequireReceiver);
 	}
 	Destroy (this);	
 }
@@ -1001,8 +1016,8 @@ private function fadeTo(args:Hashtable){
 	if(args["transition"]==null){
 		args.Add("transition",fadeDefaults["transition"]);
 	}
-	if(args["onComplete"]==null){
-		args.Add("onComplete","null");
+	if(args["onCompleteTarget"]==null){
+		args.Add("onCompleteTarget",gameObject);
 	}
 	
 	//delay:
@@ -1119,7 +1134,7 @@ private function fadeTo(args:Hashtable){
 		}
 		guiTexture.color.a= endA;
 		if(args["onComplete"]){
-			SendMessage(args["onComplete"], args["onCompleteParams"], SendMessageOptions.DontRequireReceiver);
+			args["onCompleteTarget"].SendMessage(args["onComplete"], args["onCompleteParams"], SendMessageOptions.DontRequireReceiver);
 		}
 		Destroy (this);	
 	}else{
@@ -1213,7 +1228,7 @@ private function fadeTo(args:Hashtable){
 		}
 		obj.renderer.material.color.a= endA;
 		if(args["onComplete"]){
-			SendMessage(args["onComplete"], args["onCompleteParams"], SendMessageOptions.DontRequireReceiver);
+			args["onCompleteTarget"].SendMessage(args["onComplete"], args["onCompleteParams"], SendMessageOptions.DontRequireReceiver);
 		}
 		Destroy (this);
 	}
@@ -1231,8 +1246,8 @@ private function moveTo(args:Hashtable){
 	if(args["transition"]==null){
 		args.Add("transition",moveDefaults["transition"]);
 	}
-	if(args["onComplete"]==null){
-		args.Add("onComplete","null");
+	if(args["onCompleteTarget"]==null){
+		args.Add("onCompleteTarget",gameObject);
 	}
 	
 	//delay:
@@ -1408,7 +1423,7 @@ private function moveTo(args:Hashtable){
 	}
 	obj.localPosition=end;
 	if(args["onComplete"]){
-		SendMessage(args["onComplete"], args["onCompleteParams"], SendMessageOptions.DontRequireReceiver);
+		args["onCompleteTarget"].SendMessage(args["onComplete"], args["onCompleteParams"], SendMessageOptions.DontRequireReceiver);
 	}
 	Destroy (this);
 }
@@ -1424,9 +1439,6 @@ private function moveToWorld(args:Hashtable){
 	}
 	if(args["transition"]==null){
 		args.Add("transition",moveDefaults["transition"]);
-	}
-	if(args["onComplete"]==null){
-		args.Add("onComplete","null");
 	}
 	
 	//delay:
@@ -1602,7 +1614,7 @@ private function moveToWorld(args:Hashtable){
 	}
 	obj.position=end;
 	if(args["onComplete"]){
-		SendMessage(args["onComplete"], args["onCompleteParams"], SendMessageOptions.DontRequireReceiver);
+		args["onCompleteTarget"].SendMessage(args["onComplete"], args["onCompleteParams"], SendMessageOptions.DontRequireReceiver);
 	}
 	Destroy (this);
 }
@@ -1619,9 +1631,6 @@ private function scaleTo(args:Hashtable){
 	}
 	if(args["transition"]==null){
 		args.Add("transition",scaleDefaults["transition"]);
-	}
-	if(args["onComplete"]==null){
-		args.Add("onComplete","null");
 	}
 	
 	//delay:
@@ -1797,7 +1806,7 @@ private function scaleTo(args:Hashtable){
 	}
 	obj.localScale=end;	
 	if(args["onComplete"]){
-		SendMessage(args["onComplete"], args["onCompleteParams"], SendMessageOptions.DontRequireReceiver);
+		args["onCompleteTarget"].SendMessage(args["onComplete"], args["onCompleteParams"], SendMessageOptions.DontRequireReceiver);
 	}
 	Destroy (this);	
 }
@@ -1820,9 +1829,6 @@ private function rotateTo(args:Hashtable) {
 	if(args["transition"]==null){
 		args.Add("transition",rotateToDefaults["transition"]);
 	}
-	if(args["onComplete"]==null){
-		args.Add("onComplete","null");
-	}	
 	
 	//delay:
 	var delay : float = args["delay"];
@@ -1943,7 +1949,7 @@ private function rotateTo(args:Hashtable) {
 	}
 	obj.localRotation=Quaternion.Euler(end.x,end.y,end.z);
 	if(args["onComplete"]){
-		SendMessage(args["onComplete"], args["onCompleteParams"], SendMessageOptions.DontRequireReceiver);
+		args["onCompleteTarget"].SendMessage(args["onComplete"], args["onCompleteParams"], SendMessageOptions.DontRequireReceiver);
 	}
 	Destroy (this);
 }
@@ -1966,9 +1972,6 @@ private function rotateBy(args:Hashtable) {
 	if(args["transition"]==null){
 		args.Add("transition",rotateByDefaults["transition"]);
 	}
-	if(args["onComplete"]==null){
-		args.Add("onComplete","null");
-	}	
 	
 	//delay:
 	var delay : float = args["delay"];
@@ -2093,7 +2096,7 @@ private function rotateBy(args:Hashtable) {
 	}
 	obj.localRotation=Quaternion.Euler(end.x,end.y,end.z);
 	if(args["onComplete"]){
-		SendMessage(args["onComplete"], args["onCompleteParams"], SendMessageOptions.DontRequireReceiver);
+		args["onCompleteTarget"].SendMessage(args["onComplete"], args["onCompleteParams"], SendMessageOptions.DontRequireReceiver);
 	}
 	Destroy (this);
 }
@@ -2109,9 +2112,6 @@ private function colorTo(args:Hashtable) {
 	}
 	if(args["transition"]==null){
 		args.Add("transition",colorDefaults["transition"]);
-	}
-	if(args["onComplete"]==null){
-		args.Add("onComplete","null");
 	}
 	
 	//delay:
@@ -2289,14 +2289,14 @@ private function colorTo(args:Hashtable) {
 		obj.guiTexture.color.g=end.g;
 		obj.guiTexture.color.b=end.b;
 		if(args["onComplete"]){
-			SendMessage(args["onComplete"], args["onCompleteParams"], SendMessageOptions.DontRequireReceiver);
+			args["onCompleteTarget"].SendMessage(args["onComplete"], args["onCompleteParams"], SendMessageOptions.DontRequireReceiver);
 		}
 		Destroy (this);	
 	}else{
 		start=obj.renderer.material.color;
 		for (i = 0.0; i < 1.0; i += Time.deltaTime*(1/runTime)) {
 			switch(easing){
-								case "easeInQuad":
+				case "easeInQuad":
 					obj.renderer.material.color.r=easeInQuad(start.r,end.r,i);
 					obj.renderer.material.color.g=easeInQuad(start.g,end.g,i);
 					obj.renderer.material.color.b=easeInQuad(start.b,end.b,i);
@@ -2431,151 +2431,14 @@ private function colorTo(args:Hashtable) {
 					obj.renderer.material.color.g=easeInOutBack(start.g,end.g,i);
 					obj.renderer.material.color.b=easeInOutBack(start.b,end.b,i);
 					break;
-			}
-			/*
-			if(easing=="easeInQuad"){
-				obj.renderer.material.color.r=easeInQuad(start.r,end.r,i);
-				obj.renderer.material.color.g=easeInQuad(start.g,end.g,i);
-				obj.renderer.material.color.b=easeInQuad(start.b,end.b,i);
-			}
-			if(easing=="easeOutQuad"){
-				obj.renderer.material.color.r=easeOutQuad(start.r,end.r,i);
-				obj.renderer.material.color.g=easeOutQuad(start.g,end.g,i);
-				obj.renderer.material.color.b=easeOutQuad(start.b,end.b,i);
-			}
-			if(easing=="easeInOutQuad"){
-				obj.renderer.material.color.r=easeInOutQuad(start.r,end.r,i);
-				obj.renderer.material.color.g=easeInOutQuad(start.g,end.g,i);
-				obj.renderer.material.color.b=easeInOutQuad(start.b,end.b,i);
-			}
-			if(easing=="easeInCubic"){
-				obj.renderer.material.color.r=easeInCubic(start.r,end.r,i);
-				obj.renderer.material.color.g=easeInCubic(start.g,end.g,i);
-				obj.renderer.material.color.b=easeInCubic(start.b,end.b,i);
-			}
-			if(easing=="easeOutCubic"){
-				obj.renderer.material.color.r=easeOutCubic(start.r,end.r,i);
-				obj.renderer.material.color.g=easeOutCubic(start.g,end.g,i);
-				obj.renderer.material.color.b=easeOutCubic(start.b,end.b,i);
-			}
-			if(easing=="easeInOutCubic"){
-				obj.renderer.material.color.r=easeInOutCubic(start.r,end.r,i);
-				obj.renderer.material.color.g=easeInOutCubic(start.g,end.g,i);
-				obj.renderer.material.color.b=easeInOutCubic(start.b,end.b,i);
 			}	
-			if(easing=="easeInQuart"){
-				obj.renderer.material.color.r=easeInQuart(start.r,end.r,i);
-				obj.renderer.material.color.g=easeInQuart(start.g,end.g,i);
-				obj.renderer.material.color.b=easeInQuart(start.b,end.b,i);
-			}
-			if(easing=="easeOutQuart"){
-				obj.renderer.material.color.r=easeOutQuart(start.r,end.r,i);
-				obj.renderer.material.color.g=easeOutQuart(start.g,end.g,i);
-				obj.renderer.material.color.b=easeOutQuart(start.b,end.b,i);
-			}
-			if(easing=="easeInOutQuart"){
-				obj.renderer.material.color.r=easeInOutQuart(start.r,end.r,i);
-				obj.renderer.material.color.g=easeInOutQuart(start.g,end.g,i);
-				obj.renderer.material.color.b=easeInOutQuart(start.b,end.b,i);
-			}
-			if(easing=="easeInQuint"){
-				obj.renderer.material.color.r=easeInQuint(start.r,end.r,i);
-				obj.renderer.material.color.g=easeInQuint(start.g,end.g,i);
-				obj.renderer.material.color.b=easeInQuint(start.b,end.b,i);
-			}
-			if(easing=="easeOutQuint"){
-				obj.renderer.material.color.r=easeOutQuint(start.r,end.r,i);
-				obj.renderer.material.color.g=easeOutQuint(start.g,end.g,i);
-				obj.renderer.material.color.b=easeOutQuint(start.b,end.b,i);
-			}
-			if(easing=="easeInOutQuint"){
-				obj.renderer.material.color.r=easeInOutQuint(start.r,end.r,i);
-				obj.renderer.material.color.g=easeInOutQuint(start.g,end.g,i);
-				obj.renderer.material.color.b=easeInOutQuint(start.b,end.b,i);
-			}	
-			if(easing=="easeInSine"){
-				obj.renderer.material.color.r=easeInSine(start.r,end.r,i);
-				obj.renderer.material.color.g=easeInSine(start.g,end.g,i);
-				obj.renderer.material.color.b=easeInSine(start.b,end.b,i);
-			}
-			if(easing=="easeOutSine"){
-				obj.renderer.material.color.r=easeOutSine(start.r,end.r,i);
-				obj.renderer.material.color.g=easeOutSine(start.g,end.g,i);
-				obj.renderer.material.color.b=easeOutSine(start.b,end.b,i);
-			}
-			if(easing=="easeInOutSine"){
-				obj.renderer.material.color.r=easeInOutSine(start.r,end.r,i);
-				obj.renderer.material.color.g=easeInOutSine(start.g,end.g,i);
-				obj.renderer.material.color.b=easeInOutSine(start.b,end.b,i);
-			}
-			if(easing=="easeInExpo"){
-				obj.renderer.material.color.r=easeInExpo(start.r,end.r,i);
-				obj.renderer.material.color.g=easeInExpo(start.g,end.g,i);
-				obj.renderer.material.color.b=easeInExpo(start.b,end.b,i);
-			}
-			if(easing=="easeOutExpo"){
-				obj.renderer.material.color.r=easeOutExpo(start.r,end.r,i);
-				obj.renderer.material.color.g=easeOutExpo(start.g,end.g,i);
-				obj.renderer.material.color.b=easeOutExpo(start.b,end.b,i);
-			}
-			if(easing=="easeInOutExpo"){
-				obj.renderer.material.color.r=easeInOutExpo(start.r,end.r,i);
-				obj.renderer.material.color.g=easeInOutExpo(start.g,end.g,i);
-				obj.renderer.material.color.b=easeInOutExpo(start.b,end.b,i);
-			}
-			if(easing=="easeInCirc"){
-				obj.renderer.material.color.r=easeInCirc(start.r,end.r,i);
-				obj.renderer.material.color.g=easeInCirc(start.g,end.g,i);
-				obj.renderer.material.color.b=easeInCirc(start.b,end.b,i);
-			}
-			if(easing=="easeOutCirc"){
-				obj.renderer.material.color.r=easeOutCirc(start.r,end.r,i);
-				obj.renderer.material.color.g=easeOutCirc(start.g,end.g,i);
-				obj.renderer.material.color.b=easeOutCirc(start.b,end.b,i);
-			}
-			if(easing=="easeInOutCirc"){
-				obj.renderer.material.color.r=easeInOutCirc(start.r,end.r,i);
-				obj.renderer.material.color.g=easeInOutCirc(start.g,end.g,i);
-				obj.renderer.material.color.b=easeInOutCirc(start.b,end.b,i);
-			}		
-			if(easing=="linear"){
-				obj.renderer.material.color.r=linear(start.r,end.r,i);
-				obj.renderer.material.color.g=linear(start.g,end.g,i);
-				obj.renderer.material.color.b=linear(start.b,end.b,i);
-			}
-			if(easing=="spring"){
-				obj.renderer.material.color.r=spring(start.r,end.r,i);
-				obj.renderer.material.color.g=spring(start.g,end.g,i);
-				obj.renderer.material.color.b=spring(start.b,end.b,i);
-			}
-			if(easing=="bounce"){
-				obj.renderer.material.color.r=bounce(start.r,end.r,i);
-				obj.renderer.material.color.g=bounce(start.g,end.g,i);
-				obj.renderer.material.color.b=bounce(start.b,end.b,i);
-			}
-			if(easing=="easeInBack"){
-				obj.renderer.material.color.r=easeInBack(start.r,end.r,i);
-				obj.renderer.material.color.g=easeInBack(start.g,end.g,i);
-				obj.renderer.material.color.b=easeInBack(start.b,end.b,i);
-			}
-			if(easing=="easeOutBack"){
-				obj.renderer.material.color.r=easeOutBack(start.r,end.r,i);
-				obj.renderer.material.color.g=easeOutBack(start.g,end.g,i);
-				obj.renderer.material.color.b=easeOutBack(start.b,end.b,i);
-			}	
-			if(easing=="easeInOutBack"){
-				obj.renderer.material.color.r=easeInOutBack(start.r,end.r,i);
-				obj.renderer.material.color.g=easeInOutBack(start.g,end.g,i);
-				obj.renderer.material.color.b=easeInOutBack(start.b,end.b,i);
-			}	
-			*/		
 			yield;
 		}
 		obj.renderer.material.color.r=end.r;
 		obj.renderer.material.color.g=end.g;
 		obj.renderer.material.color.b=end.b;
 		if(args["onComplete"]){
-			SendMessage(args["onComplete"], args["onCompleteParams"], SendMessageOptions.DontRequireReceiver);	
+			args["onCompleteTarget"].SendMessage(args["onComplete"], args["onCompleteParams"], SendMessageOptions.DontRequireReceiver);	
 		}
 		Destroy (this);		
 	}
