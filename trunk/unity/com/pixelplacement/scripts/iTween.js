@@ -1,4 +1,4 @@
-//VERSION: 1.0.8
+//VERSION: 1.0.9
 
 /*
 Copyright ©2010 Bob Berkebile(http://www.pixelplacement.com), C# port by Patrick Corkum(http://www.insquare.com)
