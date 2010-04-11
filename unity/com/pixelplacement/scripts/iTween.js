@@ -304,26 +304,26 @@ static function scaleBy(target: GameObject,args: Hashtable):void{
 	
 	if(args.Contains("x")){
 		xValue=args["x"];
-		xValue+=target.transform.localScale.x;
+		xValue=target.transform.localScale.x*xValue;
 		args["x"]=xValue;
 	}else{
 		xValue=target.transform.localScale.x;
 	}
 	
 	if(args.Contains("y")){
-		xValue=args["y"];
-		xValue+=target.transform.localScale.y;
+		yValue=args["y"];
+		yValue=target.transform.localScale.y*yValue;
 		args["y"]=yValue;
 	}else{
-		xValue=target.transform.localScale.y;
+		yValue=target.transform.localScale.y;
 	}
 	
 	if(args.Contains("z")){
-		xValue=args["z"];
-		xValue+=target.transform.localScale.z;
-		args["z"]=yValue;
+		zValue=args["z"];
+		zValue=target.transform.localScale.z*zValue;
+		args["z"]=zValue;
 	}else{
-		xValue=target.transform.localScale.z;
+		zValue=target.transform.localScale.z;
 	}
 	
 	init(target,args);
