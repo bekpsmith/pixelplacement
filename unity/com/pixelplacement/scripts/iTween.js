@@ -1,4 +1,4 @@
-//VERSION: 1.0.10
+//VERSION: 1.0.11
 
 /*
 Copyright ©2010 Bob Berkebile(http://www.pixelplacement.com), C# port by Patrick Corkum(http://www.insquare.com)
@@ -298,22 +298,34 @@ static function moveFromWorld(target: GameObject,args: Hashtable):void{
 static function scaleBy(target: GameObject,args: Hashtable):void{
 	args.Add("type","scaleTo");
 	
-	var xValue : float = args["x"];
-	var yValue : float = args["y"];
-	var zValue : float = args["z"];
+	var xValue : float;
+	var yValue : float;
+	var zValue : float;
 	
 	if(args.Contains("x")){
-		xValue*=target.transform.localScale.x;
+		xValue=args["x"];
+		xValue+=target.transform.localScale.x;
 		args["x"]=xValue;
+	}else{
+		xValue=target.transform.localScale.x;
 	}
+	
 	if(args.Contains("y")){
-		yValue*=target.transform.localScale.y;
+		xValue=args["y"];
+		xValue+=target.transform.localScale.y;
 		args["y"]=yValue;
+	}else{
+		xValue=target.transform.localScale.y;
 	}
+	
 	if(args.Contains("z")){
-		zValue*=target.transform.localScale.z;
-		args["z"]=zValue;
+		xValue=args["z"];
+		xValue+=target.transform.localScale.z;
+		args["z"]=yValue;
+	}else{
+		xValue=target.transform.localScale.z;
 	}
+	
 	init(target,args);
 }
 
