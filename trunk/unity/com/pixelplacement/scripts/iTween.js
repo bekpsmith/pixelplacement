@@ -1,4 +1,4 @@
-//VERSION: 1.0.9
+//VERSION: 1.0.10
 
 /*
 Copyright ©2010 Bob Berkebile(http://www.pixelplacement.com), C# port by Patrick Corkum(http://www.insquare.com)
@@ -41,9 +41,13 @@ public static var audioDefaults : Hashtable = {"time":1,"delay":0,"volume":1,"pi
 public static var scaleDefaults : Hashtable = {"time":1,"delay":0,"transition":"easeInOutCubic"};
 public static var fadeDefaults : Hashtable = {"time":1,"delay":0,"transition":"linear"};
 public static var moveDefaults : Hashtable = {"time":1,"delay":0,"transition":"easeInOutCubic"};
+public static var moveBezierDefaults : Hashtable = {"time":1,"delay":0,"transition":"easeInOutCubic"};
 public static var punchPositionDefaults : Hashtable = {"time":1,"delay":0};
 public static var punchRotationDefaults : Hashtable = {"time":1,"delay":0};
 public static var colorDefaults : Hashtable = {"time":1,"delay":0,"transition":"linear"};
+
+//Transition curve organization - David Bardos
+private var TRANSITIONS : Hashtable = {"easeInQuad":easeInQuad, "easeOutQuad":easeOutQuad,"easeInOutQuad":easeInOutQuad, "easeInCubic":easeInCubic, "easeOutCubic":easeOutCubic, "easeInOutCubic":easeInOutCubic, "easeInQuart":easeInQuart, "easeOutQuart":easeOutQuart, "easeInOutQuart":easeInOutQuart, "easeInQuint":easeInQuint, "easeOutQuint":easeOutQuint, "easeInOutQuint":easeInOutQuint, "easeInSine":easeInSine, "easeOutSine":easeOutSine, "easeInOutSine":easeInOutSine, "easeInExpo":easeInExpo, "easeOutExpo":easeOutExpo, "easeInOutExpo":easeInOutExpo, "easeInCirc":easeInCirc, "easeOutCirc":easeOutCirc, "easeInOutCirc":easeInOutCirc, "linear":linear, "spring":spring, "bounce":bounce, "easeInBack":easeInBack, "easeOutBack":easeOutBack, "easeInOutBack":easeInOutBack}; 
 
 //Check for and remove running tweens of same type:
 private function checkForConflicts(type:String):void{
@@ -99,6 +103,14 @@ static function init(target: GameObject,args: Hashtable):void{
 	target.AddComponent ("iTween");
 }
 
+//Helper class for bezierCurves - David Bardos
+class BezierPointInfo
+{
+	public var starting : Vector3;
+	public var intermediate : Vector3;
+	public var end: Vector3;
+}
+
 //Fade to static register:
 static function fadeTo(target: GameObject,args: Hashtable):void{
 	args.Add("type","fadeTo");	
@@ -138,20 +150,25 @@ static function moveBy(target: GameObject,args: Hashtable):void{
 		xValue = args["x"];
 		xValue+=target.transform.localPosition.x;
 		args["x"]=xValue;
+	}else{
+		xValue=target.transform.localPosition.x;
 	}
 	
 	if(args.Contains("y")){
 		yValue=args["y"];
 		yValue+=target.transform.localPosition.y;
 		args["y"]=yValue;
+	}else{
+		yValue=target.transform.localPosition.y;	
 	}
 	
 	if(args.Contains("z")){
 		zValue=args["z"];
 		zValue+=target.transform.localPosition.z;
 		args["z"]=zValue;
+	}else{
+		zValue=target.transform.localPosition.z;	
 	}
-	
 	init(target,args);
 }
 
@@ -167,18 +184,24 @@ static function moveByWorld(target: GameObject,args: Hashtable):void{
 		xValue=args["x"];
 		xValue+=target.transform.position.x;
 		args["x"]=xValue;
+	}else{
+		xValue=target.transform.position.x;
 	}
 	
 	if(args.Contains("y")){
 		yValue=args["y"];
 		yValue+=target.transform.position.y;
 		args["y"]=yValue;
+	}else{
+		yValue=target.transform.position.y;
 	}
 	
 	if(args.Contains("z")){
 		zValue=args["z"];
 		zValue+=target.transform.position.z;
 		args["z"]=zValue;
+	}else{
+		zValue=target.transform.position.z;
 	}
 	
 	init(target,args);
@@ -193,6 +216,19 @@ static function moveTo(target: GameObject,args: Hashtable):void{
 //MoveToWorld static register:
 static function moveToWorld(target: GameObject,args: Hashtable):void{
 	args.Add("type","moveToWorld");	
+	init(target,args);
+}
+
+
+//MoveTo static register:
+static function moveToBezier(target: GameObject,args: Hashtable):void{
+	args.Add("type","moveToBezier");	
+	init(target,args);
+}
+
+//MoveToWorld static register:
+static function moveToBezierWorld(target: GameObject,args: Hashtable):void{
+	args.Add("type","moveToBezierWorld");	
 	init(target,args);
 }
 
@@ -475,66 +511,51 @@ function Start(){
 	tweenType=args["type"];
 	switch(args["type"]){
 		case "fadeTo":
-			while (true){
-				yield fadeTo(args);
-			}
+			fadeTo(args);
 			break;
 		case "moveTo":
-			while (true){
-				yield moveTo(args);
-			}
+			moveTo(args);
 			break;
 		case "moveToWorld":
-			while (true){
-				yield moveToWorld(args);
-			}
+			moveToWorld(args);
+			break;
+		case "moveToBezier":
+			args["isLocal"] = "true";			
+			moveToBezier(args);
+			break;
+		case "moveToBezierWorld":
+			args["isLocal"] = "false";			
+			moveToBezier(args);			
 			break;
 		case "scaleTo":
-			while (true){
-				yield scaleTo(args);
-			}
+			scaleTo(args);			
 			break;
 		case "rotateTo":
-			while (true){
-				yield rotateTo(args);
-			}
+			rotateTo(args);
 			break;
 		case "rotateBy":
-			while (true){
-				yield rotateBy(args);
-			}
+			rotateBy(args);
 			break;	
 		case "colorTo":
-			while (true){
-				yield colorTo(args);
-			}
+			colorTo(args);
 			break;
 		case "punchPosition":
-			while (true){
-				yield punchPosition(args);
-			}
+			punchPosition(args);
 			break;
 		case "punchRotation":
-			while (true){
-				yield punchRotation(args);
-			}
+			punchRotation(args);
 			break;
 		case "shake":
-			while (true){
-				yield shake(args);
-			}
+			shake(args);
 			break;
 		case "audioTo":
-			while (true){
-				yield audioTo(args);
-			}
+			audioTo(args);
 			break;
 		case "stab":
 			stab(args);
 			break;
 	}
 }
-
 
 //Audio to application:
 private function audioTo(args:Hashtable) {
@@ -547,9 +568,6 @@ private function audioTo(args:Hashtable) {
 	}
 	if(args["transition"]==null){
 		args.Add("transition",audioDefaults["transition"]);
-	}
-	if(args["onComplete"]==null){
-		args.Add("onComplete","null");
 	}
 	if(args["audioSource"]==null){
 		args.Add("audioSource",audio);
@@ -586,124 +604,23 @@ private function audioTo(args:Hashtable) {
 	var easing : String = args["transition"];
 	var runTime : float = args["time"];
 	
+	var easingFunc = easeInQuad;
+	easingFunc = TRANSITIONS[easing];
+	
 	//run tween:
 	for (i = 0.0; i < 1.0; i += Time.deltaTime*(1/runTime)) {
-		switch (easing){
-			case "easeInQuad":
-				sound.volume =easeInQuad(startV,endV,i);
-				sound.pitch =easeInQuad(startP,endP,i);
-				break;
-			case "easeOutQuad":
-				sound.volume =easeOutQuad(startV,endV,i);
-				sound.pitch =easeOutQuad(startP,endP,i);
-				break;
-			case "easeInOutQuad":
-				sound.volume =easeInOutQuad(startV,endV,i);
-				sound.pitch =easeInOutQuad(startP,endP,i);
-				break;
-			case "easeInCubic":
-				sound.volume =easeInCubic(startV,endV,i);
-				sound.pitch =easeInCubic(startP,endP,i);			
-				break;
-			case "easeOutCubic":
-				sound.volume =easeOutCubic(startV,endV,i);
-				sound.pitch =easeOutCubic(startP,endP,i);			
-				break;
-			case "easeInOutCubic":
-				sound.volume =easeInOutCubic(startV,endV,i);
-				sound.pitch =easeInOutCubic(startP,endP,i);			
-				break;
-			case "easeInQuart":
-				sound.volume =easeInQuart(startV,endV,i);
-				sound.pitch =easeInQuart(startP,endP,i);			
-				break;
-			case "easeOutQuart":
-				sound.volume =easeOutQuart(startV,endV,i);
-				sound.pitch =easeOutQuart(startP,endP,i);
-				break;
-			case "easeInOutQuart":
-				sound.volume =easeInOutQuart(startV,endV,i);
-				sound.pitch =easeInOutQuart(startP,endP,i);
-				break;
-			case "easeInQuint":
-				sound.volume =easeInQuint(startV,endV,i);
-				sound.pitch =easeInQuint(startP,endP,i);
-				break;
-			case "easeOutQuint":
-				sound.volume =easeOutQuint(startV,endV,i);
-				sound.pitch =easeOutQuint(startP,endP,i);			
-				break;
-			case "easeInOutQuint":
-				sound.volume =easeInOutQuint(startV,endV,i);
-				sound.pitch =easeInOutQuint(startP,endP,i);
-				break;
-			case "easeInSine":
-				sound.volume =easeInSine(startV,endV,i);
-				sound.pitch =easeInSine(startP,endP,i);
-				break;
-			case "easeOutSine":
-				sound.volume =easeOutSine(startV,endV,i);
-				sound.pitch =easeOutSine(startP,endP,i);
-				break;
-			case "easeInOutSine":
-				sound.volume =easeInOutSine(startV,endV,i);
-				sound.pitch =easeInOutSine(startP,endP,i);
-				break;
-			case "easeInExpo":
-				sound.volume =easeInExpo(startV,endV,i);
-				sound.pitch =easeInExpo(startP,endP,i);
-				break;
-			case "easeOutExpo":
-				sound.volume =easeOutExpo(startV,endV,i);
-				sound.pitch =easeOutExpo(startP,endP,i);
-				break;
-			case "easeInOutExpo":
-				sound.volume =easeInOutExpo(startV,endV,i);
-				sound.pitch =easeInOutExpo(startP,endP,i);
-				break;
-			case "easeInCirc":
-				sound.volume =easeInCirc(startV,endV,i);
-				sound.pitch =easeInCirc(startP,endP,i);
-				break;	
-			case "easeOutCirc":
-				sound.volume =easeOutCirc(startV,endV,i);
-				sound.pitch =easeOutCirc(startP,endP,i);
-				break;
-			case "easeInOutCirc":
-				sound.volume =easeInOutCirc(startV,endV,i);
-				sound.pitch =easeInOutCirc(startP,endP,i);
-				break;
-			case "easeInBack":
-				sound.volume =easeInBack(startV,endV,i);
-				sound.pitch =easeInBack(startP,endP,i);
-				break;
-			case "easeOutBack":
-				sound.volume =easeOutBack(startV,endV,i);
-				sound.pitch =easeOutBack(startP,endP,i);
-				break;
-			case "easeInOutBack":
-				sound.volume =easeInOutBack(startV,endV,i);
-				sound.pitch =easeInOutBack(startP,endP,i);
-				break;				
-			case "spring":
-				sound.volume =spring(startV,endV,i);
-				sound.pitch =spring(startP,endP,i);
-				break;
-			case "bounce":
-				sound.volume =bounce(startV,endV,i);
-				sound.pitch =bounce(startP,endP,i);
-				break;	
-			case "linear":
-				sound.volume =linear(startV,endV,i);
-				sound.pitch =linear(startP,endP,i);
-				break;
-		}		
+		
+		sound.volume =easingFunc(startV,endV,i);
+		sound.pitch =easingFunc(startP,endP,i);
+				
 		yield;
 	}
+	
 	sound.volume = endV;
 	sound.pitch = endP;
 	if(args["onComplete"]){
-		args["onCompleteTarget"].SendMessage(args["onComplete"], args["onCompleteParams"], SendMessageOptions.DontRequireReceiver);
+		var target : GameObject = args["onCompleteTarget"];
+		target.SendMessage(args["onComplete"], args["onCompleteParams"], SendMessageOptions.DontRequireReceiver);
 	}
 	Destroy (this);
 }
@@ -751,7 +668,8 @@ function stab(args:Hashtable){
 	if(args["onComplete"]){
 		var pitchArg : float = args["pitch"];
 		yield WaitForSeconds(obj.clip.length/pitchArg);
-		args["onCompleteTarget"].SendMessage(args["onComplete"], args["onCompleteParams"], SendMessageOptions.DontRequireReceiver);
+		var target : GameObject = args["onCompleteTarget"];
+		target.SendMessage(args["onComplete"], args["onCompleteParams"], SendMessageOptions.DontRequireReceiver);
 		Destroy (this);
 	}else{
 		Destroy (this);	
@@ -825,7 +743,8 @@ function shake(args:Hashtable){
 		yield;
 	}
 	if(args["onComplete"]){
-		args["onCompleteTarget"].SendMessage(args["onComplete"], args["onCompleteParams"], SendMessageOptions.DontRequireReceiver);
+		var target : GameObject = args["onCompleteTarget"];
+		target.SendMessage(args["onComplete"], args["onCompleteParams"], SendMessageOptions.DontRequireReceiver);
 	}
 	obj.position=start;
 	
@@ -927,7 +846,8 @@ private function punchRotation(args:Hashtable) {
 	}
 	obj.localRotation=Quaternion.Euler(pos.x,pos.y,pos.z);
 	if(args["onComplete"]){
-		args["onCompleteTarget"].SendMessage(args["onComplete"], args["onCompleteParams"], SendMessageOptions.DontRequireReceiver);
+		var target : GameObject = args["onCompleteTarget"];
+		target.SendMessage(args["onComplete"], args["onCompleteParams"], SendMessageOptions.DontRequireReceiver);
 	}
 	Destroy (this);
 }
@@ -998,7 +918,8 @@ private function punchPosition(args:Hashtable) {
 	}
 	obj.position=pos;
 	if(args["onComplete"]){
-		args["onCompleteTarget"].SendMessage(args["onComplete"], args["onCompleteParams"], SendMessageOptions.DontRequireReceiver);
+		var target : GameObject = args["onCompleteTarget"];
+		target.SendMessage(args["onComplete"], args["onCompleteParams"], SendMessageOptions.DontRequireReceiver);
 	}
 	Destroy (this);	
 }
@@ -1042,193 +963,36 @@ private function fadeTo(args:Hashtable){
 	var endA  : float = args["alpha"];
 	var easing : String = args["transition"];
 	var runTime : float = args["time"];
+	var target : GameObject;
+	
+	//just so we know the type
+	var easingFunc = easeInQuad;
+	easingFunc = TRANSITIONS[easing];
 	
 	//run tween:
 	if(obj.guiTexture){
 		start=obj.guiTexture.color.a;
-		for (i = 0.0; i < 1.0; i += Time.deltaTime*(1/runTime)) {
-			switch (easing){
-				case "easeInQuad":
-					obj.guiTexture.color.a=easeInQuad(start,endA,i);
-					break;
-				case "easeOutQuad":
-					obj.guiTexture.color.a=easeOutQuad(start,endA,i);
-					break;
-				case "easeInOutQuad":
-					obj.guiTexture.color.a=easeInOutQuad(start,endA,i);
-					break;
-				case "easeInCubic":
-					obj.guiTexture.color.a=easeInCubic(start,endA,i);
-					break;
-				case "easeOutCubic":
-					obj.guiTexture.color.a=easeOutCubic(start,endA,i);
-					break;
-				case "easeInOutCubic":
-					obj.guiTexture.color.a=easeInOutCubic(start,endA,i);
-					break;
-				case "easeInQuart":
-					obj.guiTexture.color.a=easeInQuart(start,endA,i);
-					break;
-				case "easeOutQuart":
-					obj.guiTexture.color.a=easeOutQuart(start,endA,i);
-					break;
-				case "easeInOutQuart":
-					obj.guiTexture.color.a=easeOutQuart(start,endA,i);
-					break;
-				case "easeInQuint":
-					obj.guiTexture.color.a=easeInQuint(start,endA,i);
-					break;
-				case "easeOutQuint":
-					obj.guiTexture.color.a=easeOutQuint(start,endA,i);
-					break;
-				case "easeInOutQuint":
-					obj.guiTexture.color.a=easeInOutQuint(start,endA,i);
-					break;
-				case "easeInSine":
-					obj.guiTexture.color.a=easeInSine(start,endA,i);
-					break;
-				case "easeOutSine":
-					obj.guiTexture.color.a=easeOutSine(start,endA,i);
-					break;
-				case "easeInOutSine":
-					obj.guiTexture.color.a=easeInOutSine(start,endA,i);
-					break;
-				case "easeInExpo":
-					obj.guiTexture.color.a=easeInExpo(start,endA,i);
-					break;
-				case "easeOutExpo":
-					obj.guiTexture.color.a=easeOutExpo(start,endA,i);
-					break;
-				case "easeInOutExpo":
-					obj.guiTexture.color.a=easeInOutExpo(start,endA,i);
-					break;
-				case "easeInCirc":
-					obj.guiTexture.color.a=easeInCirc(start,endA,i);
-					break;
-				case "easeOutCirc":
-					obj.guiTexture.color.a=easeOutCirc(start,endA,i);
-					break;
-				case "easeInOutCirc":
-					obj.guiTexture.color.a=easeInOutCirc(start,endA,i);
-					break;
-				case "linear":
-					obj.guiTexture.color.a=linear(start,endA,i);
-					break;
-				case "spring":
-					obj.guiTexture.color.a=spring(start,endA,i);
-					break;
-				case "bounce":
-					obj.guiTexture.color.a=bounce(start,endA,i);
-					break;
-				case "easeInBack":
-					obj.guiTexture.color.a=easeInBack(start,endA,i);
-					break;
-				case "easeOutBack":
-					obj.guiTexture.color.a=easeOutBack(start,endA,i);
-					break;
-				case "easeInOutBack":
-					obj.guiTexture.color.a=easeInOutBack(start,endA,i);
-					break;
-			}		
+		
+		for (i = 0.0; i < 1.0; i += Time.deltaTime*(1/runTime)) {			
+			obj.guiTexture.color.a=easingFunc(start,endA,i);			
 			yield;
 		}
 		guiTexture.color.a= endA;
 		if(args["onComplete"]){
-			args["onCompleteTarget"].SendMessage(args["onComplete"], args["onCompleteParams"], SendMessageOptions.DontRequireReceiver);
+			target = args["onCompleteTarget"];
+			target.SendMessage(args["onComplete"], args["onCompleteParams"], SendMessageOptions.DontRequireReceiver);
 		}
 		Destroy (this);	
 	}else{
 		start=obj.renderer.material.color.a;
-		for (i = 0.0; i < 1.0; i += Time.deltaTime*(1/runTime)) {
-			switch (easing){
-				case "easeInQuad":
-					obj.renderer.material.color.a=easeInQuad(start,endA,i);
-					break;
-				case "easeOutQuad":
-					obj.renderer.material.color.a=easeOutQuad(start,endA,i);
-					break;
-				case "easeInOutQuad":
-					obj.renderer.material.color.a=easeInOutQuad(start,endA,i);
-					break;
-				case "easeInCubic":
-					obj.renderer.material.color.a=easeInCubic(start,endA,i);
-					break;
-				case "easeOutCubic":
-					obj.renderer.material.color.a=easeOutCubic(start,endA,i);
-					break;
-				case "easeInOutCubic":
-					obj.renderer.material.color.a=easeInOutCubic(start,endA,i);
-					break;
-				case "easeInQuart":
-					obj.renderer.material.color.a=easeInQuart(start,endA,i);
-					break;
-				case "easeOutQuart":
-					obj.renderer.material.color.a=easeOutQuart(start,endA,i);
-					break;
-				case "easeInOutQuart":
-					obj.renderer.material.color.a=easeInOutQuart(start,endA,i);
-					break;
-				case "easeInQuint":
-					obj.renderer.material.color.a=easeInQuint(start,endA,i);
-					break;
-				case "easeOutQuint":
-					obj.renderer.material.color.a=easeOutQuint(start,endA,i);
-					break;
-				case "easeInOutQuint":
-					obj.renderer.material.color.a=easeInOutQuint(start,endA,i);
-					break;
-				case "easeInSine":
-					obj.renderer.material.color.a=easeInSine(start,endA,i);
-					break;
-				case "easeOutSine":
-					obj.renderer.material.color.a=easeOutSine(start,endA,i);
-					break;
-				case "easeInOutSine":
-					obj.renderer.material.color.a=easeInOutSine(start,endA,i);
-					break;
-				case "easeInExpo":
-					obj.renderer.material.color.a=easeInExpo(start,endA,i);
-					break;
-				case "easeOutExpo":
-					obj.renderer.material.color.a=easeOutExpo(start,endA,i);
-					break;
-				case "easeInOutExpo":
-					obj.renderer.material.color.a=easeInOutExpo(start,endA,i);
-					break;
-				case "easeInCirc":
-					obj.renderer.material.color.a=easeInCirc(start,endA,i);
-					break;
-				case "easeOutCirc":
-					obj.renderer.material.color.a=easeOutCirc(start,endA,i);
-					break;
-				case "easeInOutCirc":
-					obj.renderer.material.color.a=easeInOutCirc(start,endA,i);
-					break;
-				case "linear":
-					obj.renderer.material.color.a=linear(start,endA,i);
-					break;
-				case "spring":
-					obj.renderer.material.color.a=spring(start,endA,i);
-					break;
-				case "bounce":
-					obj.renderer.material.color.a=bounce(start,endA,i);
-					break;
-				case "easeInBack":
-					obj.renderer.material.color.a=easeInBack(start,endA,i);
-					break;
-				case "easeOutBack":
-					obj.renderer.material.color.a=easeOutBack(start,endA,i);
-					break;
-				case "easeInOutBack":
-					obj.renderer.material.color.a=easeInOutBack(start,endA,i);
-					break;
-				
-			}		
+		for (i = 0.0; i < 1.0; i += Time.deltaTime*(1/runTime)) {			
+			obj.renderer.material.color.a=easingFunc(start,endA,i);			
 			yield;
 		}
 		obj.renderer.material.color.a= endA;
 		if(args["onComplete"]){
-			args["onCompleteTarget"].SendMessage(args["onComplete"], args["onCompleteParams"], SendMessageOptions.DontRequireReceiver);
+			target = args["onCompleteTarget"];
+			target.SendMessage(args["onComplete"], args["onCompleteParams"], SendMessageOptions.DontRequireReceiver);
 		}
 		Destroy (this);
 	}
@@ -1280,150 +1044,20 @@ private function moveTo(args:Hashtable){
 	var easing : String = args["transition"];
 	var runTime : float = args["time"];
 	
+	var easingFunc = easeInQuad;
+	easingFunc = TRANSITIONS[easing];
+	
 	//run tween:
-	for (i = 0.0; i < 1.0; i += Time.deltaTime*(1/runTime)) {
-		switch(easing){
-			case "easeInQuad":
-				obj.localPosition.x=easeInQuad(start.x,end.x,i);
-				obj.localPosition.y=easeInQuad(start.y,end.y,i);
-				obj.localPosition.z=easeInQuad(start.z,end.z,i);
-				break;
-			case "easeOutQuad":
-				obj.localPosition.x=easeOutQuad(start.x,end.x,i);
-				obj.localPosition.y=easeOutQuad(start.y,end.y,i);
-				obj.localPosition.z=easeOutQuad(start.z,end.z,i);
-				break;
-			case "easeInOutQuad":
-				obj.localPosition.x=easeInOutQuad(start.x,end.x,i);
-				obj.localPosition.y=easeInOutQuad(start.y,end.y,i);
-				obj.localPosition.z=easeInOutQuad(start.z,end.z,i);
-				break;
-			case "easeInCubic":
-				obj.localPosition.x=easeInCubic(start.x,end.x,i);
-				obj.localPosition.y=easeInCubic(start.y,end.y,i);
-				obj.localPosition.z=easeInCubic(start.z,end.z,i);
-				break;
-			case "easeOutCubic":
-				obj.localPosition.x=easeOutCubic(start.x,end.x,i);
-				obj.localPosition.y=easeOutCubic(start.y,end.y,i);
-				obj.localPosition.z=easeOutCubic(start.z,end.z,i);
-				break;
-			case "easeInOutCubic":
-				obj.localPosition.x=easeInOutCubic(start.x,end.x,i);
-				obj.localPosition.y=easeInOutCubic(start.y,end.y,i);
-				obj.localPosition.z=easeInOutCubic(start.z,end.z,i);
-				break;
-			case "easeInQuart":
-				obj.localPosition.x=easeInQuart(start.x,end.x,i);
-				obj.localPosition.y=easeInQuart(start.y,end.y,i);
-				obj.localPosition.z=easeInQuart(start.z,end.z,i);
-				break;
-			case "easeOutQuart":
-				obj.localPosition.x=easeOutQuart(start.x,end.x,i);
-				obj.localPosition.y=easeOutQuart(start.y,end.y,i);
-				obj.localPosition.z=easeOutQuart(start.z,end.z,i);
-				break;
-			case "easeInOutQuart":
-				obj.localPosition.x=easeInOutQuart(start.x,end.x,i);
-				obj.localPosition.y=easeInOutQuart(start.y,end.y,i);
-				obj.localPosition.z=easeInOutQuart(start.z,end.z,i);
-				break;
-			case "easeInQuint":
-				obj.localPosition.x=easeInQuint(start.x,end.x,i);
-				obj.localPosition.y=easeInQuint(start.y,end.y,i);
-				obj.localPosition.z=easeInQuint(start.z,end.z,i);
-				break;
-			case "easeOutQuint":
-				obj.position.x=easeOutQuint(start.x,end.x,i);
-				obj.position.y=easeOutQuint(start.y,end.y,i);
-				obj.position.z=easeOutQuint(start.z,end.z,i);
-				break;
-			case "easeInOutQuint":
-				obj.localPosition.x=easeInOutQuint(start.x,end.x,i);
-				obj.localPosition.y=easeInOutQuint(start.y,end.y,i);
-				obj.localPosition.z=easeInOutQuint(start.z,end.z,i);
-				break;
-			case "easeInSine":
-				obj.localPosition.x=easeInSine(start.x,end.x,i);
-				obj.localPosition.y=easeInSine(start.y,end.y,i);
-				obj.localPosition.z=easeInSine(start.z,end.z,i);
-				break;
-			case "easeOutSine":
-				obj.localPosition.x=easeOutSine(start.x,end.x,i);
-				obj.localPosition.y=easeOutSine(start.y,end.y,i);
-				obj.localPosition.z=easeOutSine(start.z,end.z,i);
-				break;
-			case "easeInOutSine":
-				obj.localPosition.x=easeInOutSine(start.x,end.x,i);
-				obj.localPosition.y=easeInOutSine(start.y,end.y,i);
-				obj.localPosition.z=easeInOutSine(start.z,end.z,i);
-				break;
-			case "easeInExpo":
-				obj.localPosition.x=easeInExpo(start.x,end.x,i);
-				obj.localPosition.y=easeInExpo(start.y,end.y,i);
-				obj.localPosition.z=easeInExpo(start.z,end.z,i);
-				break;
-			case "easeOutExpo":
-				obj.localPosition.x=easeOutExpo(start.x,end.x,i);
-				obj.localPosition.y=easeOutExpo(start.y,end.y,i);
-				obj.localPosition.z=easeOutExpo(start.z,end.z,i);
-				break;
-			case "easeInOutExpo":
-				obj.localPosition.x=easeInOutExpo(start.x,end.x,i);
-				obj.localPosition.y=easeInOutExpo(start.y,end.y,i);
-				obj.localPosition.z=easeInOutExpo(start.z,end.z,i);
-				break;
-			case "easeInCirc":
-				obj.localPosition.x=easeInCirc(start.x,end.x,i);
-				obj.localPosition.y=easeInCirc(start.y,end.y,i);
-				obj.localPosition.z=easeInCirc(start.z,end.z,i);
-				break;
-			case "easeOutCirc":
-				obj.localPosition.x=easeOutCirc(start.x,end.x,i);
-				obj.localPosition.y=easeOutCirc(start.y,end.y,i);
-				obj.localPosition.z=easeOutCirc(start.z,end.z,i);
-				break;
-			case "easeInOutCirc":
-				obj.localPosition.x=easeInOutCirc(start.x,end.x,i);
-				obj.localPosition.y=easeInOutCirc(start.y,end.y,i);
-				obj.localPosition.z=easeInOutCirc(start.z,end.z,i);
-				break;
-			case "linear":
-				obj.localPosition.x=linear(start.x,end.x,i);
-				obj.localPosition.y=linear(start.y,end.y,i);
-				obj.localPosition.z=linear(start.z,end.z,i);
-				break;
-			case "spring":
-				obj.localPosition.x=spring(start.x,end.x,i);
-				obj.localPosition.y=spring(start.y,end.y,i);
-				obj.localPosition.z=spring(start.z,end.z,i);
-				break;
-			case "bounce":
-				obj.localPosition.x=bounce(start.x,end.x,i);
-				obj.localPosition.y=bounce(start.y,end.y,i);
-				obj.localPosition.z=bounce(start.z,end.z,i);
-				break;
-			case "easeInBack":
-				obj.localPosition.x=easeInBack(start.x,end.x,i);
-				obj.localPosition.y=easeInBack(start.y,end.y,i);
-				obj.localPosition.z=easeInBack(start.z,end.z,i);
-				break;
-			case "easeOutBack":
-				obj.localPosition.x=easeOutBack(start.x,end.x,i);
-				obj.localPosition.y=easeOutBack(start.y,end.y,i);
-				obj.localPosition.z=easeOutBack(start.z,end.z,i);
-				break;
-			case "easeInOutBack":
-				obj.localPosition.x=easeInOutBack(start.x,end.x,i);
-				obj.localPosition.y=easeInOutBack(start.y,end.y,i);
-				obj.localPosition.z=easeInOutBack(start.z,end.z,i);
-				break;			
-		}
+	for (i = 0.0; i < 1.0; i += Time.deltaTime*(1/runTime)) {		
+		obj.localPosition.x=easingFunc(start.x,end.x,i);
+		obj.localPosition.y=easingFunc(start.y,end.y,i);
+		obj.localPosition.z=easingFunc(start.z,end.z,i);
 		yield;
 	}
 	obj.localPosition=end;
 	if(args["onComplete"]){
-		args["onCompleteTarget"].SendMessage(args["onComplete"], args["onCompleteParams"], SendMessageOptions.DontRequireReceiver);
+		var target : GameObject = args["onCompleteTarget"];
+		target.SendMessage(args["onComplete"], args["onCompleteParams"], SendMessageOptions.DontRequireReceiver);
 	}
 	Destroy (this);
 }
@@ -1439,6 +1073,9 @@ private function moveToWorld(args:Hashtable){
 	}
 	if(args["transition"]==null){
 		args.Add("transition",moveDefaults["transition"]);
+	}
+	if(args["onCompleteTarget"]==null){
+		args.Add("onCompleteTarget",gameObject);
 	}
 	
 	//delay:
@@ -1471,154 +1108,200 @@ private function moveToWorld(args:Hashtable){
 	var easing : String = args["transition"];
 	var runTime : float = args["time"];
 	
+	var easingFunc = easeInQuad;
+	easingFunc = TRANSITIONS[easing];
+	
 	//run tween:
-	for (i = 0.0; i < 1.0; i += Time.deltaTime*(1/runTime)) {
-		switch(easing){
-			case "easeInQuad":
-				obj.position.x=easeInQuad(start.x,end.x,i);
-				obj.position.y=easeInQuad(start.y,end.y,i);
-				obj.position.z=easeInQuad(start.z,end.z,i);
-				break;
-			case "easeOutQuad":
-				obj.position.x=easeOutQuad(start.x,end.x,i);
-				obj.position.y=easeOutQuad(start.y,end.y,i);
-				obj.position.z=easeOutQuad(start.z,end.z,i);
-				break;
-			case "easeInOutQuad":
-				obj.position.x=easeInOutQuad(start.x,end.x,i);
-				obj.position.y=easeInOutQuad(start.y,end.y,i);
-				obj.position.z=easeInOutQuad(start.z,end.z,i);
-				break;
-			case "easeInCubic":
-				obj.position.x=easeInCubic(start.x,end.x,i);
-				obj.position.y=easeInCubic(start.y,end.y,i);
-				obj.position.z=easeInCubic(start.z,end.z,i);
-				break;
-			case "easeOutCubic":
-				obj.position.x=easeOutCubic(start.x,end.x,i);
-				obj.position.y=easeOutCubic(start.y,end.y,i);
-				obj.position.z=easeOutCubic(start.z,end.z,i);
-				break;
-			case "easeInOutCubic":
-				obj.position.x=easeInOutCubic(start.x,end.x,i);
-				obj.position.y=easeInOutCubic(start.y,end.y,i);
-				obj.position.z=easeInOutCubic(start.z,end.z,i);
-				break;
-			case "easeInQuart":
-				obj.position.x=easeInQuart(start.x,end.x,i);
-				obj.position.y=easeInQuart(start.y,end.y,i);
-				obj.position.z=easeInQuart(start.z,end.z,i);
-				break;
-			case "easeOutQuart":
-				obj.position.x=easeOutQuart(start.x,end.x,i);
-				obj.position.y=easeOutQuart(start.y,end.y,i);
-				obj.position.z=easeOutQuart(start.z,end.z,i);
-				break;
-			case "easeInOutQuart":
-				obj.position.x=easeInOutQuart(start.x,end.x,i);
-				obj.position.y=easeInOutQuart(start.y,end.y,i);
-				obj.position.z=easeInOutQuart(start.z,end.z,i);
-				break;
-			case "easeInQuint":
-				obj.position.x=easeInQuint(start.x,end.x,i);
-				obj.position.y=easeInQuint(start.y,end.y,i);
-				obj.position.z=easeInQuint(start.z,end.z,i);
-				break;
-			case "easeOutQuint":
-				obj.position.x=easeOutQuint(start.x,end.x,i);
-				obj.position.y=easeOutQuint(start.y,end.y,i);
-				obj.position.z=easeOutQuint(start.z,end.z,i);
-				break;
-			case "easeInOutQuint":
-				obj.position.x=easeInOutQuint(start.x,end.x,i);
-				obj.position.y=easeInOutQuint(start.y,end.y,i);
-				obj.position.z=easeInOutQuint(start.z,end.z,i);
-				break;
-			case "easeInSine":
-				obj.position.x=easeInSine(start.x,end.x,i);
-				obj.position.y=easeInSine(start.y,end.y,i);
-				obj.position.z=easeInSine(start.z,end.z,i);
-				break;
-			case "easeOutSine":
-				obj.position.x=easeOutSine(start.x,end.x,i);
-				obj.position.y=easeOutSine(start.y,end.y,i);
-				obj.position.z=easeOutSine(start.z,end.z,i);
-				break;
-			case "easeInOutSine":
-				obj.position.x=easeInOutSine(start.x,end.x,i);
-				obj.position.y=easeInOutSine(start.y,end.y,i);
-				obj.position.z=easeInOutSine(start.z,end.z,i);
-				break;
-			case "easeInExpo":
-				obj.position.x=easeInExpo(start.x,end.x,i);
-				obj.position.y=easeInExpo(start.y,end.y,i);
-				obj.position.z=easeInExpo(start.z,end.z,i);
-				break;
-			case "easeOutExpo":
-				obj.position.x=easeOutExpo(start.x,end.x,i);
-				obj.position.y=easeOutExpo(start.y,end.y,i);
-				obj.position.z=easeOutExpo(start.z,end.z,i);
-				break;
-			case "easeInOutExpo":
-				obj.position.x=easeInOutExpo(start.x,end.x,i);
-				obj.position.y=easeInOutExpo(start.y,end.y,i);
-				obj.position.z=easeInOutExpo(start.z,end.z,i);
-				break;
-			case "easeInCirc":
-				obj.position.x=easeInCirc(start.x,end.x,i);
-				obj.position.y=easeInCirc(start.y,end.y,i);
-				obj.position.z=easeInCirc(start.z,end.z,i);
-				break;
-			case "easeOutCirc":
-				obj.position.x=easeOutCirc(start.x,end.x,i);
-				obj.position.y=easeOutCirc(start.y,end.y,i);
-				obj.position.z=easeOutCirc(start.z,end.z,i);
-				break;
-			case "easeInOutCirc":
-				obj.position.x=easeInOutCirc(start.x,end.x,i);
-				obj.position.y=easeInOutCirc(start.y,end.y,i);
-				obj.position.z=easeInOutCirc(start.z,end.z,i);
-				break;
-			case "linear":
-				obj.position.x=linear(start.x,end.x,i);
-				obj.position.y=linear(start.y,end.y,i);
-				obj.position.z=linear(start.z,end.z,i);
-				break;
-			case "spring":
-				obj.position.x=spring(start.x,end.x,i);
-				obj.position.y=spring(start.y,end.y,i);
-				obj.position.z=spring(start.z,end.z,i);
-				break;
-			case "bounce":
-				obj.position.x=bounce(start.x,end.x,i);
-				obj.position.y=bounce(start.y,end.y,i);
-				obj.position.z=bounce(start.z,end.z,i);
-				break;
-			case "easeInBack":
-				obj.position.x=easeInBack(start.x,end.x,i);
-				obj.position.y=easeInBack(start.y,end.y,i);
-				obj.position.z=easeInBack(start.z,end.z,i);
-				break;
-			case "easeOutBack":
-				obj.position.x=easeOutBack(start.x,end.x,i);
-				obj.position.y=easeOutBack(start.y,end.y,i);
-				obj.position.z=easeOutBack(start.z,end.z,i);
-				break;
-			case "easeInOutBack":
-				obj.position.x=easeInOutBack(start.x,end.x,i);
-				obj.position.y=easeInOutBack(start.y,end.y,i);
-				obj.position.z=easeInOutBack(start.z,end.z,i);
-				break;			
-		}
+	for (i = 0.0; i < 1.0; i += Time.deltaTime*(1/runTime)) {		
+		obj.position.x=easingFunc(start.x,end.x,i);
+		obj.position.y=easingFunc(start.y,end.y,i);
+		obj.position.z=easingFunc(start.z,end.z,i);
 		yield;
 	}
+	
 	obj.position=end;
 	if(args["onComplete"]){
-		args["onCompleteTarget"].SendMessage(args["onComplete"], args["onCompleteParams"], SendMessageOptions.DontRequireReceiver);
+		var target : GameObject = args["onCompleteTarget"];
+		target.SendMessage(args["onComplete"], args["onCompleteParams"], SendMessageOptions.DontRequireReceiver);
 	}
 	Destroy (this);
 }
 
+//Bezier move to application: - David Bardos
+private function moveToBezier(args:Hashtable){	
+	//construct args:
+	if(args["time"]==null){
+		args.Add("time",moveBezierDefaults["time"]);
+	}
+	if(args["delay"]==null){
+		args.Add("delay",moveBezierDefaults["delay"]);
+	}
+	if(args["transition"]==null){
+		args.Add("transition",moveBezierDefaults["transition"]);
+	}
+	if(args["onCompleteTarget"]==null){
+		args.Add("onCompleteTarget",gameObject);
+	}
+			
+	//delay:
+	var delay : float = args["delay"];
+	if(delay > 0){
+		yield WaitForSeconds (args["delay"]);
+	}
+	
+	//Look for conflicts:
+	checkForConflicts(tweenType);
+	inProgress=true;
+	
+	
+	//define object:
+	var obj : GameObject = gameObject;
+		
+	//define targets:
+	var easing : String = args["transition"];
+	var runTime : float = args["time"];
+
+	var easingFunc = easeInQuad;
+	easingFunc = TRANSITIONS[easing];
+	
+	//init bezier
+	var n : float;
+	var segments : float;
+	var beziers : Array = Array(args["bezier"]);
+	var _beziersPI: Array;
+	var props : Hashtable = {};
+    var i : float;
+    var ii : float;
+    var b : Object;
+    var p : DictionaryEntry;
+    
+	
+	if (args["isLocal"] == "true") {
+		beziers.splice(0,0, obj.transform.localPosition);
+	}
+	else {
+		beziers.splice(0,0, obj.transform.position);
+	}
+
+	_beziersPI = ParseBeziers(beziers);
+	var iNumPoints : int = _beziersPI.length;
+	
+	//run tween:
+	for (i = 0.0; i < 1.0; i += Time.deltaTime*(1/runTime)) {
+		//get the easing as a percentage... not * 100, of course
+		var virtTimePart : float = easingFunc(0, 1, i);
+
+		//get the array position of the intermediate point that we want
+		var iCurAxisPoint : int;
+		if (virtTimePart <= 0)
+		{
+			//first array position
+			iCurAxisPoint = 0;
+		}
+		else if (virtTimePart >= 1)
+		{
+			//last array position
+			iCurAxisPoint = iNumPoints - 1;
+		}
+		else
+		{
+			//the transition is > 0 and less than 1. get the position we're looking for.
+			iCurAxisPoint = Mathf.Floor(iNumPoints * virtTimePart);
+		}
+
+		//we are getting how far past the current point we are.
+		var timeFract : float = iNumPoints * virtTimePart - iCurAxisPoint;
+		
+		//get the point info that we are interested in dealing with.
+		var bpi : BezierPointInfo = _beziersPI[iCurAxisPoint];
+
+		//get the new vector... I love vector math!
+		var newVector : Vector3 = bpi.starting + timeFract * (2 * (1 - timeFract) * (bpi.intermediate - bpi.starting) + timeFract * (bpi.end - bpi.starting));
+
+		//move object				
+		if (args["isLocal"] == "true") 
+		{
+		   obj.transform.localPosition = newVector;
+		}
+		else
+		{
+			obj.transform.position = newVector;                    
+		}
+			
+		yield;
+	}
+	
+	var bpiEnd : BezierPointInfo = _beziersPI[_beziersPI.Count - 1];
+	//get the object to it's final resting position
+	if (args["isLocal"] == "true") 
+	{
+	   obj.transform.localPosition = bpiEnd.end;
+	}
+	else
+	{
+		obj.transform.position = bpiEnd.end;                    
+	}
+	
+		
+	if(args["onComplete"]){
+		var target : GameObject = args["onCompleteTarget"];
+		target.SendMessage(args["onComplete"], args["onCompleteParams"], SendMessageOptions.DontRequireReceiver);
+	}
+	Destroy (this);
+}
+
+//Helper method for translating control points into bezier information. - David Bardos
+private function ParseBeziers(points: Array) : Array
+	{
+		var returnPoints : Array= new Array();
+
+		if (points.Count > 2)
+		{
+			//the first item is the starting position of the current point for that axis. So, we are storing off the following values:
+			//The starting position for the current point for the axis
+			//A smoothing point for the curve
+			//The next major point		
+			var iCurPoint : int;
+			
+			for (iCurPoint = 0; iCurPoint < points.Count - 1; iCurPoint++)
+			{
+				var curPoint : Vector3 = points[iCurPoint];
+
+				//I know I am going to store exactly 3, the starting, intermediate and end.
+				var curSetofPoints: BezierPointInfo = new BezierPointInfo();
+
+				curSetofPoints.starting = curPoint;
+				if (iCurPoint == 0)
+				{
+					var p1 : Vector3 = points[1];
+					var p2 : Vector3 = points[2];
+					curSetofPoints.intermediate = p1 - ((p2 - curPoint) / 4);					
+				}
+				else
+				{
+					//double the current point minus the prior point's intermediate position
+					var bpiint: BezierPointInfo = returnPoints[iCurPoint - 1];
+					curSetofPoints.intermediate = 2 * curPoint - bpiint.intermediate;
+				}
+				//This is fine because we end at the next to last item.
+				curSetofPoints.end = points[iCurPoint + 1];
+
+				returnPoints.push(curSetofPoints);
+			}
+		}
+		else
+		{
+			var curSetofPoints2: BezierPointInfo = new BezierPointInfo();
+			curSetofPoints2.starting = points[0];
+			curSetofPoints2.end = points[1];
+			curSetofPoints2.intermediate = ((curSetofPoints2.starting + curSetofPoints2.end) / 2);
+			
+			returnPoints.push(curSetofPoints2);
+		}
+
+		return returnPoints;
+	}
+	
 
 //Scale to application:
 private function scaleTo(args:Hashtable){	
@@ -1632,7 +1315,10 @@ private function scaleTo(args:Hashtable){
 	if(args["transition"]==null){
 		args.Add("transition",scaleDefaults["transition"]);
 	}
-	
+	if(args["onCompleteTarget"]==null){
+		args.Add("onCompleteTarget",gameObject);
+	}
+		
 	//delay:
 	var delay : float = args["delay"];
 	if(delay > 0){
@@ -1663,150 +1349,21 @@ private function scaleTo(args:Hashtable){
 	var easing : String = args["transition"];
 	var runTime : float = args["time"];
 	
+	var easingFunc = easeInQuad;
+	easingFunc = TRANSITIONS[easing];
+	
 	//run tween:
 	for (i = 0.0; i < 1.0; i += Time.deltaTime*(1/runTime)) {
-		switch(easing){
-			case "easeInQuad":
-				obj.localScale.x=easeInQuad(start.x,end.x,i);
-				obj.localScale.y=easeInQuad(start.y,end.y,i);
-				obj.localScale.z=easeInQuad(start.z,end.z,i);
-				break;
-			case "easeOutQuad":
-				obj.localScale.x=easeOutQuad(start.x,end.x,i);
-				obj.localScale.y=easeOutQuad(start.y,end.y,i);
-				obj.localScale.z=easeOutQuad(start.z,end.z,i);
-				break;
-			case "easeInOutQuad":
-				obj.localScale.x=easeInOutQuad(start.x,end.x,i);
-				obj.localScale.y=easeInOutQuad(start.y,end.y,i);
-				obj.localScale.z=easeInOutQuad(start.z,end.z,i);
-				break;
-			case "easeInCubic":
-				obj.localScale.x=easeInCubic(start.x,end.x,i);
-				obj.localScale.y=easeInCubic(start.y,end.y,i);
-				obj.localScale.z=easeInCubic(start.z,end.z,i);
-				break;
-			case "easeOutCubic":
-				obj.localScale.x=easeOutCubic(start.x,end.x,i);
-				obj.localScale.y=easeOutCubic(start.y,end.y,i);
-				obj.localScale.z=easeOutCubic(start.z,end.z,i);
-				break;
-			case "easeInOutCubic":
-				obj.localScale.x=easeInOutCubic(start.x,end.x,i);
-				obj.localScale.y=easeInOutCubic(start.y,end.y,i);
-				obj.localScale.z=easeInOutCubic(start.z,end.z,i);
-				break;
-			case "easeInQuart":
-				obj.localScale.x=easeInQuart(start.x,end.x,i);
-				obj.localScale.y=easeInQuart(start.y,end.y,i);
-				obj.localScale.z=easeInQuart(start.z,end.z,i);
-				break;
-			case "easeOutQuart":
-				obj.localScale.x=easeOutQuart(start.x,end.x,i);
-				obj.localScale.y=easeOutQuart(start.y,end.y,i);
-				obj.localScale.z=easeOutQuart(start.z,end.z,i);
-				break;
-			case "easeInOutQuart":
-				obj.localScale.x=easeInOutQuart(start.x,end.x,i);
-				obj.localScale.y=easeInOutQuart(start.y,end.y,i);
-				obj.localScale.z=easeInOutQuart(start.z,end.z,i);
-				break;
-			case "easeInQuint":
-				obj.localScale.x=easeInQuint(start.x,end.x,i);
-				obj.localScale.y=easeInQuint(start.y,end.y,i);
-				obj.localScale.z=easeInQuint(start.z,end.z,i);
-				break;
-			case "easeOutQuint":
-				obj.localScale.x=easeOutQuint(start.x,end.x,i);
-				obj.localScale.y=easeOutQuint(start.y,end.y,i);
-				obj.localScale.z=easeOutQuint(start.z,end.z,i);
-				break;
-			case "easeInOutQuint":
-				obj.localScale.x=easeInOutQuint(start.x,end.x,i);
-				obj.localScale.y=easeInOutQuint(start.y,end.y,i);
-				obj.localScale.z=easeInOutQuint(start.z,end.z,i);
-				break;
-			case "easeInSine":
-				obj.localScale.x=easeInSine(start.x,end.x,i);
-				obj.localScale.y=easeInSine(start.y,end.y,i);
-				obj.localScale.z=easeInSine(start.z,end.z,i);
-				break;
-			case "easeOutSine":
-				obj.localScale.x=easeOutSine(start.x,end.x,i);
-				obj.localScale.y=easeOutSine(start.y,end.y,i);
-				obj.localScale.z=easeOutSine(start.z,end.z,i);
-				break;
-			case "easeInOutSine":
-				obj.localScale.x=easeInOutSine(start.x,end.x,i);
-				obj.localScale.y=easeInOutSine(start.y,end.y,i);
-				obj.localScale.z=easeInOutSine(start.z,end.z,i);
-				break;
-			case "easeInExpo":
-				obj.localScale.x=easeInExpo(start.x,end.x,i);
-				obj.localScale.y=easeInExpo(start.y,end.y,i);
-				obj.localScale.z=easeInExpo(start.z,end.z,i);
-				break;
-			case "easeOutExpo":
-				obj.localScale.x=easeOutExpo(start.x,end.x,i);
-				obj.localScale.y=easeOutExpo(start.y,end.y,i);
-				obj.localScale.z=easeOutExpo(start.z,end.z,i);
-				break;
-			case "easeInOutExpo":
-				obj.localScale.x=easeInOutExpo(start.x,end.x,i);
-				obj.localScale.y=easeInOutExpo(start.y,end.y,i);
-				obj.localScale.z=easeInOutExpo(start.z,end.z,i);
-				break;
-			case "easeInCirc":
-				obj.localScale.x=easeInCirc(start.x,end.x,i);
-				obj.localScale.y=easeInCirc(start.y,end.y,i);
-				obj.localScale.z=easeInCirc(start.z,end.z,i);
-				break;
-			case "easeOutCirc":
-				obj.localScale.x=easeOutCirc(start.x,end.x,i);
-				obj.localScale.y=easeOutCirc(start.y,end.y,i);
-				obj.localScale.z=easeOutCirc(start.z,end.z,i);
-				break;
-			case "easeInOutCirc":
-				obj.localScale.x=easeInOutCirc(start.x,end.x,i);
-				obj.localScale.y=easeInOutCirc(start.y,end.y,i);
-				obj.localScale.z=easeInOutCirc(start.z,end.z,i);
-				break;
-			case "linear":
-				obj.localScale.x=linear(start.x,end.x,i);
-				obj.localScale.y=linear(start.y,end.y,i);
-				obj.localScale.z=linear(start.z,end.z,i);
-				break;
-			case "spring":
-				obj.localScale.x=spring(start.x,end.x,i);
-				obj.localScale.y=spring(start.y,end.y,i);
-				obj.localScale.z=spring(start.z,end.z,i);
-				break;
-			case "bounce":
-				obj.localScale.x=bounce(start.x,end.x,i);
-				obj.localScale.y=bounce(start.y,end.y,i);
-				obj.localScale.z=bounce(start.z,end.z,i);
-				break;
-			case "easeInBack":
-				obj.localScale.x=easeInBack(start.x,end.x,i);
-				obj.localScale.y=easeInBack(start.y,end.y,i);
-				obj.localScale.z=easeInBack(start.z,end.z,i);
-				break;
-			case "easeOutBack":
-				obj.localScale.x=easeOutBack(start.x,end.x,i);
-				obj.localScale.y=easeOutBack(start.y,end.y,i);
-				obj.localScale.z=easeOutBack(start.z,end.z,i);
-				break;
-			case "easeInOutBack":
-				obj.localScale.x=easeInOutBack(start.x,end.x,i);
-				obj.localScale.y=easeInOutBack(start.y,end.y,i);
-				obj.localScale.z=easeInOutBack(start.z,end.z,i);
-				break;	
-		}
+		obj.localScale.x=easingFunc(start.x,end.x,i);
+		obj.localScale.y=easingFunc(start.y,end.y,i);
+		obj.localScale.z=easingFunc(start.z,end.z,i);
+				
 		yield;
 	}
 	obj.localScale=end;	
 	if(args["onComplete"]){
-		args["onCompleteTarget"].SendMessage(args["onComplete"], args["onCompleteParams"], SendMessageOptions.DontRequireReceiver);
+		var target : GameObject = args["onCompleteTarget"];
+		target.SendMessage(args["onComplete"], args["onCompleteParams"], SendMessageOptions.DontRequireReceiver);
 	}
 	Destroy (this);	
 }
@@ -1828,6 +1385,9 @@ private function rotateTo(args:Hashtable) {
 	}
 	if(args["transition"]==null){
 		args.Add("transition",rotateToDefaults["transition"]);
+	}
+	if(args["onCompleteTarget"]==null){
+		args.Add("onCompleteTarget",gameObject);
 	}
 	
 	//delay:
@@ -1860,96 +1420,20 @@ private function rotateTo(args:Hashtable) {
 	var easing : String = args["transition"];
 	var runTime : float = args["time"];
 	
+	var easingFunc = easeInQuad;
+	easingFunc = TRANSITIONS[easing];
+	
 	//run tween:
 	for (i = 0.0; i < 1.0; i += Time.deltaTime*(1/runTime)) {
-		switch (easing){
-			case "easeInQuad":
-				obj.localRotation=Quaternion.Euler(easeInQuad(start.x,end.x,i),easeInQuad(start.y,end.y,i),easeInQuad(start.z,end.z,i));
-				break;
-			case "easeOutQuad":
-				obj.localRotation=Quaternion.Euler(easeOutQuad(start.x,end.x,i),easeOutQuad(start.y,end.y,i),easeOutQuad(start.z,end.z,i));
-				break;
-			case "easeInOutQuad":
-				obj.localRotation=Quaternion.Euler(easeInOutQuad(start.x,end.x,i),easeInOutQuad(start.y,end.y,i),easeInOutQuad(start.z,end.z,i));
-				break;
-			case "easeInCubic":
-				obj.localRotation=Quaternion.Euler(easeInCubic(start.x,end.x,i),easeInCubic(start.y,end.y,i),easeInCubic(start.z,end.z,i));
-				break;
-			case "easeOutCubic":
-				obj.localRotation=Quaternion.Euler(easeOutCubic(start.x,end.x,i),easeOutCubic(start.y,end.y,i),easeOutCubic(start.z,end.z,i));
-				break;
-			case "easeInOutCubic":
-				obj.localRotation=Quaternion.Euler(easeInOutCubic(start.x,end.x,i),easeInOutCubic(start.y,end.y,i),easeInOutCubic(start.z,end.z,i));
-				break;
-			case "easeInQuart":
-				obj.localRotation=Quaternion.Euler(easeInQuart(start.x,end.x,i),easeInQuart(start.y,end.y,i),easeInQuart(start.z,end.z,i));
-				break;
-			case "easeOutQuart":
-				obj.localRotation=Quaternion.Euler(easeOutQuart(start.x,end.x,i),easeOutQuart(start.y,end.y,i),easeOutQuart(start.z,end.z,i));
-				break;
-			case "easeInOutQuart":
-				obj.localRotation=Quaternion.Euler(easeInOutQuart(start.x,end.x,i),easeInOutQuart(start.y,end.y,i),easeInOutQuart(start.z,end.z,i));
-				break;
-			case "easeInQuint":
-				obj.localRotation=Quaternion.Euler(easeInQuint(start.x,end.x,i),easeInQuint(start.y,end.y,i),easeInQuint(start.z,end.z,i));
-				break;
-			case "easeOutQuint":
-				obj.localRotation=Quaternion.Euler(easeOutQuint(start.x,end.x,i),easeOutQuint(start.y,end.y,i),easeOutQuint(start.z,end.z,i));
-				break;
-			case "easeInOutQuint":
-				obj.localRotation=Quaternion.Euler(easeInOutQuint(start.x,end.x,i),easeInOutQuint(start.y,end.y,i),easeInOutQuint(start.z,end.z,i));
-				break;
-			case "easeInSine":
-				obj.localRotation=Quaternion.Euler(easeInSine(start.x,end.x,i),easeInSine(start.y,end.y,i),easeInSine(start.z,end.z,i));
-				break;
-			case "easeOutSine":
-				obj.localRotation=Quaternion.Euler(easeOutSine(start.x,end.x,i),easeOutSine(start.y,end.y,i),easeOutSine(start.z,end.z,i));
-				break;
-			case "easeInOutSine":
-				obj.localRotation=Quaternion.Euler(easeInOutSine(start.x,end.x,i),easeInOutSine(start.y,end.y,i),easeInOutSine(start.z,end.z,i));
-				break;
-			case "easeInExpo":
-				obj.localRotation=Quaternion.Euler(easeInExpo(start.x,end.x,i),easeInExpo(start.y,end.y,i),easeInExpo(start.z,end.z,i));
-				break;
-			case "easeOutExpo":
-				obj.localRotation=Quaternion.Euler(easeOutExpo(start.x,end.x,i),easeOutExpo(start.y,end.y,i),easeOutExpo(start.z,end.z,i));
-				break;
-			case "easeInOutExpo":
-				obj.localRotation=Quaternion.Euler(easeInOutExpo(start.x,end.x,i),easeInOutExpo(start.y,end.y,i),easeInOutExpo(start.z,end.z,i));
-				break;
-			case "easeInCirc":
-				obj.localRotation=Quaternion.Euler(easeInCirc(start.x,end.x,i),easeInCirc(start.y,end.y,i),easeInCirc(start.z,end.z,i));
-				break;
-			case "easeOutCirc":
-				obj.localRotation=Quaternion.Euler(easeOutCirc(start.x,end.x,i),easeOutCirc(start.y,end.y,i),easeOutCirc(start.z,end.z,i));
-				break;
-			case "easeInOutCirc":
-				obj.localRotation=Quaternion.Euler(easeInOutCirc(start.x,end.x,i),easeInOutCirc(start.y,end.y,i),easeInOutCirc(start.z,end.z,i));
-				break;
-			case "linear":
-				obj.localRotation=Quaternion.Euler(clerp(start.x,end.x,i),clerp(start.y,end.y,i),clerp(start.z,end.z,i));
-				break;
-			case "spring":
-				obj.localRotation=Quaternion.Euler(spring(start.x,end.x,i),spring(start.y,end.y,i),spring(start.z,end.z,i));
-				break;
-			case "bounce":
-				obj.localRotation=Quaternion.Euler(bounce(start.x,end.x,i),bounce(start.y,end.y,i),bounce(start.z,end.z,i));
-				break;
-			case "easeInBack":
-				obj.localRotation=Quaternion.Euler(easeInBack(start.x,end.x,i),easeInBack(start.y,end.y,i),easeInBack(start.z,end.z,i));
-				break;
-			case "easeOutBack":
-				obj.localRotation=Quaternion.Euler(easeOutBack(start.x,end.x,i),easeOutBack(start.y,end.y,i),easeOutBack(start.z,end.z,i));
-				break;
-			case "easeInOutBack":
-				obj.localRotation=Quaternion.Euler(easeInOutBack(start.x,end.x,i),easeInOutBack(start.y,end.y,i),easeInOutBack(start.z,end.z,i));
-				break;
-		}
+		obj.localRotation=Quaternion.Euler(easingFunc(start.x,end.x,i),easingFunc(start.y,end.y,i),easingFunc(start.z,end.z,i));		
 		yield;
 	}
+	
 	obj.localRotation=Quaternion.Euler(end.x,end.y,end.z);
+	
 	if(args["onComplete"]){
-		args["onCompleteTarget"].SendMessage(args["onComplete"], args["onCompleteParams"], SendMessageOptions.DontRequireReceiver);
+		var target : GameObject = args["onCompleteTarget"];
+		target.SendMessage(args["onComplete"], args["onCompleteParams"], SendMessageOptions.DontRequireReceiver);
 	}
 	Destroy (this);
 }
@@ -1972,7 +1456,10 @@ private function rotateBy(args:Hashtable) {
 	if(args["transition"]==null){
 		args.Add("transition",rotateByDefaults["transition"]);
 	}
-	
+	if(args["onCompleteTarget"]==null){
+		args.Add("onCompleteTarget",gameObject);
+	}
+		
 	//delay:
 	var delay : float = args["delay"];
 	if(delay > 0){
@@ -2006,97 +1493,21 @@ private function rotateBy(args:Hashtable) {
 	var	end = Vector3(360*xValue + obj.localEulerAngles.x, 360*yValue + obj.localEulerAngles.y, 360 *zValue + obj.localEulerAngles.x);
 	var easing : String = args["transition"];
 	var runTime : float = args["time"];
-		
+	
+	var easingFunc = easeInQuad;
+	easingFunc = TRANSITIONS[easing];
+	
 	//run tween:
 	for (i = 0.0; i < 1.0; i += Time.deltaTime*(1/runTime)) {
-		switch (easing){
-			case "easeInQuad":
-				obj.localRotation=Quaternion.Euler(easeInQuad(start.x,end.x,i),easeInQuad(start.y,end.y,i),easeInQuad(start.z,end.z,i));
-				break;
-			case "easeOutQuad":
-				obj.localRotation=Quaternion.Euler(easeOutQuad(start.x,end.x,i),easeOutQuad(start.y,end.y,i),easeOutQuad(start.z,end.z,i));
-				break;
-			case "easeInOutQuad":
-				obj.localRotation=Quaternion.Euler(easeInOutQuad(start.x,end.x,i),easeInOutQuad(start.y,end.y,i),easeInOutQuad(start.z,end.z,i));
-				break;
-			case "easeInCubic":
-				obj.localRotation=Quaternion.Euler(easeInCubic(start.x,end.x,i),easeInCubic(start.y,end.y,i),easeInCubic(start.z,end.z,i));
-				break;
-			case "easeOutCubic":
-				obj.localRotation=Quaternion.Euler(easeOutCubic(start.x,end.x,i),easeOutCubic(start.y,end.y,i),easeOutCubic(start.z,end.z,i));
-				break;
-			case "easeInOutCubic":
-				obj.localRotation=Quaternion.Euler(easeInOutCubic(start.x,end.x,i),easeInOutCubic(start.y,end.y,i),easeInOutCubic(start.z,end.z,i));
-				break;
-			case "easeInQuart":
-				obj.localRotation=Quaternion.Euler(easeInQuart(start.x,end.x,i),easeInQuart(start.y,end.y,i),easeInQuart(start.z,end.z,i));
-				break;
-			case "easeOutQuart":
-				obj.localRotation=Quaternion.Euler(easeOutQuart(start.x,end.x,i),easeOutQuart(start.y,end.y,i),easeOutQuart(start.z,end.z,i));
-				break;
-			case "easeInOutQuart":
-				obj.localRotation=Quaternion.Euler(easeInOutQuart(start.x,end.x,i),easeInOutQuart(start.y,end.y,i),easeInOutQuart(start.z,end.z,i));
-				break;
-			case "easeInQuint":
-				obj.localRotation=Quaternion.Euler(easeInQuint(start.x,end.x,i),easeInQuint(start.y,end.y,i),easeInQuint(start.z,end.z,i));
-				break;
-			case "easeOutQuint":
-				obj.localRotation=Quaternion.Euler(easeOutQuint(start.x,end.x,i),easeOutQuint(start.y,end.y,i),easeOutQuint(start.z,end.z,i));
-				break;
-			case "easeInOutQuint":
-				obj.localRotation=Quaternion.Euler(easeInOutQuint(start.x,end.x,i),easeInOutQuint(start.y,end.y,i),easeInOutQuint(start.z,end.z,i));
-				break;
-			case "easeInSine":
-				obj.localRotation=Quaternion.Euler(easeInSine(start.x,end.x,i),easeInSine(start.y,end.y,i),easeInSine(start.z,end.z,i));
-				break;
-			case "easeOutSine":
-				obj.localRotation=Quaternion.Euler(easeOutSine(start.x,end.x,i),easeOutSine(start.y,end.y,i),easeOutSine(start.z,end.z,i));
-				break;
-			case "easeInOutSine":
-				obj.localRotation=Quaternion.Euler(easeInOutSine(start.x,end.x,i),easeInOutSine(start.y,end.y,i),easeInOutSine(start.z,end.z,i));
-				break;
-			case "easeInExpo":
-				obj.localRotation=Quaternion.Euler(easeInExpo(start.x,end.x,i),easeInExpo(start.y,end.y,i),easeInExpo(start.z,end.z,i));
-				break;
-			case "easeOutExpo":
-				obj.localRotation=Quaternion.Euler(easeOutExpo(start.x,end.x,i),easeOutExpo(start.y,end.y,i),easeOutExpo(start.z,end.z,i));
-				break;
-			case "easeInOutExpo":
-				obj.localRotation=Quaternion.Euler(easeInOutExpo(start.x,end.x,i),easeInOutExpo(start.y,end.y,i),easeInOutExpo(start.z,end.z,i));
-				break;
-			case "easeInCirc":
-				obj.localRotation=Quaternion.Euler(easeInCirc(start.x,end.x,i),easeInCirc(start.y,end.y,i),easeInCirc(start.z,end.z,i));
-				break;
-			case "easeOutCirc":
-				obj.localRotation=Quaternion.Euler(easeOutCirc(start.x,end.x,i),easeOutCirc(start.y,end.y,i),easeOutCirc(start.z,end.z,i));
-				break;
-			case "easeInOutCirc":
-				obj.localRotation=Quaternion.Euler(easeInOutCirc(start.x,end.x,i),easeInOutCirc(start.y,end.y,i),easeInOutCirc(start.z,end.z,i));
-				break;
-			case "linear":
-				obj.localRotation=Quaternion.Euler(clerp(start.x,end.x,i),clerp(start.y,end.y,i),clerp(start.z,end.z,i));
-				break;
-			case "spring":
-				obj.localRotation=Quaternion.Euler(spring(start.x,end.x,i),spring(start.y,end.y,i),spring(start.z,end.z,i));
-				break;
-			case "bounce":
-				obj.localRotation=Quaternion.Euler(bounce(start.x,end.x,i),bounce(start.y,end.y,i),bounce(start.z,end.z,i));
-				break;
-			case "easeInBack":
-				obj.localRotation=Quaternion.Euler(easeInBack(start.x,end.x,i),easeInBack(start.y,end.y,i),easeInBack(start.z,end.z,i));
-				break;
-			case "easeOutBack":
-				obj.localRotation=Quaternion.Euler(easeOutBack(start.x,end.x,i),easeOutBack(start.y,end.y,i),easeOutBack(start.z,end.z,i));
-				break;
-			case "easeInOutBack":
-				obj.localRotation=Quaternion.Euler(easeInOutBack(start.x,end.x,i),easeInOutBack(start.y,end.y,i),easeInOutBack(start.z,end.z,i));
-				break;
-		}
+		obj.localRotation=Quaternion.Euler(easingFunc(start.x,end.x,i),easingFunc(start.y,end.y,i),easingFunc(start.z,end.z,i));		
 		yield;
 	}
+	
 	obj.localRotation=Quaternion.Euler(end.x,end.y,end.z);
+	
 	if(args["onComplete"]){
-		args["onCompleteTarget"].SendMessage(args["onComplete"], args["onCompleteParams"], SendMessageOptions.DontRequireReceiver);
+		var target : GameObject = args["onCompleteTarget"];
+		target.SendMessage(args["onComplete"], args["onCompleteParams"], SendMessageOptions.DontRequireReceiver);
 	}
 	Destroy (this);
 }
@@ -2112,6 +1523,9 @@ private function colorTo(args:Hashtable) {
 	}
 	if(args["transition"]==null){
 		args.Add("transition",colorDefaults["transition"]);
+	}
+	if(args["onCompleteTarget"]==null){
+		args.Add("onCompleteTarget",gameObject);
 	}
 	
 	//delay:
@@ -2142,303 +1556,44 @@ private function colorTo(args:Hashtable) {
 	end = Color (args["r"],args["g"],args["b"]);
 	var easing : String = args["transition"];
 	var runTime : float = args["time"];
+	var target : GameObject;
+	
+	var easingFunc = easeInQuad;
+	easingFunc = TRANSITIONS[easing];
 	
 	if(obj.guiTexture){
 		start=obj.guiTexture.color;
-		for (i = 0.0; i < 1.0; i += Time.deltaTime*(1/runTime)) {
-			switch (easing){
-				case "easeInQuad":
-					obj.guiTexture.color.r=easeInQuad(start.r,end.r,i);
-					obj.guiTexture.color.g=easeInQuad(start.g,end.g,i);
-					obj.guiTexture.color.b=easeInQuad(start.b,end.b,i);
-					break;
-				case "easeOutQuad":
-					obj.guiTexture.color.r=easeOutQuad(start.r,end.r,i);
-					obj.guiTexture.color.g=easeOutQuad(start.g,end.g,i);
-					obj.guiTexture.color.b=easeOutQuad(start.b,end.b,i);
-					break;
-				case "easeInOutQuad":
-					obj.guiTexture.color.r=easeInOutQuad(start.r,end.r,i);
-					obj.guiTexture.color.g=easeInOutQuad(start.g,end.g,i);
-					obj.guiTexture.color.b=easeInOutQuad(start.b,end.b,i);
-					break;
-				case "easeInCubic":
-					obj.guiTexture.color.r=easeInCubic(start.r,end.r,i);
-					obj.guiTexture.color.g=easeInCubic(start.g,end.g,i);
-					obj.guiTexture.color.b=easeInCubic(start.b,end.b,i);
-					break;
-				case "easeOutCubic":
-					obj.guiTexture.color.r=easeOutCubic(start.r,end.r,i);
-					obj.guiTexture.color.g=easeOutCubic(start.g,end.g,i);
-					obj.guiTexture.color.b=easeOutCubic(start.b,end.b,i);
-					break;
-				case "easeInOutCubic":
-					obj.guiTexture.color.r=easeInOutCubic(start.r,end.r,i);
-					obj.guiTexture.color.g=easeInOutCubic(start.g,end.g,i);
-					obj.guiTexture.color.b=easeInOutCubic(start.b,end.b,i);
-					break;
-				case "easeInQuart":
-					obj.guiTexture.color.r=easeInQuart(start.r,end.r,i);
-					obj.guiTexture.color.g=easeInQuart(start.g,end.g,i);
-					obj.guiTexture.color.b=easeInQuart(start.b,end.b,i);
-					break;
-				case "easeOutQuart":
-					obj.guiTexture.color.r=easeOutQuart(start.r,end.r,i);
-					obj.guiTexture.color.g=easeOutQuart(start.g,end.g,i);
-					obj.guiTexture.color.b=easeOutQuart(start.b,end.b,i);
-					break;
-				case "easeInOutQuart":
-					obj.guiTexture.color.r=easeInOutQuart(start.r,end.r,i);
-					obj.guiTexture.color.g=easeInOutQuart(start.g,end.g,i);
-					obj.guiTexture.color.b=easeInOutQuart(start.b,end.b,i);
-					break;
-				case "easeInQuint":
-					obj.guiTexture.color.r=easeInQuint(start.r,end.r,i);
-					obj.guiTexture.color.g=easeInQuint(start.g,end.g,i);
-					obj.guiTexture.color.b=easeInQuint(start.b,end.b,i);
-					break;
-				case "easeOutQuint":
-					obj.guiTexture.color.r=easeOutQuint(start.r,end.r,i);
-					obj.guiTexture.color.g=easeOutQuint(start.g,end.g,i);
-					obj.guiTexture.color.b=easeOutQuint(start.b,end.b,i);
-					break;
-				case "easeInOutQuint":
-					obj.guiTexture.color.r=easeInOutQuint(start.r,end.r,i);
-					obj.guiTexture.color.g=easeInOutQuint(start.g,end.g,i);
-					obj.guiTexture.color.b=easeInOutQuint(start.b,end.b,i);
-					break;
-				case "easeInSine":
-					obj.guiTexture.color.r=easeInSine(start.r,end.r,i);
-					obj.guiTexture.color.g=easeInSine(start.g,end.g,i);
-					obj.guiTexture.color.b=easeInSine(start.b,end.b,i);
-					break;
-				case "easeOutSine":
-					obj.guiTexture.color.r=easeOutSine(start.r,end.r,i);
-					obj.guiTexture.color.g=easeOutSine(start.g,end.g,i);
-					obj.guiTexture.color.b=easeOutSine(start.b,end.b,i);
-					break;
-				case "easeInOutSine":
-					obj.guiTexture.color.r=easeInOutSine(start.r,end.r,i);
-					obj.guiTexture.color.g=easeInOutSine(start.g,end.g,i);
-					obj.guiTexture.color.b=easeInOutSine(start.b,end.b,i);
-					break;
-				case "easeInExpo":
-					obj.guiTexture.color.r=easeInExpo(start.r,end.r,i);
-					obj.guiTexture.color.g=easeInExpo(start.g,end.g,i);
-					obj.guiTexture.color.b=easeInExpo(start.b,end.b,i);
-					break;
-				case "easeOutExpo":
-					obj.guiTexture.color.r=easeOutExpo(start.r,end.r,i);
-					obj.guiTexture.color.g=easeOutExpo(start.g,end.g,i);
-					obj.guiTexture.color.b=easeOutExpo(start.b,end.b,i);
-					break;
-				case "easeInOutExpo":
-					obj.guiTexture.color.r=easeInOutExpo(start.r,end.r,i);
-					obj.guiTexture.color.g=easeInOutExpo(start.g,end.g,i);
-					obj.guiTexture.color.b=easeInOutExpo(start.b,end.b,i);
-					break;
-				case "easeInCirc":
-					obj.guiTexture.color.r=easeInCirc(start.r,end.r,i);
-					obj.guiTexture.color.g=easeInCirc(start.g,end.g,i);
-					obj.guiTexture.color.b=easeInCirc(start.b,end.b,i);
-					break;
-				case "easeOutCirc":
-					obj.guiTexture.color.r=easeOutCirc(start.r,end.r,i);
-					obj.guiTexture.color.g=easeOutCirc(start.g,end.g,i);
-					obj.guiTexture.color.b=easeOutCirc(start.b,end.b,i);
-					break;
-				case "easeInOutCirc":
-					obj.guiTexture.color.r=easeInOutCirc(start.r,end.r,i);
-					obj.guiTexture.color.g=easeInOutCirc(start.g,end.g,i);
-					obj.guiTexture.color.b=easeInOutCirc(start.b,end.b,i);
-					break;
-				case "linear":
-					obj.guiTexture.color.r=linear(start.r,end.r,i);
-					obj.guiTexture.color.g=linear(start.g,end.g,i);
-					obj.guiTexture.color.b=linear(start.b,end.b,i);
-					break;
-				case "spring":
-					obj.guiTexture.color.r=spring(start.r,end.r,i);
-					obj.guiTexture.color.g=spring(start.g,end.g,i);
-					obj.guiTexture.color.b=spring(start.b,end.b,i);
-					break;
-				case "bounce":
-					obj.guiTexture.color.r=bounce(start.r,end.r,i);
-					obj.guiTexture.color.g=bounce(start.g,end.g,i);
-					obj.guiTexture.color.b=bounce(start.b,end.b,i);
-					break;
-				case "easeInBack":
-					obj.guiTexture.color.r=easeInBack(start.r,end.r,i);
-					obj.guiTexture.color.g=easeInBack(start.g,end.g,i);
-					obj.guiTexture.color.b=easeInBack(start.b,end.b,i);
-					break;
-				case "easeOutBack":
-					obj.guiTexture.color.r=easeOutBack(start.r,end.r,i);
-					obj.guiTexture.color.g=easeOutBack(start.g,end.g,i);
-					obj.guiTexture.color.b=easeOutBack(start.b,end.b,i);
-					break;
-				case "easeInOutBack":
-					obj.guiTexture.color.r=easeInOutBack(start.r,end.r,i);
-					obj.guiTexture.color.g=easeInOutBack(start.g,end.g,i);
-					obj.guiTexture.color.b=easeInOutBack(start.b,end.b,i);
-					break;
-			}		
+		for (i = 0.0; i < 1.0; i += Time.deltaTime*(1/runTime)) {			
+			obj.guiTexture.color.r=easingFunc(start.r,end.r,i);
+			obj.guiTexture.color.g=easingFunc(start.g,end.g,i);
+			obj.guiTexture.color.b=easingFunc(start.b,end.b,i);
 			yield;
 		}
+		
 		obj.guiTexture.color.r=end.r;
 		obj.guiTexture.color.g=end.g;
 		obj.guiTexture.color.b=end.b;
 		if(args["onComplete"]){
-			args["onCompleteTarget"].SendMessage(args["onComplete"], args["onCompleteParams"], SendMessageOptions.DontRequireReceiver);
+			target = args["onCompleteTarget"];
+			target.SendMessage(args["onComplete"], args["onCompleteParams"], SendMessageOptions.DontRequireReceiver);
 		}
 		Destroy (this);	
 	}else{
 		start=obj.renderer.material.color;
 		for (i = 0.0; i < 1.0; i += Time.deltaTime*(1/runTime)) {
-			switch(easing){
-				case "easeInQuad":
-					obj.renderer.material.color.r=easeInQuad(start.r,end.r,i);
-					obj.renderer.material.color.g=easeInQuad(start.g,end.g,i);
-					obj.renderer.material.color.b=easeInQuad(start.b,end.b,i);
-					break;
-				case "easeOutQuad":
-					obj.renderer.material.color.r=easeOutQuad(start.r,end.r,i);
-					obj.renderer.material.color.g=easeOutQuad(start.g,end.g,i);
-					obj.renderer.material.color.b=easeOutQuad(start.b,end.b,i);
-					break;
-				case "easeInOutQuad":
-					obj.renderer.material.color.r=easeInOutQuad(start.r,end.r,i);
-					obj.renderer.material.color.g=easeInOutQuad(start.g,end.g,i);
-					obj.renderer.material.color.b=easeInOutQuad(start.b,end.b,i);
-					break;
-				case "easeInCubic":
-					obj.renderer.material.color.r=easeInCubic(start.r,end.r,i);
-					obj.renderer.material.color.g=easeInCubic(start.g,end.g,i);
-					obj.renderer.material.color.b=easeInCubic(start.b,end.b,i);
-					break;
-				case "easeOutCubic":
-					obj.renderer.material.color.r=easeOutCubic(start.r,end.r,i);
-					obj.renderer.material.color.g=easeOutCubic(start.g,end.g,i);
-					obj.renderer.material.color.b=easeOutCubic(start.b,end.b,i);
-					break;
-				case "easeInOutCubic":
-					obj.renderer.material.color.r=easeInOutCubic(start.r,end.r,i);
-					obj.renderer.material.color.g=easeInOutCubic(start.g,end.g,i);
-					obj.renderer.material.color.b=easeInOutCubic(start.b,end.b,i);
-					break;
-				case "easeInQuart":
-					obj.renderer.material.color.r=easeInQuart(start.r,end.r,i);
-					obj.renderer.material.color.g=easeInQuart(start.g,end.g,i);
-					obj.renderer.material.color.b=easeInQuart(start.b,end.b,i);
-					break;
-				case "easeOutQuart":
-					obj.renderer.material.color.r=easeOutQuart(start.r,end.r,i);
-					obj.renderer.material.color.g=easeOutQuart(start.g,end.g,i);
-					obj.renderer.material.color.b=easeOutQuart(start.b,end.b,i);
-					break;
-				case "easeInOutQuart":
-					obj.renderer.material.color.r=easeInOutQuart(start.r,end.r,i);
-					obj.renderer.material.color.g=easeInOutQuart(start.g,end.g,i);
-					obj.renderer.material.color.b=easeInOutQuart(start.b,end.b,i);
-					break;
-				case "easeInQuint":
-					obj.renderer.material.color.r=easeInQuint(start.r,end.r,i);
-					obj.renderer.material.color.g=easeInQuint(start.g,end.g,i);
-					obj.renderer.material.color.b=easeInQuint(start.b,end.b,i);
-					break;
-				case "easeOutQuint":
-					obj.renderer.material.color.r=easeOutQuint(start.r,end.r,i);
-					obj.renderer.material.color.g=easeOutQuint(start.g,end.g,i);
-					obj.renderer.material.color.b=easeOutQuint(start.b,end.b,i);
-					break;
-				case "easeInOutQuint":
-					obj.renderer.material.color.r=easeInOutQuint(start.r,end.r,i);
-					obj.renderer.material.color.g=easeInOutQuint(start.g,end.g,i);
-					obj.renderer.material.color.b=easeInOutQuint(start.b,end.b,i);
-					break;
-				case "easeInSine":
-					obj.renderer.material.color.r=easeInSine(start.r,end.r,i);
-					obj.renderer.material.color.g=easeInSine(start.g,end.g,i);
-					obj.renderer.material.color.b=easeInSine(start.b,end.b,i);
-					break;
-				case "easeOutSine":
-					obj.renderer.material.color.r=easeOutSine(start.r,end.r,i);
-					obj.renderer.material.color.g=easeOutSine(start.g,end.g,i);
-					obj.renderer.material.color.b=easeOutSine(start.b,end.b,i);
-					break;
-				case "easeInOutSine":
-					obj.renderer.material.color.r=easeInOutSine(start.r,end.r,i);
-					obj.renderer.material.color.g=easeInOutSine(start.g,end.g,i);
-					obj.renderer.material.color.b=easeInOutSine(start.b,end.b,i);
-					break;
-				case "easeInExpo":
-					obj.renderer.material.color.r=easeInExpo(start.r,end.r,i);
-					obj.renderer.material.color.g=easeInExpo(start.g,end.g,i);
-					obj.renderer.material.color.b=easeInExpo(start.b,end.b,i);
-					break;
-				case "easeOutExpo":
-					obj.renderer.material.color.r=easeOutExpo(start.r,end.r,i);
-					obj.renderer.material.color.g=easeOutExpo(start.g,end.g,i);
-					obj.renderer.material.color.b=easeOutExpo(start.b,end.b,i);
-					break;
-				case "easeInOutExpo":
-					obj.renderer.material.color.r=easeInOutExpo(start.r,end.r,i);
-					obj.renderer.material.color.g=easeInOutExpo(start.g,end.g,i);
-					obj.renderer.material.color.b=easeInOutExpo(start.b,end.b,i);
-					break;
-				case "easeInCirc":
-					obj.renderer.material.color.r=easeInCirc(start.r,end.r,i);
-					obj.renderer.material.color.g=easeInCirc(start.g,end.g,i);
-					obj.renderer.material.color.b=easeInCirc(start.b,end.b,i);
-					break;
-				case "easeOutCirc":
-					obj.renderer.material.color.r=easeOutCirc(start.r,end.r,i);
-					obj.renderer.material.color.g=easeOutCirc(start.g,end.g,i);
-					obj.renderer.material.color.b=easeOutCirc(start.b,end.b,i);
-					break;
-				case "easeInOutCirc":
-					obj.renderer.material.color.r=easeInOutCirc(start.r,end.r,i);
-					obj.renderer.material.color.g=easeInOutCirc(start.g,end.g,i);
-					obj.renderer.material.color.b=easeInOutCirc(start.b,end.b,i);
-					break;
-				case "linear":
-					obj.renderer.material.color.r=linear(start.r,end.r,i);
-					obj.renderer.material.color.g=linear(start.g,end.g,i);
-					obj.renderer.material.color.b=linear(start.b,end.b,i);
-					break;
-				case "spring":
-					obj.renderer.material.color.r=spring(start.r,end.r,i);
-					obj.renderer.material.color.g=spring(start.g,end.g,i);
-					obj.renderer.material.color.b=spring(start.b,end.b,i);
-					break;
-				case "bounce":
-					obj.renderer.material.color.r=bounce(start.r,end.r,i);
-					obj.renderer.material.color.g=bounce(start.g,end.g,i);
-					obj.renderer.material.color.b=bounce(start.b,end.b,i);
-					break;
-				case "easeInBack":
-					obj.renderer.material.color.r=easeInBack(start.r,end.r,i);
-					obj.renderer.material.color.g=easeInBack(start.g,end.g,i);
-					obj.renderer.material.color.b=easeInBack(start.b,end.b,i);
-					break;
-				case "easeOutBack":
-					obj.renderer.material.color.r=easeOutBack(start.r,end.r,i);
-					obj.renderer.material.color.g=easeOutBack(start.g,end.g,i);
-					obj.renderer.material.color.b=easeOutBack(start.b,end.b,i);
-					break;
-				case "easeInOutBack":
-					obj.renderer.material.color.r=easeInOutBack(start.r,end.r,i);
-					obj.renderer.material.color.g=easeInOutBack(start.g,end.g,i);
-					obj.renderer.material.color.b=easeInOutBack(start.b,end.b,i);
-					break;
-			}	
+			obj.renderer.material.color.r=easingFunc(start.r,end.r,i);
+			obj.renderer.material.color.g=easingFunc(start.g,end.g,i);
+			obj.renderer.material.color.b=easingFunc(start.b,end.b,i);
 			yield;
 		}
+		
 		obj.renderer.material.color.r=end.r;
 		obj.renderer.material.color.g=end.g;
 		obj.renderer.material.color.b=end.b;
+		
 		if(args["onComplete"]){
-			args["onCompleteTarget"].SendMessage(args["onComplete"], args["onCompleteParams"], SendMessageOptions.DontRequireReceiver);	
+			target = args["onCompleteTarget"];
+			target.SendMessage(args["onComplete"], args["onCompleteParams"], SendMessageOptions.DontRequireReceiver);	
 		}
 		Destroy (this);		
 	}
