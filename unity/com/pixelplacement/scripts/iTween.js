@@ -1,7 +1,7 @@
-//VERSION: 1.0.11
+//VERSION: 1.0.12
 
 /*
-Copyright ©2010 Bob Berkebile(http://www.pixelplacement.com), C# port by Patrick Corkum(http://www.insquare.com)
+Copyright (c)2010 Bob Berkebile(http://www.pixelplacement.com), C# port by Patrick Corkum(http://www.insquare.com)
 
 Permission is hereby granted, free of charge, to any person  obtaining a copy of this software and associated documentation  files (the "Software"), to deal in the Software without  restriction, including without limitation the rights to use,  copy, modify, merge, publish, distribute, sublicense, and/or sell  copies of the Software, and to permit persons to whom the  Software is furnished to do so, subject to the following conditions:
 The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
@@ -14,7 +14,7 @@ TERMS OF USE - EASING EQUATIONS
 
 Open source under the BSD License.
 
-Copyright ©2001 Robert Penner
+Copyright (c)2001 Robert Penner
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
@@ -294,7 +294,7 @@ static function moveFromWorld(target: GameObject,args: Hashtable):void{
 	init(target,args);
 }
 
-//Scale by static register:
+//ScaleBy static register:
 static function scaleBy(target: GameObject,args: Hashtable):void{
 	args.Add("type","scaleTo");
 	
@@ -321,6 +321,41 @@ static function scaleBy(target: GameObject,args: Hashtable):void{
 	if(args.Contains("z")){
 		zValue=args["z"];
 		zValue=target.transform.localScale.z*zValue;
+		args["z"]=zValue;
+	}else{
+		zValue=target.transform.localScale.z;
+	}
+	
+	init(target,args);
+}
+
+//ScaleAdd static register:
+static function scaleAdd(target: GameObject,args: Hashtable):void{
+	args.Add("type","scaleTo");
+	
+	var xValue : float;
+	var yValue : float;
+	var zValue : float;
+	
+	if(args.Contains("x")){
+		xValue=args["x"];
+		xValue+=target.transform.localScale.x;
+		args["x"]=xValue;
+	}else{
+		xValue=target.transform.localScale.x;
+	}
+	
+	if(args.Contains("y")){
+		yValue=args["y"];
+		yValue+=target.transform.localScale.y;
+		args["y"]=yValue;
+	}else{
+		yValue=target.transform.localScale.y;
+	}
+	
+	if(args.Contains("z")){
+		zValue=args["z"];
+		zValue+=target.transform.localScale.z;
 		args["z"]=zValue;
 	}else{
 		zValue=target.transform.localScale.z;
