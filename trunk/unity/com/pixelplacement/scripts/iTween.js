@@ -1268,9 +1268,8 @@ private function moveToBezier(args:Hashtable){
 		//get the new vector... I love vector math!
 		var newVector : Vector3 = bpi.starting + timeFract * (2 * (1 - timeFract) * (bpi.intermediate - bpi.starting) + timeFract * (bpi.end - bpi.starting));
 
-		//orientToPath:
-		if(args["orientToPath"] == true && i <.96){
-			Debug.Log(obj.transform.localPosition - newVector + " " + i);
+		//orientToPath - cutting off outer ends of curve percentage to avoid lookAt jitters:
+		if(args["orientToPath"] == true && i <.98 && i>.02){
 			obj.transform.LookAt(newVector);
 		}
 		
