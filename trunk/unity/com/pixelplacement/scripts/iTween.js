@@ -1,4 +1,4 @@
-//VERSION: 1.0.13
+//VERSION: 1.0.14
 
 /*
 Copyright (c)2010 Bob Berkebile(http://www.pixelplacement.com), C# port by Patrick Corkum(http://www.insquare.com)
@@ -113,7 +113,9 @@ class BezierPointInfo
 
 //Fade to static register:
 static function fadeTo(target: GameObject,args: Hashtable):void{
-	args.Add("type","fadeTo");	
+	if(args["type"]==null){
+		args.Add("type","fadeTo");	
+	}
 	init(target,args);
 }
 
@@ -209,7 +211,9 @@ static function moveByWorld(target: GameObject,args: Hashtable):void{
 
 //MoveTo static register:
 static function moveTo(target: GameObject,args: Hashtable):void{
-	args.Add("type","moveTo");	
+	if(args["type"]==null){
+		args.Add("type","moveTo");	
+	}
 	init(target,args);
 }
 
@@ -219,16 +223,19 @@ static function moveToWorld(target: GameObject,args: Hashtable):void{
 	init(target,args);
 }
 
-
 //MoveTo static register:
 static function moveToBezier(target: GameObject,args: Hashtable):void{
-	args.Add("type","moveToBezier");	
+	if(args["type"]==null){
+		args.Add("type","moveToBezier");	
+	}
 	init(target,args);
 }
 
 //MoveToWorld static register:
-static function moveToBezierWorld(target: GameObject,args: Hashtable):void{
-	args.Add("type","moveToBezierWorld");	
+static function moveToBezierWorld(target: GameObject,args: Hashtable):void{	
+	if(args["type"] == null){
+		args.Add("type","moveToBezierWorld");	
+	}
 	init(target,args);
 }
 
@@ -259,7 +266,9 @@ static function moveFrom(target: GameObject,args: Hashtable):void{
 	}else{
 		args["z"]=target.transform.localPosition.z;
 	}
-	args.Add("type","moveTo");
+	if(args["type"] == null){
+		args.Add("type","moveTo");	
+	}
 	init(target,args);
 }
 
@@ -290,7 +299,9 @@ static function moveFromWorld(target: GameObject,args: Hashtable):void{
 	}else{
 		args["z"]=target.transform.position.z;
 	}
-	args.Add("type","moveToWorld");
+	if(args["type"] == null){
+		args.Add("type","moveToWorld");	
+	}
 	init(target,args);
 }
 
@@ -366,7 +377,9 @@ static function scaleAdd(target: GameObject,args: Hashtable):void{
 
 //Scale to static register:
 static function scaleTo(target: GameObject,args: Hashtable):void{
-	args.Add("type","scaleTo");	
+	if(args["type"] == null){
+		args.Add("type","scaleTo");	
+	}
 	init(target,args);
 }
 
@@ -403,7 +416,9 @@ static function scaleFrom(target: GameObject,args: Hashtable){
 
 //Rotate to static register:
 static function rotateTo(target: GameObject,args: Hashtable):void{
-	args.Add("type","rotateTo");	
+	if(args["type"] == null){
+		args.Add("type","rotateTo");	
+	}	
 	init(target,args);
 }
 
@@ -445,7 +460,7 @@ static function rotateFrom(target: GameObject,args: Hashtable){
 
 //Rotate by static register:
 static function rotateBy(target: GameObject,args: Hashtable):void{
-	args.Add("type","rotateBy");	
+	args.Add("type","rotateBy");
 	init(target,args);
 }
 
@@ -486,7 +501,9 @@ static function colorFrom(target: GameObject,args: Hashtable):void{
 
 //Color to static register:
 static function colorTo(target: GameObject,args: Hashtable):void{
-	args.Add("type","colorTo");	
+	if(args["type"] == null){
+		args.Add("type","colorTo");	
+	}
 	init(target,args);
 }
 
@@ -749,7 +766,7 @@ function shake(args:Hashtable){
 	
 	//define object:
 	var obj : Transform = gameObject.transform;
-	var start : Vector3=obj.position;
+	var start : Vector3=obj.localPosition;
 
 	//coordiantes:
 	if(args["x"]==null){
@@ -774,29 +791,27 @@ function shake(args:Hashtable){
 	
 	for (i = 0.0; i < 1.0; i += Time.deltaTime*(1/runTime)) {
 		if(!impact){
-			obj.position.x =start.x + Random.Range(-shakeMagnitude.x, shakeMagnitude.x);
-			obj.position.y =start.y + Random.Range(-shakeMagnitude.y, shakeMagnitude.y);
-			obj.position.z =start.z + Random.Range(-shakeMagnitude.z, shakeMagnitude.z);
+			obj.localPosition.x =start.x + Random.Range(-shakeMagnitude.x, shakeMagnitude.x);
+			obj.localPosition.y =start.y + Random.Range(-shakeMagnitude.y, shakeMagnitude.y);
+			obj.localPosition.z =start.z + Random.Range(-shakeMagnitude.z, shakeMagnitude.z);
 		}
 		if(impact){
 			impact = false;
-			obj.position.x += shakeMagnitude.x;
-			obj.position.y += shakeMagnitude.y;
-			obj.position.z += shakeMagnitude.z;
+			obj.localPosition.x += shakeMagnitude.x;
+			obj.localPosition.y += shakeMagnitude.y;
+			obj.localPosition.z += shakeMagnitude.z;
 		}
 		shakeMagnitude.x=xValue-(i*xValue);
 		shakeMagnitude.y=yValue-(i*yValue);
 		shakeMagnitude.z=zValue-(i*zValue);
 		yield;
 	}
+	obj.localPosition=start;
 	if(args["onComplete"]){
 		var target : GameObject = args["onCompleteTarget"];
 		target.SendMessage(args["onComplete"], args["onCompleteParams"], SendMessageOptions.DontRequireReceiver);
 	}
-	obj.position=start;
-	
-	//DestroyImmediate is needed to avoid shake restarts (odd, but needed):
-	DestroyImmediate (this);
+	Destroy (this);
 }
 
 
@@ -924,7 +939,7 @@ private function punchPosition(args:Hashtable) {
 	
 	//define object:
 	var obj : Transform = gameObject.transform;
-	var pos : Vector3 = obj.position;
+	var pos : Vector3 = obj.localPosition;
 		
 	//coordiantes:
 	if(args["x"]==null){
@@ -947,23 +962,23 @@ private function punchPosition(args:Hashtable) {
 	
 	for (i = 0.0; i < 1.0; i += Time.deltaTime*(1/runTime)) {
 		if(xValue>0){
-			obj.position.x=punch(xValue,i) + pos.x;
+			obj.localPosition.x=punch(xValue,i) + pos.x;
 		}else if(xValue<0){
-			obj.position.x=-punch(Mathf.Abs(xValue),i) + pos.x;	
+			obj.localPosition.x=-punch(Mathf.Abs(xValue),i) + pos.x;	
 		}
 		if(yValue>0){
-			obj.position.y=punch(yValue,i) + pos.y;
+			obj.localPosition.y=punch(yValue,i) + pos.y;
 		}else if(yValue<0){
-			obj.position.y=-punch(Mathf.Abs(yValue),i) + pos.y;	
+			obj.localPosition.y=-punch(Mathf.Abs(yValue),i) + pos.y;	
 		}
 		if(zValue>0){
-			obj.position.z=punch(zValue,i) + pos.z;
+			obj.localPosition.z=punch(zValue,i) + pos.z;
 		}else if(zValue<0){
-			obj.position.z=-punch(Mathf.Abs(zValue),i) + pos.z;	
+			obj.localPosition.z=-punch(Mathf.Abs(zValue),i) + pos.z;	
 		}
 		yield;
 	}
-	obj.position=pos;
+	obj.localPosition=pos;
 	if(args["onComplete"]){
 		var target : GameObject = args["onCompleteTarget"];
 		target.SendMessage(args["onComplete"], args["onCompleteParams"], SendMessageOptions.DontRequireReceiver);
@@ -1029,7 +1044,20 @@ private function fadeTo(args:Hashtable){
 			target = args["onCompleteTarget"];
 			target.SendMessage(args["onComplete"], args["onCompleteParams"], SendMessageOptions.DontRequireReceiver);
 		}
-		Destroy (this);	
+		
+		switch(args["loopType"]){
+		case "loop":
+			guiTexture.color.a= start;
+			iTween.fadeTo(gameObject,args);
+			break;
+		case "pingPong":
+			args["alpha"]=start;
+			iTween.fadeTo(gameObject,args);
+			break;
+		default:
+			Destroy (this);
+			break;	
+	}	
 	}else{
 		start=obj.renderer.material.color.a;
 		for (i = 0.0; i < 1.0; i += Time.deltaTime*(1/runTime)) {			
@@ -1041,7 +1069,20 @@ private function fadeTo(args:Hashtable){
 			target = args["onCompleteTarget"];
 			target.SendMessage(args["onComplete"], args["onCompleteParams"], SendMessageOptions.DontRequireReceiver);
 		}
-		Destroy (this);
+		
+		switch(args["loopType"]){
+		case "loop":
+			obj.renderer.material.color.a=start;
+			iTween.fadeTo(gameObject,args);
+			break;
+		case "pingPong":
+			args["alpha"]=start;
+			iTween.fadeTo(gameObject,args);
+			break;
+		default:
+			Destroy (this);
+			break;
+		}
 	}
 }
 
@@ -1102,11 +1143,29 @@ private function moveTo(args:Hashtable){
 		yield;
 	}
 	obj.localPosition=end;
+	
 	if(args["onComplete"]){
 		var target : GameObject = args["onCompleteTarget"];
 		target.SendMessage(args["onComplete"], args["onCompleteParams"], SendMessageOptions.DontRequireReceiver);
 	}
-	Destroy (this);
+	
+	switch(args["loopType"]){
+		case "loop":
+			obj.localPosition.x=start.x;
+			obj.localPosition.y=start.y;
+			obj.localPosition.z=start.z;
+			iTween.moveTo(gameObject,args);
+			break;
+		case "pingPong":
+			args["x"]=start.x;
+			args["y"]=start.y;
+			args["z"]=start.z;
+			iTween.moveTo(gameObject,args);
+			break;
+		default:
+			Destroy (this);
+			break;	
+	}	
 }
 
 //Move to application:
@@ -1171,7 +1230,24 @@ private function moveToWorld(args:Hashtable){
 		var target : GameObject = args["onCompleteTarget"];
 		target.SendMessage(args["onComplete"], args["onCompleteParams"], SendMessageOptions.DontRequireReceiver);
 	}
-	Destroy (this);
+	
+	switch(args["loopType"]){
+		case "loop":
+			obj.position.x=start.x;
+			obj.position.y=start.y;
+			obj.position.z=start.z;
+			iTween.moveTo(gameObject,args);
+			break;
+		case "pingPong":
+			args["x"]=start.x;
+			args["y"]=start.y;
+			args["z"]=start.z;
+			iTween.moveTo(gameObject,args);
+			break;
+		default:
+			Destroy (this);
+			break;	
+	}	
 }
 
 //Bezier move to application: - David Bardos
@@ -1224,13 +1300,15 @@ private function moveToBezier(args:Hashtable){
     var ii : float;
     var b : Object;
     var p : DictionaryEntry;
-    
+    var start : Vector3;
 	
 	if (args["isLocal"] == true) {
 		beziers.splice(0,0, obj.transform.localPosition);
+		start=obj.transform.localPosition;
 	}
 	else {
 		beziers.splice(0,0, obj.transform.position);
+		start=obj.transform.position;
 	}
 
 	_beziersPI = ParseBeziers(beziers);
@@ -1283,7 +1361,7 @@ private function moveToBezier(args:Hashtable){
 		//move object				
 		if (args["isLocal"] == "true") 
 		{
-			obj.transform.localPosition = newVector;
+			obj.transform.localPosition = newVector;			
 		}
 		else
 		{
@@ -1293,14 +1371,57 @@ private function moveToBezier(args:Hashtable){
 	}
 	
 	var bpiEnd : BezierPointInfo = _beziersPI[_beziersPI.Count - 1];
+	
 	//get the object to it's final resting position
 	if (args["isLocal"] == "true") 
 	{
-	   obj.transform.localPosition = bpiEnd.end;
+		obj.transform.localPosition = bpiEnd.end;
+		
+		switch(args["loopType"]){
+	  	 	case "loop":
+				obj.transform.localPosition.x=start.x;
+				obj.transform.localPosition.y=start.y;
+				obj.transform.localPosition.z=start.z;
+				iTween.moveToBezier(gameObject,args);
+				break;
+			case "pingPong":
+				Debug.LogError("WARNING: Ping-ponging a bezier move will create undesired results!  Consider using a call back method and launching a new bezier.");
+				args["x"]=start.x;
+				args["y"]=start.y;
+				args["z"]=start.z;
+				beziers.Reverse();
+				args["bezier"]=beziers;
+				iTween.moveToBezier(gameObject,args);
+				break;
+			default:
+				Destroy (this);
+				break;	
+		}
 	}
 	else
 	{
-		obj.transform.position = bpiEnd.end;                    
+		obj.transform.position = bpiEnd.end;    
+		
+		switch(args["loopType"]){
+	  	 	case "loop":
+				obj.transform.position.x=start.x;
+				obj.transform.position.y=start.y;
+				obj.transform.position.z=start.z;
+				iTween.moveToBezier(gameObject,args);
+				break;
+			case "pingPong":
+				Debug.LogError("WARNING: Ping-ponging a bezier move will create undesired results!  Consider using a call back method and launching a new bezier.");
+				args["x"]=start.x;
+				args["y"]=start.y;
+				args["z"]=start.z;
+				beziers.Reverse();
+				args["bezier"]=beziers;
+				iTween.moveToBezier(gameObject,args);
+				break;
+			default:
+				Destroy (this);
+				break;	
+		}		                
 	}
 	
 		
@@ -1308,7 +1429,8 @@ private function moveToBezier(args:Hashtable){
 		var target : GameObject = args["onCompleteTarget"];
 		target.SendMessage(args["onComplete"], args["onCompleteParams"], SendMessageOptions.DontRequireReceiver);
 	}
-	Destroy (this);
+	
+	
 }
 
 //Helper method for translating control points into bezier information. - David Bardos
@@ -1422,11 +1544,28 @@ private function scaleTo(args:Hashtable){
 		yield;
 	}
 	obj.localScale=end;	
+	
 	if(args["onComplete"]){
 		var target : GameObject = args["onCompleteTarget"];
 		target.SendMessage(args["onComplete"], args["onCompleteParams"], SendMessageOptions.DontRequireReceiver);
 	}
-	Destroy (this);	
+	
+	switch(args["loopType"]){
+		case "loop":
+			obj.localScale.x=start.x;
+			obj.localScale.y=start.y;
+			obj.localScale.z=start.z;
+			iTween.scaleTo(gameObject,args);
+			break;
+		case "pingPong":
+			args["x"]=start.x;
+			args["y"]=start.y;
+			args["z"]=start.z;
+			iTween.scaleTo(gameObject,args);
+			break;
+		default:
+			Destroy (this);
+	}	
 }
 
 //Rotate to application:
@@ -1496,7 +1635,22 @@ private function rotateTo(args:Hashtable) {
 		var target : GameObject = args["onCompleteTarget"];
 		target.SendMessage(args["onComplete"], args["onCompleteParams"], SendMessageOptions.DontRequireReceiver);
 	}
-	Destroy (this);
+	
+	switch(args["loopType"]){
+		case "loop":
+			obj.localRotation=Quaternion.Euler(start);
+			iTween.rotateTo(gameObject,args);
+			break;
+		case "pingPong":
+			args["x"]=start.x;
+			args["y"]=start.y;
+			args["z"]=start.z;
+			iTween.rotateTo(gameObject,args);
+			break;
+		default:
+			Destroy (this);
+			break;	
+	}	
 }
 
 //Rotate by application:
@@ -1638,7 +1792,24 @@ private function colorTo(args:Hashtable) {
 			target = args["onCompleteTarget"];
 			target.SendMessage(args["onComplete"], args["onCompleteParams"], SendMessageOptions.DontRequireReceiver);
 		}
-		Destroy (this);	
+		
+		switch(args["loopType"]){
+		case "loop":
+			obj.guiTexture.color.r=start.r;
+			obj.guiTexture.color.g=start.g;
+			obj.guiTexture.color.b=start.b;
+			iTween.colorTo(gameObject,args);
+			break;
+		case "pingPong":
+			args["r"]=start.r;
+			args["g"]=start.g;
+			args["b"]=start.b;
+			iTween.colorTo(gameObject,args);
+			break;
+		default:
+			Destroy (this);
+			break;	
+		}	
 	}else{
 		start=obj.renderer.material.color;
 		for (i = 0.0; i < 1.0; i += Time.deltaTime*(1/runTime)) {
@@ -1656,7 +1827,24 @@ private function colorTo(args:Hashtable) {
 			target = args["onCompleteTarget"];
 			target.SendMessage(args["onComplete"], args["onCompleteParams"], SendMessageOptions.DontRequireReceiver);	
 		}
-		Destroy (this);		
+		
+		switch(args["loopType"]){
+		case "loop":
+			obj.renderer.material.color.r=start.r;
+			obj.renderer.material.color.g=start.g;
+			obj.renderer.material.color.b=start.b;
+			iTween.colorTo(gameObject,args);
+			break;
+		case "pingPong":
+			args["r"]=start.r;
+			args["g"]=start.g;
+			args["b"]=start.b;
+			iTween.colorTo(gameObject,args);
+			break;
+		default:
+			Destroy (this);
+			break;	
+		}		
 	}
 }
 
