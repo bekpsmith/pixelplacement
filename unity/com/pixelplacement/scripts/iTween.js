@@ -1269,7 +1269,8 @@ private function moveToBezier(args:Hashtable){
 		var newVector : Vector3 = bpi.starting + timeFract * (2 * (1 - timeFract) * (bpi.intermediate - bpi.starting) + timeFract * (bpi.end - bpi.starting));
 
 		//orientToPath:
-		if(args["orientToPath"] == true){
+		if(args["orientToPath"] == true && i <.96){
+			Debug.Log(obj.transform.localPosition - newVector + " " + i);
 			obj.transform.LookAt(newVector);
 		}
 		
