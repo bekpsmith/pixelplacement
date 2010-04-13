@@ -1,4 +1,4 @@
-//VERSION: 1.0.12
+//VERSION: 1.0.13
 
 /*
 Copyright (c)2010 Bob Berkebile(http://www.pixelplacement.com), C# port by Patrick Corkum(http://www.insquare.com)
@@ -1189,6 +1189,9 @@ private function moveToBezier(args:Hashtable){
 	if(args["onCompleteTarget"]==null){
 		args.Add("onCompleteTarget",gameObject);
 	}
+	if(args["orientToPath"] == null){
+		args.Add("orientToPath",true);
+	}
 			
 	//delay:
 	var delay : float = args["delay"];
@@ -1223,7 +1226,7 @@ private function moveToBezier(args:Hashtable){
     var p : DictionaryEntry;
     
 	
-	if (args["isLocal"] == "true") {
+	if (args["isLocal"] == true) {
 		beziers.splice(0,0, obj.transform.localPosition);
 	}
 	else {
@@ -1265,16 +1268,27 @@ private function moveToBezier(args:Hashtable){
 		//get the new vector... I love vector math!
 		var newVector : Vector3 = bpi.starting + timeFract * (2 * (1 - timeFract) * (bpi.intermediate - bpi.starting) + timeFract * (bpi.end - bpi.starting));
 
+		//orientToPath:
+		if(args["orientToPath"] == true){
+			obj.transform.LookAt(newVector);
+		}
+		
+		//look at target
+		if(args["lookAt"] != null){
+			args["orientToPath"] == false;
+			var lookTarget : Vector3 = args["lookAt"];
+			obj.transform.LookAt(lookTarget);
+		}
+
 		//move object				
 		if (args["isLocal"] == "true") 
 		{
-		   obj.transform.localPosition = newVector;
+			obj.transform.localPosition = newVector;
 		}
 		else
 		{
-			obj.transform.position = newVector;                    
-		}
-			
+			obj.transform.position = newVector; 			
+		}		
 		yield;
 	}
 	
