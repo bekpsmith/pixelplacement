@@ -1,4 +1,4 @@
-//VERSION: 1.0.15
+//VERSION: 1.0.16
 
 /*
 Copyright (c)2010 Bob Berkebile(http://www.pixelplacement.com), C# port by Patrick Corkum(http://www.insquare.com)
@@ -577,46 +577,76 @@ function Start(){
 		case "fadeTo":
 			StartCoroutine("fadeTo",args);
 			break;
+			fadeTo({}); //fake call to avoid editor warnings 
+			
 		case "moveTo":
 			StartCoroutine("moveTo",args);
 			break;
+			moveTo({}); //fake call to avoid editor warnings 
+			
 		case "moveToWorld":
 			StartCoroutine("moveToWorld",args);
 			break;
+			moveToWorld({}); //fake call to avoid editor warnings 
+			
 		case "moveToBezier":
 			args["isLocal"] = "true";			
 			StartCoroutine("moveToBezier",args);
 			break;
+			moveToBezier({}); //fake call to avoid editor warnings 
+			
 		case "moveToBezierWorld":
 			args["isLocal"] = "false";			
 			StartCoroutine("moveToBezier",args);			
 			break;
+			moveToBezier({}); //fake call to avoid editor warnings 
+			
 		case "scaleTo":
 			StartCoroutine("scaleTo",args);			
 			break;
+			scaleTo({}); //fake call to avoid editor warnings 
+			
 		case "rotateTo":
 			StartCoroutine("rotateTo",args);
 			break;
+			rotateTo({}); //fake call to avoid editor warnings 
+			
 		case "rotateBy":
 			StartCoroutine("rotateBy",args);
 			break;	
+			rotateBy({}); //fake call to avoid editor warnings 
+			
 		case "colorTo":
 			StartCoroutine("colorTo",args);
 			break;
+			colorTo({}); //fake call to avoid editor warnings 
+			
 		case "punchPosition":
 			StartCoroutine("punchPosition",args);
 			break;
+			punchPosition({}); //fake call to avoid editor warnings 
+			
 		case "punchRotation":
 			StartCoroutine("punchRotation",args);
 			break;
+			punchRotation({}); //fake call to avoid editor warnings 
+			
 		case "shake":
 			StartCoroutine("shake",args);
 			break;
+			shake({}); //fake call to avoid editor warnings 
+			
 		case "audioTo":
 			StartCoroutine("audioTo",args);
 			break;
+			audioTo({}); //fake call to avoid editor warnings 
+			
 		case "stab":
 			StartCoroutine("stab",args);
+			break;
+			stab({}); //fake call to avoid editor warnings 
+			
+		default:
 			break;
 	}
 }
