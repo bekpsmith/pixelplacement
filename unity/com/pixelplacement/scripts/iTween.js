@@ -1,4 +1,4 @@
-//VERSION: 1.0.14
+//VERSION: 1.0.15
 
 /*
 Copyright (c)2010 Bob Berkebile(http://www.pixelplacement.com), C# port by Patrick Corkum(http://www.insquare.com)
@@ -52,21 +52,21 @@ private var TRANSITIONS : Hashtable = {"easeInQuad":easeInQuad, "easeOutQuad":ea
 //Check for and remove running tweens of same type:
 private function checkForConflicts(type:String):void{
 	var scripts = GetComponents (iTween);
-	if(scripts.Length>1){
-		for (var script : iTween in scripts) {
-			if(script.inProgress && script.tweenType==type){
-				Destroy(script);
-			}
+	for (var script : iTween in scripts) {
+		if(script.inProgress && script.tweenType==type){
+			Destroy(script);
+			script.StopCoroutine(script.tweenType);
 		}
 	}
 }
 
 //Stops (and removes) tweening on an object:
 static function stop(obj: GameObject){
-        var scripts = obj.GetComponents (iTween);
-        for (var script : iTween in scripts) {
-                Destroy(script);
-        }
+	var scripts = obj.GetComponents (iTween);
+	for (var script : iTween in scripts) {
+		Destroy(script);
+		script.StopCoroutine(script.tweenType);
+	}
 }
 
 //Stops (and removes) tweening of a certain type on an object derived from the root of the type (i.e. "moveTo" = "move"):
@@ -74,9 +74,9 @@ static function stopType(obj: GameObject, stopType: String){
 	var scripts = obj.GetComponents (iTween);
 	for (var script : iTween in scripts) {
 		var currentType : String = script.tweenType;
-		print(stopType.length);
 		if(currentType.Substring(0,stopType.length)==stopType){
 			Destroy(script);
+			script.StopCoroutine(script.tweenType);
 		}
 	}
 }
@@ -575,48 +575,48 @@ function Start(){
 	tweenType=args["type"];
 	switch(args["type"]){
 		case "fadeTo":
-			fadeTo(args);
+			StartCoroutine("fadeTo",args);
 			break;
 		case "moveTo":
-			moveTo(args);
+			StartCoroutine("moveTo",args);
 			break;
 		case "moveToWorld":
-			moveToWorld(args);
+			StartCoroutine("moveToWorld",args);
 			break;
 		case "moveToBezier":
 			args["isLocal"] = "true";			
-			moveToBezier(args);
+			StartCoroutine("moveToBezier",args);
 			break;
 		case "moveToBezierWorld":
 			args["isLocal"] = "false";			
-			moveToBezier(args);			
+			StartCoroutine("moveToBezier",args);			
 			break;
 		case "scaleTo":
-			scaleTo(args);			
+			StartCoroutine("scaleTo",args);			
 			break;
 		case "rotateTo":
-			rotateTo(args);
+			StartCoroutine("rotateTo",args);
 			break;
 		case "rotateBy":
-			rotateBy(args);
+			StartCoroutine("rotateBy",args);
 			break;	
 		case "colorTo":
-			colorTo(args);
+			StartCoroutine("colorTo",args);
 			break;
 		case "punchPosition":
-			punchPosition(args);
+			StartCoroutine("punchPosition",args);
 			break;
 		case "punchRotation":
-			punchRotation(args);
+			StartCoroutine("punchRotation",args);
 			break;
 		case "shake":
-			shake(args);
+			StartCoroutine("shake",args);
 			break;
 		case "audioTo":
-			audioTo(args);
+			StartCoroutine("audioTo",args);
 			break;
 		case "stab":
-			stab(args);
+			StartCoroutine("stab",args);
 			break;
 	}
 }
