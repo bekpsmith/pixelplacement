@@ -1,4 +1,4 @@
-//VERSION: 1.0.17
+//VERSION: 1.0.18
 
 /*
 Copyright (c)2010 Bob Berkebile(http://www.pixelplacement.com), C# port by Patrick Corkum(http://www.insquare.com)
@@ -127,15 +127,57 @@ static function fadeFrom(target: GameObject,args: Hashtable):void{
 		args["alpha"] = 0;	
 	}
 	
+	//Handle children:
+	if(args["includeChildren"] == null){
+		args.Add("includeChildren",true);
+	}
+	
+	//Sloppy but only way it ended up finally working:
+	if(args["includeChildren"] == true && target.transform.childCount>0){
+		var a : float;
+		var t : float;
+		var d : float;
+		var tr : String;
+		
+		if(args["alpha"]==null){
+			a=0;
+		}else{
+			a=args["alpha"];
+		}
+		
+		if(args["time"]==null){
+			t=fadeDefaults["time"];
+		}else{
+			t=args["time"];	
+		}
+		
+		if(args["delay"]==null){
+			d=fadeDefaults["delay"];
+		}else{
+			d=args["delay"];
+		}
+		
+		if(args["transition"]==null){
+			tr=fadeDefaults["transition"];
+		}else{
+			tr=args["transition"];
+		}
+		
+		for (var child : Transform in target.transform) {
+			iTween.fadeFrom(child.gameObject,{"alpha":a,"time":t,"delay":d,"transition":tr});
+		}
+	}
+	
 	if(target.guiTexture){
 		destinationHold=target.guiTexture.color.a;
-		target.guiTexture.color.a=args["alpha"];
+		target.guiTexture.color.a=args["alpha"];		
 		args["alpha"]=destinationHold;
 	}else{
 		destinationHold=target.renderer.material.color.a;
 		target.renderer.material.color.a=args["alpha"];
 		args["alpha"]=destinationHold;
-	}				
+	}		
+		
 	args.Add("type","fadeTo");	
 	init(target,args);
 }
@@ -562,6 +604,41 @@ static function colorFrom(target: GameObject,args: Hashtable):void{
 	if(args["b"]==null){
 		args["b"] = 0;	
 	}
+	
+	//Handle children:
+	if(args["includeChildren"] == null){
+		args.Add("includeChildren",true);
+	}
+	
+	//Sloppy but only way it ended up finally working:
+	if(args["includeChildren"] == true && target.transform.childCount>0){
+		var c : Color = Color(args["r"],args["g"],args["b"]);
+		var t : float;
+		var d : float;
+		var tr : String;
+				
+		if(args["time"]==null){
+			t=fadeDefaults["time"];
+		}else{
+			t=args["time"];	
+		}
+		
+		if(args["delay"]==null){
+			d=fadeDefaults["delay"];
+		}else{
+			d=args["delay"];
+		}
+		
+		if(args["transition"]==null){
+			tr=fadeDefaults["transition"];
+		}else{
+			tr=args["transition"];
+		}
+		
+		for (var child : Transform in target.transform) {
+			iTween.colorFrom(child.gameObject,{"color":c,"time":t,"delay":d,"transition":tr});
+		}
+	}	
 	
 	if(target.guiTexture){
 		destinationHold=target.guiTexture.color;
@@ -1151,6 +1228,22 @@ private function fadeTo(args:Hashtable){
 	
 	//define object:
 	var obj : Transform = gameObject.transform;
+	
+	//Handle children:
+	if(args["includeChildren"] == null){
+		args.Add("includeChildren",true);
+	}
+	
+	if(args["includeChildren"] == true && obj.childCount>0){
+		//Remove callback to avoid multiple firing from children:
+		var argsCopy : Hashtable = args.Clone();
+		if(argsCopy.Contains("onComplete")){
+			argsCopy.Remove("onComplete");
+		}
+		for (var child : Transform in obj) {
+			iTween.fadeTo(child.gameObject,argsCopy);
+		}
+	}
 	
 	//coordiantes:
 	if(args["alpha"]==null){
@@ -1929,6 +2022,22 @@ private function colorTo(args:Hashtable) {
 	
 	//define object:
 	var obj : Transform = gameObject.transform;
+	
+	//Handle children:
+	if(args["includeChildren"] == null){
+		args.Add("includeChildren",true);
+	}
+	
+	if(args["includeChildren"] == true && obj.childCount>0){
+		//Remove callback to avoid multiple firing from children:
+		var argsCopy : Hashtable = args.Clone();
+		if(argsCopy.Contains("onComplete")){
+			argsCopy.Remove("onComplete");
+		}
+		for (var child : Transform in obj) {
+			iTween.colorTo(child.gameObject,argsCopy);
+		}
+	}
 	
 	//coordiantes:
 	if(args["color"] != null){
