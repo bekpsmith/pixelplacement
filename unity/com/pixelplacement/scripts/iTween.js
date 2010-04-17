@@ -1,4 +1,4 @@
-//VERSION: 1.0.16
+//VERSION: 1.0.17
 
 /*
 Copyright (c)2010 Bob Berkebile(http://www.pixelplacement.com), C# port by Patrick Corkum(http://www.insquare.com)
@@ -148,6 +148,14 @@ static function moveBy(target: GameObject,args: Hashtable):void{
 	var yValue : float;
 	var zValue : float;
 	
+	if(args.Contains("amount")){
+		var amount : Vector3 = args["amount"];
+		args["x"]=amount.x;
+		args["y"]=amount.y;
+		args["z"]=amount.z;			
+		args["position"]=null;
+	}
+	
 	if(args.Contains("x")){
 		xValue = args["x"];
 		xValue+=target.transform.localPosition.x;
@@ -181,6 +189,14 @@ static function moveByWorld(target: GameObject,args: Hashtable):void{
 	var xValue : float;
 	var yValue : float;
 	var zValue : float;
+	
+	if(args.Contains("amount")){
+		var amount : Vector3 = args["amount"];
+		args["x"]=amount.x;
+		args["y"]=amount.y;
+		args["z"]=amount.z;			
+		args["position"]=null;
+	}
 	
 	if(args.Contains("x")){
 		xValue=args["x"];
@@ -243,6 +259,14 @@ static function moveToBezierWorld(target: GameObject,args: Hashtable):void{
 static function moveFrom(target: GameObject,args: Hashtable):void{
 	var destinationHold : float;
 	
+	if(args.Contains("position")){
+		var coordinates : Vector3 = args["position"];
+		args["x"]=coordinates.x;
+		args["y"]=coordinates.y;
+		args["z"]=coordinates.z;			
+		args["position"]=null;
+	}
+		
 	if(args.Contains("x")){
 		destinationHold = target.transform.localPosition.x;
 		target.transform.localPosition.x=args["x"];
@@ -257,7 +281,7 @@ static function moveFrom(target: GameObject,args: Hashtable):void{
 		args["y"]=destinationHold;
 	}else{
 		args["y"]=target.transform.localPosition.y;
-	}
+	}			
 
 	if(args.Contains("z")){
 		destinationHold = target.transform.localPosition.z;
@@ -266,9 +290,11 @@ static function moveFrom(target: GameObject,args: Hashtable):void{
 	}else{
 		args["z"]=target.transform.localPosition.z;
 	}
+	
 	if(args["type"] == null){
 		args.Add("type","moveTo");	
 	}
+	
 	init(target,args);
 }
 
@@ -276,29 +302,48 @@ static function moveFrom(target: GameObject,args: Hashtable):void{
 static function moveFromWorld(target: GameObject,args: Hashtable):void{
 	var destinationHold : float;
 	
-	if(args.Contains("x")){
-		destinationHold = target.transform.position.x;
-		target.transform.position.x=args["x"];
-		args["x"]=destinationHold;
+	if(args.Contains("position")){
+		var coordinates : Vector3 = args["position"];
+		
+		destinationHold = target.transform.localPosition.x;
+		target.transform.localPosition.x=coordinates.x;
+		coordinates.x=destinationHold;
+		
+		destinationHold = target.transform.localPosition.y;
+		target.transform.localPosition.y=coordinates.y;
+		coordinates.y=destinationHold;
+		
+		destinationHold = target.transform.localPosition.z;
+		target.transform.localPosition.z=coordinates.z;
+		coordinates.z=destinationHold;
+		
+		args["position"]=coordinates;
 	}else{
-		args["x"]=target.transform.position.x;
+		if(args.Contains("x")){
+			destinationHold = target.transform.position.x;
+			target.transform.position.x=args["x"];
+			args["x"]=destinationHold;
+		}else{
+			args["x"]=target.transform.position.x;
+		}	
+
+		if(args.Contains("y")){
+			destinationHold = target.transform.position.y;
+			target.transform.position.y=args["y"];
+			args["y"]=destinationHold;
+		}else{
+			args["y"]=target.transform.position.y;
+		}
+
+		if(args.Contains("z")){
+			destinationHold = target.transform.position.z;
+			target.transform.position.z=args["z"];
+			args["z"]=destinationHold;
+		}else{
+			args["z"]=target.transform.position.z;
+		}
 	}
 
-	if(args.Contains("y")){
-		destinationHold = target.transform.position.y;
-		target.transform.position.y=args["y"];
-		args["y"]=destinationHold;
-	}else{
-		args["y"]=target.transform.position.y;
-	}
-
-	if(args.Contains("z")){
-		destinationHold = target.transform.position.z;
-		target.transform.position.z=args["z"];
-		args["z"]=destinationHold;
-	}else{
-		args["z"]=target.transform.position.z;
-	}
 	if(args["type"] == null){
 		args.Add("type","moveToWorld");	
 	}
@@ -312,6 +357,14 @@ static function scaleBy(target: GameObject,args: Hashtable):void{
 	var xValue : float;
 	var yValue : float;
 	var zValue : float;
+	
+	if(args.Contains("amount")){
+		var coordinates : Vector3 = args["amount"];
+		args["x"]=coordinates.x;
+		args["y"]=coordinates.y;
+		args["z"]=coordinates.z;			
+		args["amount"]=null;
+	}
 	
 	if(args.Contains("x")){
 		xValue=args["x"];
@@ -347,6 +400,14 @@ static function scaleAdd(target: GameObject,args: Hashtable):void{
 	var xValue : float;
 	var yValue : float;
 	var zValue : float;
+	
+	if(args.Contains("amount")){
+		var coordinates : Vector3 = args["amount"];
+		args["x"]=coordinates.x;
+		args["y"]=coordinates.y;
+		args["z"]=coordinates.z;			
+		args["amount"]=null;
+	}
 	
 	if(args.Contains("x")){
 		xValue=args["x"];
@@ -386,6 +447,14 @@ static function scaleTo(target: GameObject,args: Hashtable):void{
 //Scale from static register:
 static function scaleFrom(target: GameObject,args: Hashtable){
 	var destinationHold : float;
+	
+	if(args.Contains("scale")){
+		var coordinates : Vector3 = args["scale"];
+		args["x"]=coordinates.x;
+		args["y"]=coordinates.y;
+		args["z"]=coordinates.z;			
+		args["scale"]=null;
+	}
 	
 	if(args.Contains("x")){
 		destinationHold = target.transform.localScale.x;
@@ -430,6 +499,14 @@ static function rotateFrom(target: GameObject,args: Hashtable){
 	}
 	
 	var destinationHold : float;
+	
+	if(args.Contains("rotation")){
+		var coordinates : Vector3 = args["rotation"];
+		args["x"]=coordinates.x;
+		args["y"]=coordinates.y;
+		args["z"]=coordinates.z;			
+		args["rotation"]=null;
+	}
 
 	if(args.Contains("x")){
 		destinationHold = target.transform.eulerAngles.x;
@@ -467,6 +544,14 @@ static function rotateBy(target: GameObject,args: Hashtable):void{
 //Color from static register:
 static function colorFrom(target: GameObject,args: Hashtable):void{
 	var destinationHold : Color;
+	
+	if(args.Contains("color")){
+		destinationHold = args["color"];
+		args["r"] = destinationHold.r;
+		args["g"] = destinationHold.g;
+		args["b"] = destinationHold.b;
+		args["color"]=null;
+	}
 	
 	if(args["r"]==null){
 		args["r"] = 0;	
@@ -799,14 +884,21 @@ function shake(args:Hashtable){
 	var start : Vector3=obj.localPosition;
 
 	//coordiantes:
-	if(args["x"]==null){
-		args.Add("x",0);
-	}
-	if(args["y"]==null){
-		args.Add("y",0);
-	}
-	if(args["z"]==null){
-		args.Add("z",0);
+	if(args["amount"] != null){
+		var coordinates : Vector3 = args["amount"];
+		args["x"]=coordinates.x;
+		args["y"]=coordinates.y;
+		args["z"]=coordinates.z;
+	}else{
+		if(args["x"]==null){
+			args.Add("x",0);
+		}
+		if(args["y"]==null){
+			args.Add("y",0);
+		}
+		if(args["z"]==null){
+			args.Add("z",0);
+		}
 	}
 	
 	//define targets:
@@ -865,14 +957,21 @@ private function punchRotation(args:Hashtable) {
 	}
 	
 	//coordiantes:
-	if(args["x"]==null){
-		args.Add("x",0);
-	}
-	if(args["y"]==null){
-		args.Add("y",0);
-	}
-	if(args["z"]==null){
-		args.Add("z",0);
+	if(args["rotation"] != null){
+		var coordinates : Vector3 = args["rotation"];
+		args["x"]=coordinates.x;
+		args["y"]=coordinates.y;
+		args["z"]=coordinates.z;
+	}else{
+		if(args["x"]==null){
+			args.Add("x",0);
+		}
+		if(args["y"]==null){
+			args.Add("y",0);
+		}
+		if(args["z"]==null){
+			args.Add("z",0);
+		}
 	}
 	
 	//delay:
@@ -972,14 +1071,21 @@ private function punchPosition(args:Hashtable) {
 	var pos : Vector3 = obj.localPosition;
 		
 	//coordiantes:
-	if(args["x"]==null){
-		args.Add("x",0);
-	}
-	if(args["y"]==null){
-		args.Add("y",0);
-	}
-	if(args["z"]==null){
-		args.Add("z",0);
+	if(args["position"] != null){
+		var coordinates : Vector3 = args["position"];
+		args["x"]=coordinates.x;
+		args["y"]=coordinates.y;
+		args["z"]=coordinates.z;
+	}else{
+		if(args["x"]==null){
+			args.Add("x",0);
+		}
+		if(args["y"]==null){
+			args.Add("y",0);
+		}
+		if(args["z"]==null){
+			args.Add("z",0);
+		}
 	}
 	
 	//define targets:
@@ -1147,14 +1253,21 @@ private function moveTo(args:Hashtable){
 	var start : Vector3 = obj.localPosition;
 	
 	//coordiantes:
-	if(args["x"]==null){
-		args.Add("x",start.x);
-	}
-	if(args["y"]==null){
-		args.Add("y",start.y);
-	}
-	if(args["z"]==null){
-		args.Add("z",start.z);
+	if(args["position"] != null){
+		var coordinates : Vector3 = args["position"];
+		args["x"]=coordinates.x;
+		args["y"]=coordinates.y;
+		args["z"]=coordinates.z;
+	}else{
+		if(args["x"]==null){
+			args.Add("x",start.x);
+		}
+		if(args["y"]==null){
+			args.Add("y",start.y);
+		}
+		if(args["z"]==null){
+			args.Add("z",start.z);
+		}
 	}
 	
 	//define targets:
@@ -1229,14 +1342,21 @@ private function moveToWorld(args:Hashtable){
 	var start : Vector3 = obj.position;
 	
 	//coordiantes:
-	if(args["x"]==null){
-		args.Add("x",start.x);
-	}
-	if(args["y"]==null){
-		args.Add("y",start.y);
-	}
-	if(args["z"]==null){
-		args.Add("z",start.z);
+	if(args["position"] != null){
+		var coordinates : Vector3 = args["position"];
+		args["x"]=coordinates.x;
+		args["y"]=coordinates.y;
+		args["z"]=coordinates.z;
+	}else{
+		if(args["x"]==null){
+			args.Add("x",start.x);
+		}
+		if(args["y"]==null){
+			args.Add("y",start.y);
+		}
+		if(args["z"]==null){
+			args.Add("z",start.z);
+		}
 	}
 	
 	//define targets:
@@ -1547,14 +1667,22 @@ private function scaleTo(args:Hashtable){
 	var start : Vector3 = obj.localScale;
 	
 	//coordiantes:
-	if(args["x"]==null){
-		args.Add("x",start.x);
-	}
-	if(args["y"]==null){
-		args.Add("y",start.y);
-	}
-	if(args["z"]==null){
-		args.Add("z",start.z);
+	if(args["scale"] != null){
+		var coordinates : Vector3;
+		coordinates = args["scale"];
+		args["x"]=coordinates.x;
+		args["y"]=coordinates.y;
+		args["z"]=coordinates.z;
+	}else{
+		if(args["x"]==null){
+			args.Add("x",start.x);
+		}
+		if(args["y"]==null){
+			args.Add("y",start.y);
+		}
+		if(args["z"]==null){
+			args.Add("z",start.z);
+		}
 	}
 	
 	//define targets:
@@ -1635,16 +1763,24 @@ private function rotateTo(args:Hashtable) {
 	var start : Vector3=Vector3(obj.localEulerAngles.x,obj.localEulerAngles.y,obj.localEulerAngles.z);
 	
 	//coordiantes:
-	if(args["x"]==null){
-		args.Add("x",start.x);
+	if(args["rotation"] != null){
+		var coordinates : Vector3;
+		coordinates = args["rotation"];
+		args["x"]=coordinates.x;
+		args["y"]=coordinates.y;
+		args["z"]=coordinates.z;
+	}else{
+		if(args["x"]==null){
+			args.Add("x",start.x);
+		}
+		if(args["y"]==null){
+			args.Add("y",start.y);
+		}
+		if(args["z"]==null){
+			args.Add("z",start.z);
+		}
 	}
-	if(args["y"]==null){
-		args.Add("y",start.y);
-	}
-	if(args["z"]==null){
-		args.Add("z",start.z);
-	}
-	
+		
 	//define targets:
 	var end = Vector3(clerp(start.x,args["x"],1), clerp(start.y,args["y"],1), clerp(start.z,args["z"],1));
 	var easing : String = args["transition"];
@@ -1720,14 +1856,22 @@ private function rotateBy(args:Hashtable) {
 	var start : Vector3=Vector3(obj.localEulerAngles.x,obj.localEulerAngles.y,obj.localEulerAngles.z);
 	
 	//coordiantes:
-	if(args["x"]==null){
-		args.Add("x",start.x);
-	}
-	if(args["y"]==null){
-		args.Add("y",start.y);
-	}
-	if(args["z"]==null){
-		args.Add("z",start.z);
+	if(args["amount"] != null){
+		var coordinates : Vector3;
+		coordinates = args["amount"];
+		args["x"]=coordinates.x;
+		args["y"]=coordinates.y;
+		args["z"]=coordinates.z;
+	}else{
+		if(args["x"]==null){
+			args.Add("x",start.x);
+		}
+		if(args["y"]==null){
+			args.Add("y",start.y);
+		}
+		if(args["z"]==null){
+			args.Add("z",start.z);
+		}
 	}
 	
 	//define targets:
@@ -1787,14 +1931,22 @@ private function colorTo(args:Hashtable) {
 	var obj : Transform = gameObject.transform;
 	
 	//coordiantes:
-	if(args["r"]==null){
-		args.Add("r",0);
-	}
-	if(args["g"]==null){
-		args.Add("g",0);
-	}
-	if(args["b"]==null){
-		args.Add("b",0);
+	if(args["color"] != null){
+		var coordinates : Color;
+		coordinates = args["color"];
+		args["r"]=coordinates.r;
+		args["g"]=coordinates.g;
+		args["b"]=coordinates.b;
+	}else{
+		if(args["r"]==null){
+			args.Add("r",0);
+		}
+		if(args["g"]==null){
+			args.Add("g",0);
+		}
+		if(args["b"]==null){
+			args.Add("b",0);
+		}
 	}
 	
 	//define targets:
