@@ -1,4 +1,4 @@
-//VERSION: 1.0.20
+//VERSION: 1.0.21
 
 /*
 Copyright (c)2010 Bob Berkebile(http://www.pixelplacement.com), C# port by Patrick Corkum(http://www.insquare.com)
@@ -494,9 +494,10 @@ static function rotateAdd(target: GameObject,args: Hashtable):void{
 
 private static function rotateAugment(target: GameObject,args: Hashtable):void{
 	if(args.Contains("amount")){
-		args["x"] = args["amount"].x;
-		args["y"] = args["amount"].y;
-		args["z"] = args["amount"].z;
+		var amountVector : Vector3 = args["amount"];
+		args["x"] = amountVector.x;
+		args["y"] = amountVector.y;
+		args["z"] = amountVector.z;
 		args.Remove("amount");
 	}else{
 		if(args["x"]==null){
@@ -1433,10 +1434,10 @@ private function moveToBezier(args:Hashtable){
 		var newVector : Vector3 = bpi.starting + timeFract * (2 * (1 - timeFract) * (bpi.intermediate - bpi.starting) + timeFract * (bpi.end - bpi.starting));
 
 		//orientToPath - cutting off outer ends of curve percentage to avoid lookAt jitters:
-		//&& i <.98 && i>.02
-		if(args["orientToPath"]){
+		if(args["orientToPath"] && i <.98 && i>.02){
 			var targetRotation = Quaternion.LookRotation(newVector - obj.transform.position, Vector3.up);
-			obj.transform.rotation = Quaternion.Slerp(obj.transform.rotation,targetRotation,Time.deltaTime*moveBezierDefaults["lookAtSpeed"]);
+			var lookAtSpeed : float = moveBezierDefaults["lookAtSpeed"];
+			obj.transform.rotation = Quaternion.Slerp(obj.transform.rotation,targetRotation,Time.deltaTime*lookAtSpeed);
 		}
 		
 		//look at target
@@ -1796,9 +1797,9 @@ private function rotateBy(args:Hashtable) {
 			break;
 		case "pingPong":
 			args.Remove("rotation");
-			args["x"]*=-1;
-			args["y"]*=-1;
-			args["z"]*=-1;
+			args["x"]=xValue*-1;
+			args["y"]=yValue*-1;
+			args["z"]=zValue*-1;
 			
 			switch (args["by"]){
 				case "multiplication":
