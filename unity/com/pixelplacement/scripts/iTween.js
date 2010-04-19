@@ -1,4 +1,4 @@
-//VERSION: 1.0.21
+//VERSION: 1.0.22
 
 /*
 Copyright (c)2010 Bob Berkebile(http://www.pixelplacement.com), C# port by Patrick Corkum(http://www.insquare.com)
@@ -25,12 +25,17 @@ Redistribution and use in source and binary forms, with or without modification,
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-
+//Statics:
 static var registers : Array = new Array();
 static var params : Array = new Array();
+
+//Pubs:
 public var tweenType: String;
 public var id : int = 0;
 public var inProgress : boolean;
+
+//Privs:
+private var kinematic : boolean;
 
 //Defaults:
 public static var rotateToDefaults : Hashtable = {"time":1,"delay":0,"transition":"easeInOutCubic"};
@@ -41,7 +46,7 @@ public static var audioDefaults : Hashtable = {"time":1,"delay":0,"volume":1,"pi
 public static var scaleDefaults : Hashtable = {"time":1,"delay":0,"transition":"easeInOutCubic"};
 public static var fadeDefaults : Hashtable = {"time":1,"delay":0,"transition":"linear"};
 public static var moveDefaults : Hashtable = {"time":1,"delay":0,"transition":"easeInOutCubic"};
-public static var moveBezierDefaults : Hashtable = {"time":1,"delay":0,"transition":"easeInOutCubic","lookAtSpeed":8};
+public static var moveBezierDefaults : Hashtable = {"time":1,"delay":0,"transition":"easeInOutCubic","lookSpeed":8};
 public static var punchPositionDefaults : Hashtable = {"time":1,"delay":0};
 public static var punchRotationDefaults : Hashtable = {"time":1,"delay":0};
 public static var colorDefaults : Hashtable = {"time":1,"delay":0,"transition":"linear"};
@@ -665,6 +670,7 @@ function Start(){
 	registers.RemoveAt(id);
 	params.RemoveAt(id);
 	tweenType=args["type"];
+
 	switch(args["type"]){
 		case "fadeTo":
 			StartCoroutine("fadeTo",args);
@@ -672,26 +678,31 @@ function Start(){
 			fadeTo({}); //fake call to avoid editor warnings 
 			
 		case "moveTo":
+			enableKinematic();		
 			StartCoroutine("moveTo",args);
 			break;
 			moveTo({}); //fake call to avoid editor warnings 
 						
-		case "moveToBezier":		
+		case "moveToBezier":	
+			enableKinematic();
 			StartCoroutine("moveToBezier",args);
 			break;
 			moveToBezier({}); //fake call to avoid editor warnings 
 						
 		case "scaleTo":
+			enableKinematic();
 			StartCoroutine("scaleTo",args);			
 			break;
 			scaleTo({}); //fake call to avoid editor warnings 
 			
 		case "rotateTo":
+			enableKinematic();
 			StartCoroutine("rotateTo",args);
 			break;
 			rotateTo({}); //fake call to avoid editor warnings 
 		
 		case "rotateBy":
+			enableKinematic();
 			StartCoroutine("rotateBy",args);
 			break;
 			rotateBy({}); //fake call to avoid editor warnings 
@@ -707,11 +718,13 @@ function Start(){
 			punchPosition({}); //fake call to avoid editor warnings 
 			
 		case "punchRotation":
+			enableKinematic();
 			StartCoroutine("punchRotation",args);
 			break;
 			punchRotation({}); //fake call to avoid editor warnings 
 			
 		case "shake":
+			enableKinematic();
 			StartCoroutine("shake",args);
 			break;
 			shake({}); //fake call to avoid editor warnings 
@@ -728,6 +741,46 @@ function Start(){
 			
 		default:
 			break;
+	}
+}
+
+//Set isKinematic to avoid physics issues:
+private function enableKinematic(){
+	if(gameObject.GetComponent(Rigidbody)){
+		if(!rigidbody.isKinematic){
+			rigidbody.isKinematic=true;
+			kinematic = true;
+		}
+	}	
+}
+
+//When tween is destroyed or deactivated:
+function OnDisable(){
+	//kinematic restoration
+	if(kinematic){
+		rigidbody.isKinematic=false;
+	}
+}
+
+//When tween starts:
+private function tweenStart(args : Hashtable):void{
+	if(args["onStartTarget"]==null){
+		args.Add("onStartTarget",gameObject);
+	}
+	if(args["onStart"]){
+		var target : GameObject = args["onStartTarget"];
+		target.SendMessage(args["onStart"], args["onStartParams"], SendMessageOptions.DontRequireReceiver);
+	}
+}
+
+//When tween is done:
+private function tweenComplete(args : Hashtable):void{
+	if(args["onCompleteTarget"]==null){
+		args.Add("onCompleteTarget",gameObject);
+	}
+	if(args["onComplete"]){
+		var target : GameObject = args["onCompleteTarget"];
+		target.SendMessage(args["onComplete"], args["onCompleteParams"], SendMessageOptions.DontRequireReceiver);
 	}
 }
 
@@ -752,9 +805,6 @@ private function audioTo(args:Hashtable) {
 	if(args["pitch"]==null){
 		args.Add("pitch",stabDefaults["pitch"]);
 	}
-	if(args["onCompleteTarget"]==null){
-		args.Add("onCompleteTarget",gameObject);
-	}
 	
 	//delay:
 	var delay : float = args["delay"];
@@ -765,6 +815,7 @@ private function audioTo(args:Hashtable) {
 	//Look for conflicts:
 	checkForConflicts(tweenType);
 	inProgress=true;
+	tweenStart(args);
 	
 	//define object:
 	var obj : Transform = gameObject.transform;
@@ -790,10 +841,7 @@ private function audioTo(args:Hashtable) {
 	
 	sound.volume = endV;
 	sound.pitch = endP;
-	if(args["onComplete"]){
-		var target : GameObject = args["onCompleteTarget"];
-		target.SendMessage(args["onComplete"], args["onCompleteParams"], SendMessageOptions.DontRequireReceiver);
-	}
+	tweenComplete(args);
 	Destroy (this);
 }
 
@@ -818,8 +866,8 @@ function stab(args:Hashtable){
 		args.Add("clip",gameObject.audio.clip);
 	}
 	if(args["onCompleteTarget"]==null){
-		args.Add("onCompleteTarget",gameObject);
-	}
+                args.Add("onCompleteTarget",gameObject);
+    }
 	
 	//delay:
 	var delay : float = args["delay"];
@@ -828,6 +876,7 @@ function stab(args:Hashtable){
 	}
 	
 	inProgress=true;
+	tweenStart(args);
 	
 	//target:
 	obj = gameObject.audio;
@@ -836,6 +885,7 @@ function stab(args:Hashtable){
 	obj.pitch=args["pitch"];
 	obj.PlayOneShot(args["clip"]);
 	
+	//handle completion differently due to audio usage:
 	if(args["onComplete"]){
 		var pitchArg : float = args["pitch"];
 		yield WaitForSeconds(obj.clip.length/pitchArg);
@@ -857,9 +907,6 @@ function shake(args:Hashtable){
 	if(args["delay"]==null){
 		args.Add("delay",shakeDefaults["delay"]);
 	}
-	if(args["onCompleteTarget"]==null){
-		args.Add("onCompleteTarget",gameObject);
-	}
 	
 	//delay:
 	var delay : float = args["delay"];
@@ -870,6 +917,7 @@ function shake(args:Hashtable){
 	//Look for conflicts:
 	checkForConflicts(tweenType);
 	inProgress=true;
+	tweenStart(args);
 	
 	//define object:
 	var obj : Transform = gameObject.transform;
@@ -921,13 +969,9 @@ function shake(args:Hashtable){
 		yield;
 	}
 	obj.localPosition=start;
-	if(args["onComplete"]){
-		var target : GameObject = args["onCompleteTarget"];
-		target.SendMessage(args["onComplete"], args["onCompleteParams"], SendMessageOptions.DontRequireReceiver);
-	}
+	tweenComplete(args);
 	Destroy (this);
 }
-
 
 //Punch rotation application:
 private function punchRotation(args:Hashtable) {
@@ -943,9 +987,6 @@ private function punchRotation(args:Hashtable) {
 	}
 	if(args["delay"]==null){
 		args.Add("delay",punchRotationDefaults["delay"]);
-	}
-	if(args["onCompleteTarget"]==null){
-		args.Add("onCompleteTarget",gameObject);
 	}
 	
 	//coordiantes:
@@ -975,6 +1016,7 @@ private function punchRotation(args:Hashtable) {
 	//Look for conflicts:
 	checkForConflicts(tweenType);
 	inProgress=true;
+	tweenStart(args);
 	
 	//define object:
 	var obj : Transform = gameObject.transform;
@@ -1028,10 +1070,7 @@ private function punchRotation(args:Hashtable) {
 		yield;
 	}
 	obj.localRotation=Quaternion.Euler(pos.x,pos.y,pos.z);
-	if(args["onComplete"]){
-		var target : GameObject = args["onCompleteTarget"];
-		target.SendMessage(args["onComplete"], args["onCompleteParams"], SendMessageOptions.DontRequireReceiver);
-	}
+	tweenComplete(args);
 	Destroy (this);
 }
 
@@ -1044,9 +1083,6 @@ private function punchPosition(args:Hashtable) {
 	if(args["delay"]==null){
 		args.Add("delay",punchPositionDefaults["delay"]);
 	}
-	if(args["onCompleteTarget"]==null){
-		args.Add("onCompleteTarget",gameObject);
-	}
 	
 	//delay:
 	var delay : float = args["delay"];
@@ -1057,6 +1093,7 @@ private function punchPosition(args:Hashtable) {
 	//Look for conflicts:
 	checkForConflicts(tweenType);
 	inProgress=true;
+	tweenStart(args);
 	
 	//define object:
 	var obj : Transform = gameObject.transform;
@@ -1107,10 +1144,7 @@ private function punchPosition(args:Hashtable) {
 		yield;
 	}
 	obj.localPosition=pos;
-	if(args["onComplete"]){
-		var target : GameObject = args["onCompleteTarget"];
-		target.SendMessage(args["onComplete"], args["onCompleteParams"], SendMessageOptions.DontRequireReceiver);
-	}
+	tweenComplete(args);
 	Destroy (this);	
 }
 
@@ -1127,19 +1161,6 @@ private function fadeTo(args:Hashtable){
 	if(args["transition"]==null){
 		args.Add("transition",fadeDefaults["transition"]);
 	}
-	if(args["onCompleteTarget"]==null){
-		args.Add("onCompleteTarget",gameObject);
-	}
-	
-	//delay:
-	var delay : float = args["delay"];
-	if(delay > 0){
-		yield WaitForSeconds (args["delay"]);
-	}
-	
-	//Look for conflicts:
-	checkForConflicts(tweenType);
-	inProgress=true;
 	
 	//define object:
 	var obj : Transform = gameObject.transform;
@@ -1160,6 +1181,17 @@ private function fadeTo(args:Hashtable){
 		}
 	}
 	
+	//delay:
+	var delay : float = args["delay"];
+	if(delay > 0){
+		yield WaitForSeconds (args["delay"]);
+	}
+	
+	//Look for conflicts:
+	checkForConflicts(tweenType);
+	inProgress=true;
+	tweenStart(args);
+		
 	//coordiantes:
 	if(args["alpha"]==null){
 		args.Add("alpha",0);
@@ -1184,10 +1216,8 @@ private function fadeTo(args:Hashtable){
 			yield;
 		}
 		guiTexture.color.a= endA;
-		if(args["onComplete"]){
-			target = args["onCompleteTarget"];
-			target.SendMessage(args["onComplete"], args["onCompleteParams"], SendMessageOptions.DontRequireReceiver);
-		}
+		
+		tweenComplete(args);
 		
 		switch(args["loopType"]){
 		case "loop":
@@ -1209,10 +1239,8 @@ private function fadeTo(args:Hashtable){
 			yield;
 		}
 		obj.renderer.material.color.a= endA;
-		if(args["onComplete"]){
-			target = args["onCompleteTarget"];
-			target.SendMessage(args["onComplete"], args["onCompleteParams"], SendMessageOptions.DontRequireReceiver);
-		}
+		
+		tweenComplete(args);
 		
 		switch(args["loopType"]){
 		case "loop":
@@ -1242,9 +1270,6 @@ private function moveTo(args:Hashtable){
 	if(args["transition"]==null){
 		args.Add("transition",moveDefaults["transition"]);
 	}
-	if(args["onCompleteTarget"]==null){
-		args.Add("onCompleteTarget",gameObject);
-	}
 	if(args["isLocal"]==null){
 		args.Add("isLocal",true);
 	}
@@ -1258,6 +1283,7 @@ private function moveTo(args:Hashtable){
 	//Look for conflicts:
 	checkForConflicts(tweenType);
 	inProgress=true;
+	tweenStart(args);
 	
 	//define object:
 	var obj : Transform = gameObject.transform;
@@ -1313,11 +1339,7 @@ private function moveTo(args:Hashtable){
 		obj.position=end;			
 	}
 	
-	
-	if(args["onComplete"]){
-		var target : GameObject = args["onCompleteTarget"];
-		target.SendMessage(args["onComplete"], args["onCompleteParams"], SendMessageOptions.DontRequireReceiver);
-	}
+	tweenComplete(args);
 	
 	switch(args["loopType"]){
 		case "loop":
@@ -1358,8 +1380,8 @@ private function moveToBezier(args:Hashtable){
 	if(args["transition"]==null){
 		args.Add("transition",moveBezierDefaults["transition"]);
 	}
-	if(args["onCompleteTarget"]==null){
-		args.Add("onCompleteTarget",gameObject);
+	if(args["lookSpeed"]==null){
+		args.Add("lookSpeed",moveBezierDefaults["lookSpeed"]);
 	}
 	if(args["orientToPath"] == null){
 		args.Add("orientToPath",true);
@@ -1380,7 +1402,7 @@ private function moveToBezier(args:Hashtable){
 	//Look for conflicts:
 	checkForConflicts(tweenType);
 	inProgress=true;
-	
+	tweenStart(args);
 	
 	//define object:
 	var obj : GameObject = gameObject;
@@ -1434,10 +1456,10 @@ private function moveToBezier(args:Hashtable){
 		var newVector : Vector3 = bpi.starting + timeFract * (2 * (1 - timeFract) * (bpi.intermediate - bpi.starting) + timeFract * (bpi.end - bpi.starting));
 
 		//orientToPath - cutting off outer ends of curve percentage to avoid lookAt jitters:
-		if(args["orientToPath"] && i <.98 && i>.02){
+		if(args["orientToPath"] && i <.99 && i>.01){
 			var targetRotation = Quaternion.LookRotation(newVector - obj.transform.position, Vector3.up);
-			var lookAtSpeed : float = moveBezierDefaults["lookAtSpeed"];
-			obj.transform.rotation = Quaternion.Slerp(obj.transform.rotation,targetRotation,Time.deltaTime*lookAtSpeed);
+			var lookSpeed : float = args["lookSpeed"];
+			obj.transform.rotation = Quaternion.Slerp(obj.transform.rotation,targetRotation,Time.deltaTime*lookSpeed);
 		}
 		
 		//look at target
@@ -1506,10 +1528,7 @@ private function moveToBezier(args:Hashtable){
 		}		                
 	}
 	
-	if(args["onComplete"]){
-		var target : GameObject = args["onCompleteTarget"];
-		target.SendMessage(args["onComplete"], args["onCompleteParams"], SendMessageOptions.DontRequireReceiver);
-	}
+	tweenComplete(args);
 }
 
 //Scale to application:
@@ -1524,9 +1543,6 @@ private function scaleTo(args:Hashtable){
 	if(args["transition"]==null){
 		args.Add("transition",scaleDefaults["transition"]);
 	}
-	if(args["onCompleteTarget"]==null){
-		args.Add("onCompleteTarget",gameObject);
-	}
 			
 	//delay:
 	var delay : float = args["delay"];
@@ -1537,6 +1553,7 @@ private function scaleTo(args:Hashtable){
 	//Look for conflicts:
 	checkForConflicts(tweenType);
 	inProgress=true;
+	tweenStart(args);
 	
 	//define object:
 	var obj : Transform = gameObject.transform;
@@ -1579,10 +1596,7 @@ private function scaleTo(args:Hashtable){
 	}
 	obj.localScale=end;	
 	
-	if(args["onComplete"]){
-		var target : GameObject = args["onCompleteTarget"];
-		target.SendMessage(args["onComplete"], args["onCompleteParams"], SendMessageOptions.DontRequireReceiver);
-	}
+	tweenComplete(args);
 	
 	switch(args["loopType"]){
 		case "loop":
@@ -1621,9 +1635,6 @@ private function rotateTo(args:Hashtable) {
 	if(args["transition"]==null){
 		args.Add("transition",rotateToDefaults["transition"]);
 	}
-	if(args["onCompleteTarget"]==null){
-		args.Add("onCompleteTarget",gameObject);
-	}
 	
 	//delay:
 	var delay : float = args["delay"];
@@ -1634,6 +1645,7 @@ private function rotateTo(args:Hashtable) {
 	//Look for conflicts:
 	checkForConflicts(tweenType);
 	inProgress=true;
+	tweenStart(args);
 	
 	//define object:
 	var obj : Transform = gameObject.transform;
@@ -1676,11 +1688,6 @@ private function rotateTo(args:Hashtable) {
 	
 	obj.localRotation=Quaternion.Euler(end.x,end.y,end.z);
 	
-	if(args["onComplete"]){
-		var target : GameObject = args["onCompleteTarget"];
-		target.SendMessage(args["onComplete"], args["onCompleteParams"], SendMessageOptions.DontRequireReceiver);
-	}
-	
 	switch(args["loopType"]){
 		case "loop":
 			obj.localRotation=Quaternion.Euler(start);
@@ -1717,9 +1724,6 @@ private function rotateBy(args:Hashtable) {
 	if(args["transition"]==null){
 		args.Add("transition",rotateByDefaults["transition"]);
 	}
-	if(args["onCompleteTarget"]==null){
-		args.Add("onCompleteTarget",gameObject);
-	}
 		
 	//delay:
 	var delay : float = args["delay"];
@@ -1730,6 +1734,7 @@ private function rotateBy(args:Hashtable) {
 	//Look for conflicts:
 	checkForConflicts(tweenType);
 	inProgress=true;
+	tweenStart(args);
 	
 	//define object:
 	var obj : Transform = gameObject.transform;
@@ -1785,10 +1790,7 @@ private function rotateBy(args:Hashtable) {
 	
 	obj.localRotation=Quaternion.Euler(end.x,end.y,end.z);
 	
-	if(args["onComplete"]){
-		var target : GameObject = args["onCompleteTarget"];
-		target.SendMessage(args["onComplete"], args["onCompleteParams"], SendMessageOptions.DontRequireReceiver);
-	}
+	tweenComplete(args);
 	
 	switch(args["loopType"]){
 		case "loop":
@@ -1831,19 +1833,6 @@ private function colorTo(args:Hashtable) {
 	if(args["transition"]==null){
 		args.Add("transition",colorDefaults["transition"]);
 	}
-	if(args["onCompleteTarget"]==null){
-		args.Add("onCompleteTarget",gameObject);
-	}
-	
-	//delay:
-	var delay : float = args["delay"];
-	if(delay > 0){
-		yield WaitForSeconds (args["delay"]);
-	}
-	
-	//Look for conflicts:
-	checkForConflicts(tweenType);
-	inProgress=true;
 	
 	//define object:
 	var obj : Transform = gameObject.transform;
@@ -1864,6 +1853,17 @@ private function colorTo(args:Hashtable) {
 		}
 	}
 	
+	//delay:
+	var delay : float = args["delay"];
+	if(delay > 0){
+		yield WaitForSeconds (args["delay"]);
+	}
+	
+	//Look for conflicts:
+	checkForConflicts(tweenType);
+	inProgress=true;
+	tweenStart(args);
+		
 	//coordiantes:
 	if(args["color"] != null){
 		var coordinates : Color;
@@ -1904,10 +1904,8 @@ private function colorTo(args:Hashtable) {
 		obj.guiTexture.color.r=end.r;
 		obj.guiTexture.color.g=end.g;
 		obj.guiTexture.color.b=end.b;
-		if(args["onComplete"]){
-			target = args["onCompleteTarget"];
-			target.SendMessage(args["onComplete"], args["onCompleteParams"], SendMessageOptions.DontRequireReceiver);
-		}
+		
+		tweenComplete(args);
 		
 		switch(args["loopType"]){
 		case "loop":
@@ -1939,10 +1937,7 @@ private function colorTo(args:Hashtable) {
 		obj.renderer.material.color.g=end.g;
 		obj.renderer.material.color.b=end.b;
 		
-		if(args["onComplete"]){
-			target = args["onCompleteTarget"];
-			target.SendMessage(args["onComplete"], args["onCompleteParams"], SendMessageOptions.DontRequireReceiver);	
-		}
+		tweenComplete(args);
 		
 		switch(args["loopType"]){
 		case "loop":
