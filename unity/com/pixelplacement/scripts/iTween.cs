@@ -1,4 +1,4 @@
-//VERSION: 1.0.15
+//VERSION: 1.0.20
 
 /*
  Copyright (c) 2010 Bob Berkebile(http://www.pixelplacement.com), C# port by Patrick Corkum(http://www.insquare.com)
@@ -258,6 +258,8 @@ using System.Collections.Generic;
             public LoopType loopType;
             public Vector3? lookAt;
             public bool orientToPath;
+            public bool includeChildren;
+
             private Arguments(float? i_time, float i_defaultTime, float? i_delay, float i_defaultDelay, EasingType? i_transition, EasingType i_defaultTransition, string i_onComplete, object i_onComplete_params, FunctionType i_type, bool i_reverse, GameObject i_onCompleteTarget)
             {
                 time = i_time.HasValue ? i_time.Value : i_defaultTime;
@@ -287,9 +289,10 @@ using System.Collections.Generic;
                 loopType = LoopType.none;
                 orientToPath = true;
                 lookAt = null;
+                includeChildren = true;
             }
             public Arguments(float? i_time, float i_defaultTime, float? i_delay, float i_defaultDelay, EasingType? i_transition, EasingType i_defaultTransition, string i_onComplete, object i_onComplete_params, FunctionType i_type, bool i_reverse,
-                            float? i_xr, float? i_yg, float? i_zb, bool i_isBy, bool i_isWorld, bool i_isMultiply, GameObject i_onCompleteTarget, LoopType i_loopType)
+                            float? i_xr, float? i_yg, float? i_zb, bool i_isBy, bool i_isWorld, bool i_isMultiply, bool i_includeChildren, GameObject i_onCompleteTarget, LoopType i_loopType)
                 : this(i_time, i_defaultTime, i_delay, i_defaultDelay, i_transition, i_defaultTransition, i_onComplete, i_onComplete_params, i_type, i_reverse, i_onCompleteTarget)
             {
                 isXRSet = i_xr.HasValue;
@@ -303,6 +306,7 @@ using System.Collections.Generic;
                 isWorld = i_isWorld;
                 isMultiply = i_isMultiply;
                 loopType = i_loopType;
+                includeChildren = i_includeChildren;
             }
             public Arguments(float? i_time, float i_defaultTime, float? i_delay, float i_defaultDelay, EasingType? i_transition, EasingType i_defaultTransition, string i_onComplete, object i_onComplete_params, FunctionType i_type, bool i_reverse,
                            List<Vector3> i_beziers, bool i_isWorld, GameObject i_onCompleteTarget, LoopType i_loopType, bool i_orientToPath, Vector3? i_lookAt)
@@ -316,11 +320,12 @@ using System.Collections.Generic;
                 loopType = i_loopType;
             }
             public Arguments(float? i_time, float i_defaultTime, float? i_delay, float i_defaultDelay, EasingType? i_transition, EasingType i_defaultTransition, string i_onComplete, object i_onComplete_params, FunctionType i_type, bool i_reverse,
-                           float? i_alpha, float i_defaultAlpha, GameObject i_onCompleteTarget, LoopType i_loopType)
+                           float? i_alpha, float i_defaultAlpha, bool i_includeChildren, GameObject i_onCompleteTarget, LoopType i_loopType)
                 : this(i_time, i_defaultTime, i_delay, i_defaultDelay, i_transition, i_defaultTransition, i_onComplete, i_onComplete_params, i_type, i_reverse, i_onCompleteTarget)
             {
                 alpha = i_alpha.HasValue ? i_alpha.Value : i_defaultAlpha;
                 loopType = i_loopType;
+                includeChildren = i_includeChildren;
             }
 
             public Arguments(float? i_time, float i_defaultTime, float? i_delay, float i_defaultDelay, EasingType? i_transition, EasingType i_defaultTransition, string i_onComplete, object i_onComplete_params, FunctionType i_type, bool i_reverse,
@@ -470,6 +475,12 @@ using System.Collections.Generic;
         /// </summary>
         public static EasingType moveBezierDefaultTransition = EasingType.easeInOutCubic;
 
+        /// <summary>
+        /// The Default transition type for move animation using Bezier Curves. This can be modified in code.
+        /// </summary>
+        public static float moveBezierDefaultLookAtSpeed = 8;
+
+
         //Scale Defaults
         /// <summary>
         /// The Default time that the scale operations will take to scale the object. This can be modified in code.
@@ -515,6 +526,20 @@ using System.Collections.Generic;
         /// </summary>
         public static EasingType rotateByDefaultTransition = EasingType.easeInOutCubic;
 
+        //Rotate Add Defaults
+        /// <summary>
+        /// The Default time that the color operations will take to change the color of the object. This can be modified in code.
+        /// </summary>
+        public static float rotateAddDefaultTime = 1;
+        /// <summary>
+        /// The Default delay time rotatingAdd operations will rotate the object. (This is only used by rotateBy) This can be modified in code.
+        /// </summary>
+        public static float rotateAddDefaultDelay = 0;
+        /// <summary>
+        /// The Default transition type for rotateAdd animation. (This is only used by rotateBy) This can be modified in code.
+        /// </summary>
+        public static EasingType rotateAddDefaultTransition = EasingType.easeInOutCubic;
+
         //Color To Defaults
         /// <summary>
         /// The Default time that the rotating operations will take to rotate the object. (This is not used by rotateBy) This can be modified in code.
@@ -542,7 +567,7 @@ using System.Collections.Generic;
         private Transform _transform;
 
         private bool _stopTween = false;
-
+                
 
         private void StopTween()
         {
@@ -554,17 +579,30 @@ using System.Collections.Generic;
         /// <returns>must be an IEnumerator in order to yield, which it must to delay execution.</returns>
         public IEnumerator Start()
         {
+            _transform = transform;
+
+            if (!inProgress && args.includeChildren)
+            {
+                foreach (Transform child in _transform)
+                {
+                    //Note, if Arguments was a class, this would not work. Since it is a struct, I get a copy.
+                    Arguments newArgs = args;
+                    newArgs.onComplete = null;
+                    init(child.gameObject, newArgs);
+                }
+            }
+            
             //delay:
             if (args.delay > 0)
             {
                 yield return new WaitForSeconds(args.delay);
             }
-
+            
             //don't destroy conflicts if we are not running yet.
             checkForConflicts();
             inProgress = true;
 
-            _transform = transform;
+            
             switch (args.type)
             {
                 case FunctionType.fade:
@@ -609,12 +647,10 @@ using System.Collections.Generic;
 
                 case FunctionType.audio:
                     StartCoroutine(tweenAudio());
-                    Debug.Log("Audio");
                     break;
 
                 case FunctionType.stab:
                     StartCoroutine(tweenStab());
-                    Debug.Log("Stab");
                     break;
             }
 
@@ -764,7 +800,7 @@ using System.Collections.Generic;
         private List<BezierPointInfo> ParseBeziers(List<Vector3> points)
         {
             List<BezierPointInfo> returnPoints = new List<BezierPointInfo>();
-
+            
             if (points.Count > 2)
             {
 
@@ -1102,6 +1138,7 @@ using System.Collections.Generic;
                 setFadeFrom();
             }
 
+
             //define targets:
             float endA = args.alpha;
 
@@ -1401,9 +1438,9 @@ using System.Collections.Generic;
                 Vector3 newVector = bpi.starting + timeFract * (2 * (1 - timeFract) * (bpi.intermediate - bpi.starting) + timeFract * (bpi.end - bpi.starting));
 
                 //orientToPath - cutting off outer ends of curve percentage to avoid lookAt jitters:
-                if (args.orientToPath && curTime < .98 && curTime > .02)
+                if (!args.lookAt.HasValue && args.orientToPath && curTime < .98 && curTime > .02)
                 {
-                    _transform.LookAt(newVector);
+                    _transform.rotation = Quaternion.Slerp(_transform.rotation, Quaternion.LookRotation(newVector - _transform.position, Vector3.up), Time.deltaTime * moveBezierDefaultLookAtSpeed);
                 }
 
                 //look at target
@@ -1616,7 +1653,14 @@ using System.Collections.Generic;
 
             if (args.isBy)
             {
-                end = new Vector3(360 * args.xr + e.x, 360 * args.yg + e.y, 360 * args.zb + e.z);
+                if (args.isMultiply)
+                {
+                    end = new Vector3(360 * args.xr + e.x, 360 * args.yg + e.y, 360 * args.zb + e.z);
+                }
+                else
+                {
+                    end = new Vector3(args.xr + e.x, args.yg + e.y, args.zb + e.z);
+                }
             }
             else
             {
@@ -1809,7 +1853,6 @@ using System.Collections.Generic;
                             args.xr = start.r;
                             args.yg = start.g;
                             args.zb = start.b;
-                            Debug.Log("Here I am");
                             StartCoroutine(Start());
                             break;
                         default:
@@ -2440,9 +2483,29 @@ using System.Collections.Generic;
         /// <param name="oncomplete_target">The gameobject that the complete callback will callback to.</param>
         public static void colorFrom(GameObject target, float? time, float? delay, float? r, float? g, float? b, EasingType? transition, string onComplete, object oncomplete_params, GameObject oncomplete_target)
         {
-            init(target, new Arguments(time, colorDefaultTime, delay, colorDefaultDelay, transition, colorDefaultTransition, onComplete, oncomplete_params,
-               FunctionType.color, true, r, g, b, false, false, false, oncomplete_target, LoopType.none));
+            colorFrom(target, time, delay, r, g, b, transition, onComplete, oncomplete_params, oncomplete_target, true);
         }
+
+        /// <summary>
+        /// Will change the color of the object to the color specified and transition to the starting color at tween time
+        /// </summary>
+        /// <param name="target">The GameObject that will be colored</param>
+        /// <param name="time">The length of time it will take to do the coloration. If null, it will use the colorDefaultTime</param>
+        /// <param name="delay">The time in which to wait to begin tweening. This is basically a start time. If null, it will use the colorDefaultDelay</param>
+        /// <param name="r">The red value of the rgb color to change the color from. If null, 0 will be used for the value.</param>
+        /// <param name="g">The green value of the rgb color to change the color from. If null, 0 will be used for the value.</param>
+        /// <param name="b">The blue value of the rgb color to change the color from. If null, 0 will be used for the value.</param>
+        /// <param name="transition">The method in which you wish it to transition the color. If null, it will use colorDefaultTransition</param>
+        /// <param name="onComplete">The name of the function that will be called back to.</param>
+        /// <param name="oncomplete_params">The parameter(s) that will be used with the callback.</param>
+        /// <param name="oncomplete_target">The gameobject that the complete callback will callback to.</param>
+        /// /// <param name="includeChildren">If true (default), all children will be colored in the same fashion. Note that the callback will only be done for the top level tween.</param>
+        public static void colorFrom(GameObject target, float? time, float? delay, float? r, float? g, float? b, EasingType? transition, string onComplete, object oncomplete_params, GameObject oncomplete_target, bool includeChildren)
+        {
+            init(target, new Arguments(time, colorDefaultTime, delay, colorDefaultDelay, transition, colorDefaultTransition, onComplete, oncomplete_params,
+               FunctionType.color, true, r, g, b, false, false, false, includeChildren, oncomplete_target, LoopType.none));
+        }
+
         #endregion
 
         #region colorTo
@@ -2612,6 +2675,7 @@ using System.Collections.Generic;
             colorTo(target, time, delay, color.r, color.g, color.b, transition, onComplete, oncomplete_params, null, loopType);
         }
 
+
         /// <summary>
         /// Will change the color of the object to the color specified by the color parameter
         /// </summary>
@@ -2626,7 +2690,25 @@ using System.Collections.Generic;
         /// <param name="loopType">The type of Loop that is desired to continue animation indefinitely</param>
         public static void colorTo(GameObject target, float? time, float? delay, Color color, EasingType? transition, string onComplete, object oncomplete_params, GameObject oncomplete_target, LoopType loopType)
         {
-            colorTo(target, time, delay, color.r, color.g, color.b, transition, onComplete, oncomplete_params, oncomplete_target, loopType);
+            colorTo(target, time, delay, color.r, color.g, color.b, transition, onComplete, oncomplete_params, oncomplete_target, loopType, true);
+        }
+
+        /// <summary>
+        /// Will change the color of the object to the color specified by the color parameter
+        /// </summary>
+        /// <param name="target">The GameObject that will be colored</param>
+        /// <param name="time">The length of time it will take to do the coloration. If null, it will use the colorDefaultTime</param>
+        /// <param name="delay">The time in which to wait to begin tweening. This is basically a start time. If null, it will use the colorDefaultDelay</param>
+        /// <param name="color">The color that the object will transition to.</param>
+        /// <param name="transition">The method in which you wish it to transition the color. If null, it will use colorDefaultTransition</param>
+        /// <param name="onComplete">The name of the function that will be called back to.</param>
+        /// <param name="oncomplete_params">The parameter(s) that will be used with the callback.</param>
+        /// <param name="oncomplete_target">The gameobject that the complete callback will callback to.</param>
+        /// <param name="loopType">The type of Loop that is desired to continue animation indefinitely</param>
+        /// <param name="includeChildren">If true (default), all children will be colored in the same fashion. Note that the callback will only be done for the top level tween.</param>
+        public static void colorTo(GameObject target, float? time, float? delay, Color color, EasingType? transition, string onComplete, object oncomplete_params, GameObject oncomplete_target, LoopType loopType, bool includeChildren)
+        {
+            colorTo(target, time, delay, color.r, color.g, color.b, transition, onComplete, oncomplete_params, oncomplete_target, loopType, includeChildren);
         }
 
         /// <summary>
@@ -2695,8 +2777,28 @@ using System.Collections.Generic;
         /// <param name="loopType">The type of Loop that is desired to continue animation indefinitely</param>
         public static void colorTo(GameObject target, float? time, float? delay, float? r, float? g, float? b, EasingType? transition, string onComplete, object oncomplete_params, GameObject oncomplete_target, LoopType loopType)
         {
+            colorTo(target, time, delay, r, g, b, transition, onComplete, oncomplete_params, oncomplete_target, loopType, true);
+        }
+
+        /// <summary>
+        /// Will change the color of the object to the color specified by the r,g and b parameters
+        /// </summary>
+        /// <param name="target">The GameObject that will be colored</param>
+        /// <param name="time">The length of time it will take to do the coloration. If null, it will use the colorDefaultTime</param>
+        /// <param name="delay">The time in which to wait to begin tweening. This is basically a start time. If null, it will use the colorDefaultDelay</param>
+        /// <param name="r">The red value of the rgb color to change the color to. If null, 0 will be used for the value.</param>
+        /// <param name="g">The green value of the rgb color to change the color to. If null, 0 will be used for the value.</param>
+        /// <param name="b">The blue value of the rgb color to change the color to. If null, 0 will be used for the value.</param>
+        /// <param name="transition">The method in which you wish it to transition the color. If null, it will use colorDefaultTransition</param>
+        /// <param name="onComplete">The name of the function that will be called back to.</param>
+        /// <param name="oncomplete_params">The parameter(s) that will be used with the callback.</param>
+        /// <param name="oncomplete_target">The gameobject that the complete callback will callback to.</param>
+        /// <param name="loopType">The type of Loop that is desired to continue animation indefinitely</param>
+        /// /// <param name="includeChildren">If true (default), all children will be colored in the same fashion. Note that the callback will only be done for the top level tween.</param>
+        public static void colorTo(GameObject target, float? time, float? delay, float? r, float? g, float? b, EasingType? transition, string onComplete, object oncomplete_params, GameObject oncomplete_target, LoopType loopType, bool includeChildren)
+        {
             init(target, new Arguments(time, colorDefaultTime, delay, colorDefaultDelay, transition, colorDefaultTransition, onComplete, oncomplete_params,
-               FunctionType.color, false, r, g, b, false, false, false, oncomplete_target, loopType));
+               FunctionType.color, false, r, g, b, false, false, false, includeChildren, oncomplete_target, loopType));
         }
         #endregion
 
@@ -2755,8 +2857,25 @@ using System.Collections.Generic;
         /// <param name="oncomplete_target">The gameobject that the complete callback will callback to.</param>
         public static void fadeFrom(GameObject target, float? time, float? delay, float? alpha, EasingType? transition, string onComplete, object oncomplete_params, GameObject oncomplete_target)
         {
+            fadeFrom(target, time, delay, alpha, transition, onComplete, oncomplete_params, oncomplete_target, true);
+        }
+
+        /// <summary>
+        /// Will fade from the given alpha to the current alpha of the given object
+        /// </summary>
+        /// <param name="target">The GameObject that will be faded</param>
+        /// <param name="time">The length of time it will take to do the fade from. If null, it will use the fadeDefaultTime</param>
+        /// <param name="delay">The time in which to wait to begin tweening. This is basically a start time. If null, it will use the fadeDefaultDelay</param>
+        /// <param name="alpha">The alpha that you wish to fade from to the current color. If null, it will fade from 0.</param>
+        /// <param name="transition">The method in which you wish it to fade. If null, it will use fadeDefaultTransition</param>
+        /// <param name="onComplete">The name of the function that will be called back to.</param>
+        /// <param name="oncomplete_params">The parameter(s) that will be used with the callback.</param>
+        /// <param name="oncomplete_target">The gameobject that the complete callback will callback to.</param>
+        /// <param name="includeChildren">If true (default), all children will be faded in the same fashion. Note that the callback will only be done for the top level tween.</param>
+        public static void fadeFrom(GameObject target, float? time, float? delay, float? alpha, EasingType? transition, string onComplete, object oncomplete_params, GameObject oncomplete_target, bool includeChildren)
+        {
             init(target, new Arguments(time, fadeDefaultTime, delay, fadeDefaultDelay, transition, fadeDefaultTransition, onComplete, oncomplete_params,
-                FunctionType.fade, true, alpha, 0, oncomplete_target, LoopType.none));
+                FunctionType.fade, true, alpha, 0, includeChildren, oncomplete_target, LoopType.none));
         }
 
         #endregion
@@ -2862,8 +2981,26 @@ using System.Collections.Generic;
         /// <param name="loopType">The type of Loop that is desired to continue animation indefinitely</param>
         public static void fadeTo(GameObject target, float? time, float? delay, float? alpha, EasingType? transition, string onComplete, object oncomplete_params, GameObject oncomplete_target, LoopType loopType)
         {
+            fadeTo(target, time, delay, alpha, transition, onComplete, oncomplete_params, oncomplete_target, loopType, true);
+        }
+
+        /// <summary>
+        /// Will take the current color and fade it to the given alpha channel 
+        /// </summary>
+        /// <param name="target">The GameObject that will be faded</param>
+        /// <param name="time">The length of time it will take to do the fade. If null, it will use the fadeDefaultTime</param>
+        /// <param name="delay">The time in which to wait to begin tweening. This is basically a start time. If null, it will use the fadeDefaultDelay</param>
+        /// <param name="alpha">The alpha that you wish to fade to. If null, it will fade to 0.</param>
+        /// <param name="transition">The method in which you wish it to fade. If null, it will use fadeDefaultTransition</param>
+        /// <param name="onComplete">The name of the function that will be called back to.</param>
+        /// <param name="oncomplete_params">The parameter(s) that will be used with the callback.</param>
+        /// <param name="oncomplete_target">The gameobject that the complete callback will callback to.</param>
+        /// <param name="loopType">The type of Loop that is desired to continue animation indefinitely</param>
+        /// <param name="includeChildren">If true (default), all children will be faded in the same fashion. Note that the callback will only be done for the top level tween.</param>
+        public static void fadeTo(GameObject target, float? time, float? delay, float? alpha, EasingType? transition, string onComplete, object oncomplete_params, GameObject oncomplete_target, LoopType loopType, bool includeChildren)
+        {
             init(target, new Arguments(time, fadeDefaultTime, delay, fadeDefaultDelay, transition, fadeDefaultTransition, onComplete, oncomplete_params,
-                FunctionType.fade, false, alpha, 0, oncomplete_target, loopType));
+                FunctionType.fade, false, alpha, 0, includeChildren, oncomplete_target, loopType));
         }
 
         #endregion
@@ -2936,7 +3073,7 @@ using System.Collections.Generic;
         public static void moveBy(GameObject target, float? time, float? delay, float? x, float? y, float? z, EasingType? transition, string onComplete, object oncomplete_params, GameObject oncomplete_target)
         {
             init(target, new Arguments(time, moveDefaultTime, delay, moveDefaultDelay, transition, moveDefaultTransition, onComplete, oncomplete_params,
-               FunctionType.move, false, x, y, z, true, false, false, oncomplete_target, LoopType.none));
+               FunctionType.move, false, x, y, z, true, false, false, false, oncomplete_target, LoopType.none));
         }
 
         /// <summary>
@@ -2979,112 +3116,12 @@ using System.Collections.Generic;
         /// <param name="oncomplete_params">The parameter(s) that will be used with the callback.</param>
         public static void moveBy(GameObject target, float? time, float? delay, Vector3 vector, EasingType? transition, string onComplete, object oncomplete_params)
         {
-            moveBy(target, time, delay, vector.x, vector.y, vector.z, transition, onComplete, oncomplete_params);
+            moveBy(target, time, delay, vector.x, vector.y, vector.z, transition, onComplete, oncomplete_params, null);
         }
 
         #endregion 
 
-        #region moveByWorld
-        /// <summary>
-        /// Will move the object on each axis the distance specified using the gameobjects position property. 
-        /// If any of x, y, or z are null then the value would be 0.
-        /// The transition will be done with the current value of moveDefaultTransition.
-        /// </summary>
-        /// <param name="target">The GameObject that will be moved</param>
-        /// <param name="time">The length of time it will take to do the move to. If null, it will use the moveDefaultTime</param>
-        /// <param name="delay">The time in which to wait to begin tweening. This is basically a start time. If null, it will use the moveDefaultDelay</param>
-        /// <param name="x">The distance to move to on the x axis. If null, it will not move on the x axis.</param>
-        /// <param name="y">The distance to move to on the y axis. If null, it will not move on the y axis.</param>
-        /// <param name="z">The distance to move to on the z axis. If null, it will not move on the z axis.</param>
-        public static void moveByWorld(GameObject target, float? time, float? delay, float? x, float? y, float? z)
-        {
-            moveByWorld(target, time, delay, x, y, z, null, null, null);
-        }
-        /// <summary>
-        /// Will move the object on each axis the distance specified using the gameobjects position property. 
-        /// If any of x, y, or z are null then the value would be 0.
-        /// </summary>
-        /// <param name="target">The GameObject that will be moved</param>
-        /// <param name="time">The length of time it will take to do the move to. If null, it will use the moveDefaultTime</param>
-        /// <param name="delay">The time in which to wait to begin tweening. This is basically a start time. If null, it will use the moveDefaultDelay</param>
-        /// <param name="x">The distance to move to on the x axis. If null, it will not move on the x axis.</param>
-        /// <param name="y">The distance to move to on the y axis. If null, it will not move on the y axis.</param>
-        /// <param name="z">The distance to move to on the z axis. If null, it will not move on the z axis.</param>
-        /// <param name="transition">The method in which you wish it to move. If null, it will use moveDefaultTransition</param>
-        public static void moveByWorld(GameObject target, float? time, float? delay, float? x, float? y, float? z, EasingType? transition)
-        {
-            moveByWorld(target, time, delay, x, y, z, transition, null, null);
-        }
-
-        /// <summary>
-        /// Will move the object on each axis the distance specified using the gameobjects position property
-        /// If any of x, y, or z are null then the value would be 0.
-        /// </summary>
-        /// <param name="target">The GameObject that will be moved</param>
-        /// <param name="time">The length of time it will take to do the move. If null, it will use the moveDefaultTime</param>
-        /// <param name="delay">The time in which to wait to begin tweening. This is basically a start time. If null, it will use the moveDefaultDelay</param>
-        /// <param name="x">The distance to move to on the x axis. If null, it will not move on the x axis.</param>
-        /// <param name="y">The distance to move to on the y axis. If null, it will not move on the y axis.</param>
-        /// <param name="z">The distance to move to on the z axis. If null, it will not move on the z axis.</param>
-        /// <param name="transition">The method in which you wish it to move. If null, it will use moveDefaultTransition</param>
-        /// <param name="onComplete">The name of the function that will be called back to.</param>
-        /// <param name="oncomplete_params">The parameter(s) that will be used with the callback.</param>
-        public static void moveByWorld(GameObject target, float? time, float? delay, float? x, float? y, float? z, EasingType? transition, string onComplete, object oncomplete_params)
-        {
-            moveByWorld(target, time, delay, x, y, z, transition, onComplete, oncomplete_params, null);
-        }
-
-        /// <summary>
-        /// Will move the object on each axis the distance specified using the gameobjects position property
-        /// If any of x, y, or z are null then the value would be 0.
-        /// </summary>
-        /// <param name="target">The GameObject that will be moved</param>
-        /// <param name="time">The length of time it will take to do the move. If null, it will use the moveDefaultTime</param>
-        /// <param name="delay">The time in which to wait to begin tweening. This is basically a start time. If null, it will use the moveDefaultDelay</param>
-        /// <param name="x">The distance to move to on the x axis. If null, it will not move on the x axis.</param>
-        /// <param name="y">The distance to move to on the y axis. If null, it will not move on the y axis.</param>
-        /// <param name="z">The distance to move to on the z axis. If null, it will not move on the z axis.</param>
-        /// <param name="transition">The method in which you wish it to move. If null, it will use moveDefaultTransition</param>
-        /// <param name="onComplete">The name of the function that will be called back to.</param>
-        /// <param name="oncomplete_params">The parameter(s) that will be used with the callback.</param>
-        /// <param name="oncomplete_target">The gameobject that the complete callback will callback to.</param>
-        public static void moveByWorld(GameObject target, float? time, float? delay, float? x, float? y, float? z, EasingType? transition, string onComplete, object oncomplete_params, GameObject oncomplete_target)
-        {
-            init(target, new Arguments(time, moveDefaultTime, delay, moveDefaultDelay, transition, moveDefaultTransition, onComplete, oncomplete_params,
-               FunctionType.move, false, x, y, z, true, true, false, oncomplete_target, LoopType.none));
-        }
-
-        /// <summary>
-        /// Will move by the given vector values using the gameobjects position property. 
-        /// It will transition using the current value of moveDefaultTransition.
-        /// </summary>
-        /// <param name="target">The GameObject that will be moved</param>
-        /// <param name="time">The length of time it will take to do the move. If null, it will use the moveDefaultTime</param>
-        /// <param name="delay">The time in which to wait to begin tweening. This is basically a start time. If null, it will use the moveDefaultDelay</param>
-        /// <param name="vector">The distance to move. Don't make this null.</param>
-        public static void moveByWorld(GameObject target, float? time, float? delay, Vector3 vector)
-        {
-            moveByWorld(target, time, delay, vector.x, vector.y, vector.z, null, null, null);
-        }
-
-        /// <summary>
-        /// Will move by the given vector values using the gameobjects position property. 
-        /// It will transition using the current value of moveDefaultTransition.
-        /// </summary>
-        /// <param name="target">The GameObject that will be moved</param>
-        /// <param name="time">The length of time it will take to do the move. If null, it will use the moveDefaultTime</param>
-        /// <param name="delay">The time in which to wait to begin tweening. This is basically a start time. If null, it will use the moveDefaultDelay</param>
-        /// <param name="vector">The distance to move. Don't make this null.</param>
-        /// <param name="transition">The method in which you wish it to move. If null, it will use moveDefaultTransition</param>
-        /// <param name="onComplete">The name of the function that will be called back to.</param>
-        /// <param name="oncomplete_params">The parameter(s) that will be used with the callback.</param>
-        public static void moveByWorld(GameObject target, float? time, float? delay, Vector3 vector, EasingType? transition, string onComplete, object oncomplete_params)
-        {
-            moveByWorld(target, time, delay, vector.x, vector.y, vector.z, transition, onComplete, oncomplete_params);
-        }
-
-        #endregion
-
+  
         #region moveFrom
         /// <summary>
         /// Will move from the given coordinates to the current coordinates. 
@@ -3153,7 +3190,7 @@ using System.Collections.Generic;
         public static void moveFrom(GameObject target, float? time, float? delay, float? x, float? y, float? z, EasingType? transition, string onComplete, object oncomplete_params, GameObject oncomplete_target)
         {
             init(target, new Arguments(time, moveDefaultTime, delay, moveDefaultDelay, transition, moveDefaultTransition, onComplete, oncomplete_params,
-              FunctionType.move, true, x, y, z, false, false, false, oncomplete_target, LoopType.none));
+              FunctionType.move, true, x, y, z, false, false, false, false, oncomplete_target, LoopType.none));
         }
 
         /// <summary>
@@ -3267,7 +3304,7 @@ using System.Collections.Generic;
         public static void moveFromWorld(GameObject target, float? time, float? delay, float? x, float? y, float? z, EasingType? transition, string onComplete, object oncomplete_params, GameObject oncomplete_target)
         {
             init(target, new Arguments(time, moveDefaultTime, delay, moveDefaultDelay, transition, moveDefaultTransition, onComplete, oncomplete_params,
-              FunctionType.move, true, x, y, z, false, true, false, oncomplete_target, LoopType.none));
+              FunctionType.move, true, x, y, z, false, true, false, false, oncomplete_target, LoopType.none));
         }
 
         /// <summary>
@@ -3367,7 +3404,7 @@ using System.Collections.Generic;
         /// <param name="oncomplete_target">The gameobject that the complete callback will callback to.</param>
         public static void moveTo(GameObject target, float? time, float? delay, float? x, float? y, float? z, EasingType? transition, string onComplete, object oncomplete_params, GameObject oncomplete_target)
         {
-            moveTo(target, time, delay, x, y, z, transition, onComplete, oncomplete_params, null, LoopType.none);
+            moveTo(target, time, delay, x, y, z, transition, onComplete, oncomplete_params, oncomplete_target, LoopType.none);
         }
 
         /// <summary>
@@ -3482,7 +3519,7 @@ using System.Collections.Generic;
         public static void moveTo(GameObject target, float? time, float? delay, float? x, float? y, float? z, EasingType? transition, string onComplete, object oncomplete_params, GameObject oncomplete_target, LoopType loopType)
         {
             init(target, new Arguments(time, moveDefaultTime, delay, moveDefaultDelay, transition, moveDefaultTransition, onComplete, oncomplete_params,
-               FunctionType.move, false, x, y, z, false, false, false, oncomplete_target, loopType));
+               FunctionType.move, false, x, y, z, false, false, false, false, oncomplete_target, loopType));
         }
 
         #endregion
@@ -4143,7 +4180,7 @@ using System.Collections.Generic;
         /// <param name="oncomplete_target">The gameobject that the complete callback will callback to.</param>
         public static void moveToWorld(GameObject target, float? time, float? delay, float? x, float? y, float? z, EasingType? transition, string onComplete, object oncomplete_params, GameObject oncomplete_target)
         {
-            moveToWorld(target, time, delay, x, y, z, transition, onComplete, oncomplete_params, null, LoopType.none);
+            moveToWorld(target, time, delay, x, y, z, transition, onComplete, oncomplete_params, oncomplete_target, LoopType.none);
         }
 
         /// <summary>
@@ -4258,7 +4295,7 @@ using System.Collections.Generic;
         public static void moveToWorld(GameObject target, float? time, float? delay, float? x, float? y, float? z, EasingType? transition, string onComplete, object oncomplete_params, GameObject oncomplete_target, LoopType loopType)
         {
             init(target, new Arguments(time, moveDefaultTime, delay, moveDefaultDelay, transition, moveDefaultTransition, onComplete, oncomplete_params,
-               FunctionType.move, false, x, y, z, false, true, false, oncomplete_target, loopType));
+               FunctionType.move, false, x, y, z, false, true, false, false, oncomplete_target, loopType));
         }
 
         #endregion
@@ -4319,7 +4356,7 @@ using System.Collections.Generic;
         {
             //NOTE: the easing type is set to any random value because it is not used
             init(target, new Arguments(time, punchPositionDefaultTime, delay, punchPositionDefaultDelay, EasingType.easeInExpo, EasingType.easeInExpo, onComplete, oncomplete_params,
-              FunctionType.punchPosition, false, x, y, z, false, false, false, oncomplete_target, LoopType.none));
+              FunctionType.punchPosition, false, x, y, z, false, false, false, false, oncomplete_target, LoopType.none));
         }
 
         /// <summary>
@@ -4354,6 +4391,23 @@ using System.Collections.Generic;
             punchPosition(target, time, delay, vector.x, vector.y, vector.z, onComplete, oncomplete_params);
         }
 
+        /// <summary>
+        /// Will punch the object's position with an amplitude per axis as specified by the x, y, and z parameters
+        /// the object willuse a sine curve to determine the speed given the amplitude.
+        /// The object will move and then return to it's starting position
+        /// If any of x, y, or z are null then it will not move on that axis.
+        /// </summary>
+        /// <param name="target">The GameObject that will be punched</param>
+        /// <param name="time">The length of time it will take to do the punch. If null, it will use the punchPositionDefaultTime</param>
+        /// <param name="delay">The time in which to wait to begin tweening. This is basically a start time. If null, it will use the punchPositionDefaultDelay</param>
+        /// <param name="vector">The vector specifying the amplitude of the punch along each axis. Don't make this null.</param>    
+        /// <param name="onComplete">The name of the function that will be called back to.</param>
+        /// <param name="oncomplete_params">The parameter(s) that will be used with the callback.</param>
+        /// <param name="oncomplete_target">The gameobject that the complete callback will callback to.</param>
+        public static void punchPosition(GameObject target, float? time, float? delay, Vector3 vector, string onComplete, object oncomplete_params, GameObject oncomplete_target)
+        {
+            punchPosition(target, time, delay, vector.x, vector.y, vector.z, onComplete, oncomplete_params, oncomplete_target);
+        }
         #endregion
 
         #region punchRotation
@@ -4412,7 +4466,7 @@ using System.Collections.Generic;
         {
             //NOTE: the easing type is set to any random value because it is not used
             init(target, new Arguments(time, punchRotationDefaultTime, delay, punchRotationDefaultDelay, EasingType.easeInExpo, EasingType.easeInExpo, onComplete, oncomplete_params,
-              FunctionType.punchRotation, false, x, y, z, false, false, false, oncomplete_target, LoopType.none));
+              FunctionType.punchRotation, false, x, y, z, false, false, false, false, oncomplete_target, LoopType.none));
         }
 
         /// <summary>
@@ -4446,6 +4500,165 @@ using System.Collections.Generic;
         {
             punchRotation(target, time, delay, vector.x, vector.y, vector.z, onComplete, oncomplete_params);
         }
+
+        /// <summary>
+        /// Will punch the object's rotation with an amplitude per axis as specified by the x, y, and z parameters
+        /// the object will use a sine curve to determine the speed given the amplitude.
+        /// The object will rotate and then return to it's starting position
+        /// If any of x, y, or z are null then it will not rotate on that axis.
+        /// </summary>
+        /// <param name="target">The GameObject that will be punched</param>
+        /// <param name="time">The length of time it will take to do the punch. If null, it will use the punchRotationDefaultTime</param>
+        /// <param name="delay">The time in which to wait to begin tweening. This is basically a start time. If null, it will use the punchRotationDefaultDelay</param>
+        /// <param name="vector">The vector specifying the amplitude of the punch rotating each axis (The number of rotations). Don't make this null.</param>    
+        /// <param name="onComplete">The name of the function that will be called back to.</param>
+        /// <param name="oncomplete_params">The parameter(s) that will be used with the callback.</param>
+        /// <param name="oncomplete_target">The gameobject that the complete callback will callback to.</param>
+        public static void punchRotation(GameObject target, float? time, float? delay, Vector3 vector, string onComplete, object oncomplete_params, GameObject oncomplete_target)
+        {
+            punchRotation(target, time, delay, vector.x, vector.y, vector.z, onComplete, oncomplete_params, oncomplete_target);
+        }
+        #endregion
+
+        #region rotateAdd
+        /// <summary>
+        /// Will rotate the object the number of rotations defined by each axis. 1 means rotate 360 degrees.
+        /// If any of x, y, or z are null then there will be no rotation on that axis.
+        /// The rotating will be transitioned with the current value of rotateAddDefaultTransition
+        /// </summary>
+        /// <param name="target">The GameObject that will be rotated</param>
+        /// <param name="time">The length of time it will take to do the rotation. If null, it will use the rotateAddDefaultTime</param>
+        /// <param name="delay">The time in which to wait to begin tweening. This is basically a start time. If null, it will use the rotateAddDefaultDelay</param>
+        /// <param name="x">The number of times to rotate on the x axis. If null, it will not rotate on the x axis.</param>
+        /// <param name="y">The number of times to rotate on the y axis. If null, it will not rotate on the y axis.</param>
+        /// <param name="z">The number of times to rotate on the z axis. If null, it will not rotate on the z axis.</param>   
+        public static void rotateAdd(GameObject target, float? time, float? delay, float? x, float? y, float? z)
+        {
+            rotateAdd(target, time, delay, x, y, z, null, null, null);
+        }
+
+        /// <summary>
+        /// Will rotate the object The number of rotations defined by each axis. 1 means rotate 360 degrees.
+        /// If any of x, y, or z are null then there will be no rotation on that axis.
+        /// </summary>
+        /// <param name="target">The GameObject that will be rotated</param>
+        /// <param name="time">The length of time it will take to do the rotation. If null, it will use the rotateAddDefaultTime</param>
+        /// <param name="delay">The time in which to wait to begin tweening. This is basically a start time. If null, it will use the rotateAddDefaultDelay</param>
+        /// <param name="x">The number of times to rotate on the x axis. If null, it will not rotate on the x axis.</param>
+        /// <param name="y">The number of times to rotate on the y axis. If null, it will not rotate on the y axis.</param>
+        /// <param name="z">The number of times to rotate on the z axis. If null, it will not rotate on the z axis.</param>
+        /// <param name="transition">The method in which you wish it to rotate. If null, it will use rotateAddDefaultTransition</param>   
+        public static void rotateAdd(GameObject target, float? time, float? delay, float? x, float? y, float? z, EasingType? transition)
+        {
+            rotateAdd(target, time, delay, x, y, z, transition, null, null);
+        }
+
+        /// <summary>
+        /// Will rotate the object The number of rotations defined by each axis. 1 means rotate 360 degrees.
+        /// If any of x, y, or z are null then there will be no rotation on that axis.
+        /// </summary>
+        /// <param name="target">The GameObject that will be rotated</param>
+        /// <param name="time">The length of time it will take to do the rotation. If null, it will use the rotateAddDefaultTime</param>
+        /// <param name="delay">The time in which to wait to begin tweening. This is basically a start time. If null, it will use the rotateAddDefaultDelay</param>
+        /// <param name="x">The number of times to rotate on the x axis. If null, it will not rotate on the x axis.</param>
+        /// <param name="y">The number of times to rotate on the y axis. If null, it will not rotate on the y axis.</param>
+        /// <param name="z">The number of times to rotate on the z axis. If null, it will not rotate on the z axis.</param>
+        /// <param name="transition">The method in which you wish it to rotate. If null, it will use rotateAddDefaultTransition</param>
+        /// <param name="onComplete">The name of the function that will be called back to.</param>
+        /// <param name="oncomplete_params">The parameter(s) that will be used with the callback.</param>
+        public static void rotateAdd(GameObject target, float? time, float? delay, float? x, float? y, float? z, EasingType? transition, string onComplete, object oncomplete_params)
+        {
+            rotateAdd(target, time, delay, x, y, z, transition, onComplete, oncomplete_params, null);
+        }
+
+        /// <summary>
+        /// Will rotate the object The number of rotations defined by each axis. 1 means rotate 360 degrees.
+        /// If any of x, y, or z are null then there will be no rotation on that axis.
+        /// </summary>
+        /// <param name="target">The GameObject that will be rotated</param>
+        /// <param name="time">The length of time it will take to do the rotation. If null, it will use the rotateAddDefaultTime</param>
+        /// <param name="delay">The time in which to wait to begin tweening. This is basically a start time. If null, it will use the rotateAddDefaultDelay</param>
+        /// <param name="x">The number of times to rotate on the x axis. If null, it will not rotate on the x axis.</param>
+        /// <param name="y">The number of times to rotate on the y axis. If null, it will not rotate on the y axis.</param>
+        /// <param name="z">The number of times to rotate on the z axis. If null, it will not rotate on the z axis.</param>
+        /// <param name="transition">The method in which you wish it to rotate. If null, it will use rotateAddDefaultTransition</param>
+        /// <param name="onComplete">The name of the function that will be called back to.</param>
+        /// <param name="oncomplete_params">The parameter(s) that will be used with the callback.</param>
+        /// <param name="oncomplete_target">The gameobject that the complete callback will callback to.</param>
+        public static void rotateAdd(GameObject target, float? time, float? delay, float? x, float? y, float? z, EasingType? transition, string onComplete, object oncomplete_params, GameObject oncomplete_target)
+        {
+            if (target.guiTexture || target.guiText)
+            {
+                //TODO: Why not throw a real error?
+                Debug.LogError("ERROR: GUITextures cannot be rotated!");
+                return;
+            }
+
+            init(target, new Arguments(time, rotateAddDefaultTime, delay, rotateAddDefaultDelay, transition, rotateAddDefaultTransition, onComplete, oncomplete_params,
+                FunctionType.rotate, false, x, y, z, true, false, false, false, oncomplete_target, LoopType.none));
+        }
+
+        /// <summary>
+        /// Will rotate the object The number of rotations defined by each axis. 1 means rotate 360 degrees.
+        /// If any of x, y, or z are null then there will be no rotation on that axis.
+        /// The rotation will be transitioned with the current value of rotateAddDefaultTransition
+        /// </summary>
+        /// <param name="target">The GameObject that will be rotated</param>
+        /// <param name="time">The length of time it will take to do the rotation. If null, it will use the rotateAddDefaultTime</param>
+        /// <param name="delay">The time in which to wait to begin tweening. This is basically a start time. If null, it will use the rotateAddDefaultDelay</param>
+        /// <param name="vector">The vector specifying the number of times to rotate each axis. Don't make this null.</param>        
+        public static void rotateAdd(GameObject target, float? time, float? delay, Vector3 vector)
+        {
+            rotateAdd(target, time, delay, vector.x, vector.y, vector.z, null, null, null);
+        }
+
+        /// <summary>
+        /// Will rotate the object The number of rotations defined by each axis. 1 means rotate 360 degrees.
+        /// If any of x, y, or z are null then there will be no rotation on that axis.
+        /// </summary>
+        /// <param name="target">The GameObject that will be rotated</param>
+        /// <param name="time">The length of time it will take to do the rotation. If null, it will use the rotateAddDefaultTime</param>
+        /// <param name="delay">The time in which to wait to begin tweening. This is basically a start time. If null, it will use the rotateAddDefaultDelay</param>
+        /// <param name="vector">The vector specifying the number of times to rotate each axis. Don't make this null.</param>    
+        /// <param name="transition">The method in which you wish it to rotate. If null, it will use rotateAddDefaultTransition</param>
+        public static void rotateAdd(GameObject target, float? time, float? delay, Vector3 vector, EasingType? transition)
+        {
+            rotateAdd(target, time, delay, vector.x, vector.y, vector.z, transition, null, null);
+        }
+
+        /// <summary>
+        /// Will rotate the object The number of rotations defined by each axis. 1 means rotate 360 degrees.
+        /// If any of x, y, or z are null then there will be no rotation on that axis.
+        /// </summary>
+        /// <param name="target">The GameObject that will be rotated</param>
+        /// <param name="time">The length of time it will take to do the rotation. If null, it will use the rotateAddDefaultTime</param>
+        /// <param name="delay">The time in which to wait to begin tweening. This is basically a start time. If null, it will use the rotateAddDefaultDelay</param>
+        /// <param name="vector">The vector specifying the number of times to rotate each axis. Don't make this null.</param>    
+        /// <param name="transition">The method in which you wish it to rotate. If null, it will use rotateAddDefaultTransition</param>
+        /// <param name="onComplete">The name of the function that will be called back to.</param>
+        /// <param name="oncomplete_params">The parameter(s) that will be used with the callback.</param>
+        public static void rotateAdd(GameObject target, float? time, float? delay, Vector3 vector, EasingType? transition, string onComplete, object oncomplete_params)
+        {
+            rotateAdd(target, time, delay, vector.x, vector.y, vector.z, transition, onComplete, oncomplete_params, null);
+        }
+
+        /// <summary>
+        /// Will rotate the object The number of rotations defined by each axis. 1 means rotate 360 degrees.
+        /// If any of x, y, or z are null then there will be no rotation on that axis.
+        /// </summary>
+        /// <param name="target">The GameObject that will be rotated</param>
+        /// <param name="time">The length of time it will take to do the rotation. If null, it will use the rotateAddDefaultTime</param>
+        /// <param name="delay">The time in which to wait to begin tweening. This is basically a start time. If null, it will use the rotateAddDefaultDelay</param>
+        /// <param name="vector">The vector specifying the number of times to rotate each axis. Don't make this null.</param>    
+        /// <param name="transition">The method in which you wish it to rotate. If null, it will use rotateAddDefaultTransition</param>
+        /// <param name="onComplete">The name of the function that will be called back to.</param>
+        /// <param name="oncomplete_params">The parameter(s) that will be used with the callback.</param>
+        /// <param name="oncomplete_target">The gameobject that the complete callback will callback to.</param>
+        public static void rotateAdd(GameObject target, float? time, float? delay, Vector3 vector, EasingType? transition, string onComplete, object oncomplete_params, GameObject oncomplete_target)
+        {
+            rotateAdd(target, time, delay, vector.x, vector.y, vector.z, transition, onComplete, oncomplete_params, oncomplete_target);
+        }
+
         #endregion
 
         #region rotateBy
@@ -4523,7 +4736,7 @@ using System.Collections.Generic;
             }
 
             init(target, new Arguments(time, rotateByDefaultTime, delay, rotateByDefaultDelay, transition, rotateByDefaultTransition, onComplete, oncomplete_params,
-                FunctionType.rotate, false, x, y, z, true, false, false, oncomplete_target, LoopType.none));
+                FunctionType.rotate, false, x, y, z, true, false, true, false, oncomplete_target, LoopType.none));
         }
 
         /// <summary>
@@ -4568,6 +4781,23 @@ using System.Collections.Generic;
         public static void rotateBy(GameObject target, float? time, float? delay, Vector3 vector, EasingType? transition, string onComplete, object oncomplete_params)
         {
             rotateBy(target, time, delay, vector.x, vector.y, vector.z, transition, onComplete, oncomplete_params);
+        }
+
+        /// <summary>
+        /// Will rotate the object The number of rotations defined by each axis. 1 means rotate 360 degrees.
+        /// If any of x, y, or z are null then there will be no rotation on that axis.
+        /// </summary>
+        /// <param name="target">The GameObject that will be rotated</param>
+        /// <param name="time">The length of time it will take to do the rotation. If null, it will use the rotateByDefaultTime</param>
+        /// <param name="delay">The time in which to wait to begin tweening. This is basically a start time. If null, it will use the rotateByDefaultDelay</param>
+        /// <param name="vector">The vector specifying the number of times to rotate each axis. Don't make this null.</param>    
+        /// <param name="transition">The method in which you wish it to rotate. If null, it will use rotateByDefaultTransition</param>
+        /// <param name="onComplete">The name of the function that will be called back to.</param>
+        /// <param name="oncomplete_params">The parameter(s) that will be used with the callback.</param>
+        /// <param name="oncomplete_target">The gameobject that the complete callback will callback to.</param>
+        public static void rotateBy(GameObject target, float? time, float? delay, Vector3 vector, EasingType? transition, string onComplete, object oncomplete_params, GameObject oncomplete_target)
+        {
+            rotateBy(target, time, delay, vector.x, vector.y, vector.z, transition, onComplete, oncomplete_params, oncomplete_target);
         }
 
         #endregion
@@ -4647,7 +4877,7 @@ using System.Collections.Generic;
             }
 
             init(target, new Arguments(time, rotateDefaultTime, delay, rotateDefaultDelay, transition, rotateDefaultTransition, onComplete, oncomplete_params,
-              FunctionType.rotate, true, x, y, z, false, false, false, oncomplete_target, LoopType.none));
+              FunctionType.rotate, true, x, y, z, false, false, false, false, oncomplete_target, LoopType.none));
         }
 
         /// <summary>
@@ -4689,6 +4919,22 @@ using System.Collections.Generic;
         public static void rotateFrom(GameObject target, float? time, float? delay, Vector3 vector, EasingType? transition, string onComplete, object oncomplete_params)
         {
             rotateFrom(target, time, delay, vector.x, vector.y, vector.z, transition, onComplete, oncomplete_params);
+        }
+
+        /// <summary>
+        /// Will rotate the object using the shortest path from the specified rotation to the current rotation. 
+        /// </summary>
+        /// <param name="target">The GameObject that will be rotated</param>
+        /// <param name="time">The length of time it will take to do the rotation. If null, it will use the rotateToDefaultTime</param>
+        /// <param name="delay">The time in which to wait to begin tweening. This is basically a start time. If null, it will use the rotateToDefaultDelay</param>
+        /// <param name="vector">The vector specifying the rotation to rotate the object to. Don't make this null.</param>    
+        /// <param name="transition">The method in which you wish it to rotate. If null, it will use rotateToDefaultTransition</param>
+        /// <param name="onComplete">The name of the function that will be called back to.</param>
+        /// <param name="oncomplete_params">The parameter(s) that will be used with the callback.</param>
+        /// <param name="oncomplete_target">The gameobject that the complete callback will callback to.</param>
+        public static void rotateFrom(GameObject target, float? time, float? delay, Vector3 vector, EasingType? transition, string onComplete, object oncomplete_params, GameObject oncomplete_target)
+        {
+            rotateFrom(target, time, delay, vector.x, vector.y, vector.z, transition, onComplete, oncomplete_params, oncomplete_target);
         }
 
         #endregion
@@ -4806,6 +5052,22 @@ using System.Collections.Generic;
 
         /// <summary>
         /// Will rotate the object using the shortest path to the target rotation. 
+        /// </summary>
+        /// <param name="target">The GameObject that will be rotated</param>
+        /// <param name="time">The length of time it will take to do the rotation. If null, it will use the rotateToDefaultTime</param>
+        /// <param name="delay">The time in which to wait to begin tweening. This is basically a start time. If null, it will use the rotateToDefaultDelay</param>
+        /// <param name="vector">The rotation to rotate the object to. Don't make this null.</param>    
+        /// <param name="transition">The method in which you wish it to rotate. If null, it will use rotateToDefaultTransition</param>
+        /// <param name="onComplete">The name of the function that will be called back to.</param>
+        /// <param name="oncomplete_params">The parameter(s) that will be used with the callback.</param>
+        /// <param name="oncomplete_target">The gameobject that the complete callback will callback to.</param>
+        public static void rotateTo(GameObject target, float? time, float? delay, Vector3 vector, EasingType? transition, string onComplete, object oncomplete_params, GameObject oncomplete_target)
+        {
+            rotateTo(target, time, delay, vector.x, vector.y, vector.z, transition, onComplete, oncomplete_params, oncomplete_target, LoopType.none);
+        }
+
+        /// <summary>
+        /// Will rotate the object using the shortest path to the target rotation. 
         /// If any of x, y, or z are null then the current value at tween time of the object will be used.
         /// The rotating will be transitioned with the current value of rotateToDefaultTransition
         /// </summary>
@@ -4882,7 +5144,7 @@ using System.Collections.Generic;
             }
 
             init(target, new Arguments(time, rotateDefaultTime, delay, rotateDefaultDelay, transition, rotateDefaultTransition, onComplete, oncomplete_params,
-              FunctionType.rotate, false, x, y, z, false, false, false, oncomplete_target, loopType));
+              FunctionType.rotate, false, x, y, z, false, false, false, false, oncomplete_target, loopType));
         }
 
 
@@ -4956,7 +5218,7 @@ using System.Collections.Generic;
         public static void scaleAdd(GameObject target, float? time, float? delay, float? x, float? y, float? z, EasingType? transition, string onComplete, object oncomplete_params, GameObject oncomplete_target)
         {
             init(target, new Arguments(time, scaleDefaultTime, delay, scaleDefaultDelay, transition, scaleDefaultTransition, onComplete, oncomplete_params,
-              FunctionType.scale, false, x, y, z, true, false, false, oncomplete_target, LoopType.none));
+              FunctionType.scale, false, x, y, z, true, false, false, false, oncomplete_target, LoopType.none));
         }
 
         /// <summary>
@@ -4998,6 +5260,22 @@ using System.Collections.Generic;
         public static void scaleAdd(GameObject target, float? time, float? delay, Vector3 vector, EasingType? transition, string onComplete, object oncomplete_params)
         {
             scaleAdd(target, time, delay, vector.x, vector.y, vector.z, transition, onComplete, oncomplete_params);
+        }
+
+        /// <summary>
+        /// Will scale by adding the given size specified in the vector.
+        /// </summary>
+        /// <param name="target">The GameObject that will be scaled</param>
+        /// <param name="time">The length of time it will take to do the scaling. If null, it will use the scaleDefaultTime</param>
+        /// <param name="delay">The time in which to wait to begin tweening. This is basically a start time. If null, it will use the scaleDefaultDelay</param>
+        /// <param name="vector">The size to scale the object by. Don't make this null.</param>    
+        /// <param name="transition">The method in which you wish it to scale. If null, it will use scaleDefaultTransition</param>
+        /// <param name="onComplete">The name of the function that will be called back to.</param>
+        /// <param name="oncomplete_params">The parameter(s) that will be used with the callback.</param>
+        /// <param name="oncomplete_target">The gameobject that the complete callback will callback to.</param>
+        public static void scaleAdd(GameObject target, float? time, float? delay, Vector3 vector, EasingType? transition, string onComplete, object oncomplete_params, GameObject oncomplete_target)
+        {
+            scaleAdd(target, time, delay, vector.x, vector.y, vector.z, transition, onComplete, oncomplete_params, oncomplete_target);
         }
         #endregion
 
@@ -5069,7 +5347,7 @@ using System.Collections.Generic;
         public static void scaleBy(GameObject target, float? time, float? delay, float? x, float? y, float? z, EasingType? transition, string onComplete, object oncomplete_params, GameObject oncomplete_target)
         {
             init(target, new Arguments(time, scaleDefaultTime, delay, scaleDefaultDelay, transition, scaleDefaultTransition, onComplete, oncomplete_params,
-              FunctionType.scale, false, x, y, z, true, true, true, oncomplete_target, LoopType.none));
+              FunctionType.scale, false, x, y, z, true, true, true, false, oncomplete_target, LoopType.none));
         }
 
         /// <summary>
@@ -5111,6 +5389,22 @@ using System.Collections.Generic;
         public static void scaleBy(GameObject target, float? time, float? delay, Vector3 vector, EasingType? transition, string onComplete, object oncomplete_params)
         {
             scaleBy(target, time, delay, vector.x, vector.y, vector.z, transition, onComplete, oncomplete_params);
+        }
+
+        /// <summary>
+        /// Will scale by the given size specified in the vector.
+        /// </summary>
+        /// <param name="target">The GameObject that will be scaled</param>
+        /// <param name="time">The length of time it will take to do the scaling. If null, it will use the scaleDefaultTime</param>
+        /// <param name="delay">The time in which to wait to begin tweening. This is basically a start time. If null, it will use the scaleDefaultDelay</param>
+        /// <param name="vector">The size to scale the object by. Don't make this null.</param>    
+        /// <param name="transition">The method in which you wish it to scale. If null, it will use scaleDefaultTransition</param>
+        /// <param name="onComplete">The name of the function that will be called back to.</param>
+        /// <param name="oncomplete_params">The parameter(s) that will be used with the callback.</param>
+        /// <param name="oncomplete_target">The gameobject that the complete callback will callback to.</param>
+        public static void scaleBy(GameObject target, float? time, float? delay, Vector3 vector, EasingType? transition, string onComplete, object oncomplete_params, GameObject oncomplete_target)
+        {
+            scaleBy(target, time, delay, vector.x, vector.y, vector.z, transition, onComplete, oncomplete_params, oncomplete_target);
         }
 
         #endregion
@@ -5183,7 +5477,7 @@ using System.Collections.Generic;
         public static void scaleFrom(GameObject target, float? time, float? delay, float? x, float? y, float? z, EasingType? transition, string onComplete, object oncomplete_params, GameObject oncomplete_target)
         {
             init(target, new Arguments(time, scaleDefaultTime, delay, scaleDefaultDelay, transition, scaleDefaultTransition, onComplete, oncomplete_params,
-              FunctionType.scale, true, x, y, z, false, false, false, oncomplete_target, LoopType.none));
+              FunctionType.scale, true, x, y, z, false, false, false, false, oncomplete_target, LoopType.none));
         }
 
         /// <summary>
@@ -5225,6 +5519,22 @@ using System.Collections.Generic;
         public static void scaleFrom(GameObject target, float? time, float? delay, Vector3 vector, EasingType? transition, string onComplete, object oncomplete_params)
         {
             scaleFrom(target, time, delay, vector.x, vector.y, vector.z, transition, onComplete, oncomplete_params);
+        }
+
+        /// <summary>
+        /// Will scale from the given size back to the current size. 
+        /// </summary>
+        /// <param name="target">The GameObject that will be scaled</param>
+        /// <param name="time">The length of time it will take to do the scaling. If null, it will use the scaleDefaultTime</param>
+        /// <param name="delay">The time in which to wait to begin tweening. This is basically a start time. If null, it will use the scaleDefaultDelay</param>
+        /// <param name="vector">The size to scale the object from. Don't make this null.</param>    
+        /// <param name="transition">The method in which you wish it to scale. If null, it will use scaleDefaultTransition</param>
+        /// <param name="onComplete">The name of the function that will be called back to.</param>
+        /// <param name="oncomplete_params">The parameter(s) that will be used with the callback.</param>
+        /// <param name="oncomplete_target">The gameobject that the complete callback will callback to.</param>
+        public static void scaleFrom(GameObject target, float? time, float? delay, Vector3 vector, EasingType? transition, string onComplete, object oncomplete_params, GameObject oncomplete_target)
+        {
+            scaleFrom(target, time, delay, vector.x, vector.y, vector.z, transition, onComplete, oncomplete_params, oncomplete_target);
         }
         #endregion
 
@@ -5341,6 +5651,23 @@ using System.Collections.Generic;
         }
 
         /// <summary>
+        /// Will scale to the given size specified in the vector.
+        /// </summary>
+        /// <param name="target">The GameObject that will be scaled</param>
+        /// <param name="time">The length of time it will take to do the scaling. If null, it will use the scaleDefaultTime</param>
+        /// <param name="delay">The time in which to wait to begin tweening. This is basically a start time. If null, it will use the scaleDefaultDelay</param>
+        /// <param name="vector">The size to scale the object to. Don't make this null.</param>    
+        /// <param name="transition">The method in which you wish it to scale. If null, it will use scaleDefaultTransition</param>
+        /// <param name="onComplete">The name of the function that will be called back to.</param>
+        /// <param name="oncomplete_params">The parameter(s) that will be used with the callback.</param>
+        /// <param name="oncomplete_target">The gameobject that the complete callback will callback to.</param>
+        /// <param name="loopType">The type of Loop that is desired to continue animation indefinitely</param>
+        public static void scaleTo(GameObject target, float? time, float? delay, Vector3 vector, EasingType? transition, string onComplete, object oncomplete_params, GameObject oncomplete_target, LoopType loopType)
+        {
+            scaleTo(target, time, delay, vector.x, vector.y, vector.z, transition, onComplete, oncomplete_params, oncomplete_target, loopType);
+        }
+
+        /// <summary>
         /// Will scale to the given size. 
         /// If any of x, y, or z are null then the current value at tween time of the object will be used.
         /// The scaling will be transitioned with the current value of scaleDefaultTransition
@@ -5411,7 +5738,7 @@ using System.Collections.Generic;
         public static void scaleTo(GameObject target, float? time, float? delay, float? x, float? y, float? z, EasingType? transition, string onComplete, object oncomplete_params, GameObject oncomplete_target, LoopType loopType)
         {
             init(target, new Arguments(time, scaleDefaultTime, delay, scaleDefaultDelay, transition, scaleDefaultTransition, onComplete, oncomplete_params,
-              FunctionType.scale, false, x, y, z, false, false, false, oncomplete_target, loopType));
+              FunctionType.scale, false, x, y, z, false, false, false, false, oncomplete_target, loopType));
         }
 
         #endregion
@@ -5472,7 +5799,7 @@ using System.Collections.Generic;
         {
             //NOTE: the easing type is set to any random value because it is not used
             init(target, new Arguments(time, shakeDefaultTime, delay, shakeDefaultDelay, EasingType.easeInExpo, EasingType.easeInExpo, onComplete, oncomplete_params,
-              FunctionType.shake, false, x, y, z, false, false, false, oncomplete_target, LoopType.none));
+              FunctionType.shake, false, x, y, z, false, false, false, false, oncomplete_target, LoopType.none));
         }
 
         /// <summary>
@@ -5505,6 +5832,24 @@ using System.Collections.Generic;
         public static void shake(GameObject target, float? time, float? delay, Vector3 vector, string onComplete, object oncomplete_params)
         {
             shake(target, time, delay, vector.x, vector.y, vector.z, onComplete, oncomplete_params);
+        }
+
+        /// <summary>
+        /// This will shake the object, with an initial impact of the full displacement as specified by the x, y and z parameters
+        /// The object will then have a random shaking with a maximum displacement represented by the x, y and z parameters along those axis.
+        /// The shake displacement will dissipate linearly across time from the initial maximum displacement to 0.
+        /// The object will at the end return to where it started.
+        /// </summary>
+        /// <param name="target">The GameObject that will be shaken</param>
+        /// <param name="time">The length of time to shake the object. If null, it will use the shakeDefaultTime</param>
+        /// <param name="delay">The time in which to wait to begin tweening. This is basically a start time. If null, it will use the shakeDefaultDelay</param>
+        /// <param name="vector">The vector specifys the maximum and initial displacement of the shake along each axis. Don't make this null.</param> 
+        /// <param name="onComplete">The name of the function that will be called back to.</param>
+        /// <param name="oncomplete_params">The parameter(s) that will be used with the callback.</param>
+        /// <param name="oncomplete_target">The gameobject that the complete callback will callback to.</param>
+        public static void shake(GameObject target, float? time, float? delay, Vector3 vector, string onComplete, object oncomplete_params, GameObject oncomplete_target)
+        {
+            shake(target, time, delay, vector.x, vector.y, vector.z, onComplete, oncomplete_params, oncomplete_target);
         }
         #endregion
 
