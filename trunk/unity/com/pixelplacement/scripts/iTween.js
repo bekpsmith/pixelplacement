@@ -1,4 +1,4 @@
-//VERSION: 1.0.19
+//VERSION: 1.0.20
 
 /*
 Copyright (c)2010 Bob Berkebile(http://www.pixelplacement.com), C# port by Patrick Corkum(http://www.insquare.com)
@@ -41,7 +41,7 @@ public static var audioDefaults : Hashtable = {"time":1,"delay":0,"volume":1,"pi
 public static var scaleDefaults : Hashtable = {"time":1,"delay":0,"transition":"easeInOutCubic"};
 public static var fadeDefaults : Hashtable = {"time":1,"delay":0,"transition":"linear"};
 public static var moveDefaults : Hashtable = {"time":1,"delay":0,"transition":"easeInOutCubic"};
-public static var moveBezierDefaults : Hashtable = {"time":1,"delay":0,"transition":"easeInOutCubic"};
+public static var moveBezierDefaults : Hashtable = {"time":1,"delay":0,"transition":"easeInOutCubic","lookAtSpeed":8};
 public static var punchPositionDefaults : Hashtable = {"time":1,"delay":0};
 public static var punchRotationDefaults : Hashtable = {"time":1,"delay":0};
 public static var colorDefaults : Hashtable = {"time":1,"delay":0,"transition":"linear"};
@@ -1433,8 +1433,10 @@ private function moveToBezier(args:Hashtable){
 		var newVector : Vector3 = bpi.starting + timeFract * (2 * (1 - timeFract) * (bpi.intermediate - bpi.starting) + timeFract * (bpi.end - bpi.starting));
 
 		//orientToPath - cutting off outer ends of curve percentage to avoid lookAt jitters:
-		if(args["orientToPath"] && i <.98 && i>.02){
-			obj.transform.LookAt(newVector);
+		//&& i <.98 && i>.02
+		if(args["orientToPath"]){
+			var targetRotation = Quaternion.LookRotation(newVector - obj.transform.position, Vector3.up);
+			obj.transform.rotation = Quaternion.Slerp(obj.transform.rotation,targetRotation,Time.deltaTime*moveBezierDefaults["lookAtSpeed"]);
 		}
 		
 		//look at target
