@@ -1,4 +1,4 @@
-//VERSION: 1.0.22
+//VERSION: 1.0.23
 
 /*
 Copyright (c)2010 Bob Berkebile(http://www.pixelplacement.com), C# port by Patrick Corkum(http://www.insquare.com)
@@ -50,6 +50,7 @@ public static var moveBezierDefaults : Hashtable = {"time":1,"delay":0,"transiti
 public static var punchPositionDefaults : Hashtable = {"time":1,"delay":0};
 public static var punchRotationDefaults : Hashtable = {"time":1,"delay":0};
 public static var colorDefaults : Hashtable = {"time":1,"delay":0,"transition":"linear"};
+public static var lookToDefaults : Hashtable = {"lookSpeed":3};
 
 //Transition curve organization - David Bardos
 private var TRANSITIONS : Hashtable = {"easeInQuad":easeInQuad, "easeOutQuad":easeOutQuad,"easeInOutQuad":easeInOutQuad, "easeInCubic":easeInCubic, "easeOutCubic":easeOutCubic, "easeInOutCubic":easeInOutCubic, "easeInQuart":easeInQuart, "easeOutQuart":easeOutQuart, "easeInOutQuart":easeInOutQuart, "easeInQuint":easeInQuint, "easeOutQuint":easeOutQuint, "easeInOutQuint":easeInOutQuint, "easeInSine":easeInSine, "easeOutSine":easeOutSine, "easeInOutSine":easeInOutSine, "easeInExpo":easeInExpo, "easeOutExpo":easeOutExpo, "easeInOutExpo":easeInOutExpo, "easeInCirc":easeInCirc, "easeOutCirc":easeOutCirc, "easeInOutCirc":easeInOutCirc, "linear":linear, "spring":spring, "bounce":bounce, "easeInBack":easeInBack, "easeOutBack":easeOutBack, "easeInOutBack":easeInOutBack}; 
@@ -106,6 +107,31 @@ static function init(target: GameObject,args: Hashtable):void{
 	registers.push(target);
 	params.push(args);
 	target.AddComponent ("iTween");
+}
+
+//LookToUpdate method:
+static function lookToUpdate(target: GameObject, args: Hashtable):void{
+	var lookTarget : Vector3;
+	var lookSpeed : float;
+	
+	//Define target:
+	if(args["target"]==null){
+		Debug.LogError("ERROR: You must provide a target:Vector3 for lookAtUpdate!");
+		return;
+	}else{
+		lookTarget = args["target"];
+	}
+	
+	//Define speed:
+	if(args["lookSpeed"]==null){
+		lookSpeed = lookToDefaults["lookSpeed"];
+	}else{
+		lookSpeed = args["lookSpeed"];
+	}
+	
+	//Apply look to target:
+	var targetRotation = Quaternion.LookRotation(lookTarget - target.transform.position, Vector3.up);
+	target.transform.rotation = Quaternion.Slerp(target.transform.rotation,targetRotation,Time.deltaTime*lookSpeed);
 }
 
 //Fade to static register:
