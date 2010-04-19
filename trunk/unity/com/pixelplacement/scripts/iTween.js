@@ -1,4 +1,4 @@
-//VERSION: 1.0.18
+//VERSION: 1.0.19
 
 /*
 Copyright (c)2010 Bob Berkebile(http://www.pixelplacement.com), C# port by Patrick Corkum(http://www.insquare.com)
@@ -103,19 +103,9 @@ static function init(target: GameObject,args: Hashtable):void{
 	target.AddComponent ("iTween");
 }
 
-//Helper class for bezierCurves - David Bardos
-class BezierPointInfo
-{
-	public var starting : Vector3;
-	public var intermediate : Vector3;
-	public var end: Vector3;
-}
-
 //Fade to static register:
 static function fadeTo(target: GameObject,args: Hashtable):void{
-	if(args["type"]==null){
-		args.Add("type","fadeTo");	
-	}
+	args["type"] ="fadeTo";	
 	init(target,args);
 }
 
@@ -178,13 +168,13 @@ static function fadeFrom(target: GameObject,args: Hashtable):void{
 		args["alpha"]=destinationHold;
 	}		
 		
-	args.Add("type","fadeTo");	
+	args["type"] ="fadeTo";	
 	init(target,args);
 }
 
 //MoveBy static register:
 static function moveBy(target: GameObject,args: Hashtable):void{
-	args.Add("type","moveTo");
+	args["type"] = "moveTo";
 	
 	var xValue : float;
 	var yValue : float;
@@ -224,76 +214,29 @@ static function moveBy(target: GameObject,args: Hashtable):void{
 	init(target,args);
 }
 
-//MoveByWorld static register:
-static function moveByWorld(target: GameObject,args: Hashtable):void{
-	args.Add("type","moveToWorld");
-	
-	var xValue : float;
-	var yValue : float;
-	var zValue : float;
-	
-	if(args.Contains("amount")){
-		var amount : Vector3 = args["amount"];
-		args["x"]=amount.x;
-		args["y"]=amount.y;
-		args["z"]=amount.z;			
-		args["position"]=null;
-	}
-	
-	if(args.Contains("x")){
-		xValue=args["x"];
-		xValue+=target.transform.position.x;
-		args["x"]=xValue;
-	}else{
-		xValue=target.transform.position.x;
-	}
-	
-	if(args.Contains("y")){
-		yValue=args["y"];
-		yValue+=target.transform.position.y;
-		args["y"]=yValue;
-	}else{
-		yValue=target.transform.position.y;
-	}
-	
-	if(args.Contains("z")){
-		zValue=args["z"];
-		zValue+=target.transform.position.z;
-		args["z"]=zValue;
-	}else{
-		zValue=target.transform.position.z;
-	}
-	
-	init(target,args);
-}
-
 //MoveTo static register:
 static function moveTo(target: GameObject,args: Hashtable):void{
-	if(args["type"]==null){
-		args.Add("type","moveTo");	
-	}
+	args["type"] = "moveTo";	
 	init(target,args);
 }
 
 //MoveToWorld static register:
 static function moveToWorld(target: GameObject,args: Hashtable):void{
-	args.Add("type","moveToWorld");	
+	args["type"] ="moveTo";
+	args["isLocal"] =false;	
 	init(target,args);
 }
 
 //MoveTo static register:
 static function moveToBezier(target: GameObject,args: Hashtable):void{
-	if(args["type"]==null){
-		args.Add("type","moveToBezier");	
-	}
+	args["type"] = "moveToBezier";	
 	init(target,args);
 }
 
 //MoveToWorld static register:
 static function moveToBezierWorld(target: GameObject,args: Hashtable):void{	
-	if(args["type"] == null){
-		args.Add("type","moveToBezierWorld");	
-	}
+	args["type"]="moveToBezier";
+	args["isLocal"]=false;
 	init(target,args);
 }
 
@@ -301,6 +244,10 @@ static function moveToBezierWorld(target: GameObject,args: Hashtable):void{
 static function moveFrom(target: GameObject,args: Hashtable):void{
 	var destinationHold : float;
 	
+	if(args["isLocal"] == null){
+		args["isLocal"]=true;
+	}
+	
 	if(args.Contains("position")){
 		var coordinates : Vector3 = args["position"];
 		args["x"]=coordinates.x;
@@ -311,7 +258,11 @@ static function moveFrom(target: GameObject,args: Hashtable):void{
 		
 	if(args.Contains("x")){
 		destinationHold = target.transform.localPosition.x;
-		target.transform.localPosition.x=args["x"];
+		if(args["isLocal"]){
+			target.transform.localPosition.x=args["x"];
+		}else{
+			target.transform.position.x=args["x"];
+		}
 		args["x"]=destinationHold;
 	}else{
 		args["x"]=target.transform.localPosition.x;
@@ -319,7 +270,11 @@ static function moveFrom(target: GameObject,args: Hashtable):void{
 
 	if(args.Contains("y")){
 		destinationHold = target.transform.localPosition.y;
-		target.transform.localPosition.y=args["y"];
+		if(args["isLocal"]){
+			target.transform.localPosition.y=args["y"];
+		}else{
+			target.transform.position.y=args["y"];
+		}
 		args["y"]=destinationHold;
 	}else{
 		args["y"]=target.transform.localPosition.y;
@@ -327,117 +282,42 @@ static function moveFrom(target: GameObject,args: Hashtable):void{
 
 	if(args.Contains("z")){
 		destinationHold = target.transform.localPosition.z;
-		target.transform.localPosition.z=args["z"];
+		if(args["isLocal"]){
+			target.transform.localPosition.z=args["z"];
+		}else{
+			target.transform.position.z=args["z"];
+		}
 		args["z"]=destinationHold;
 	}else{
 		args["z"]=target.transform.localPosition.z;
 	}
 	
-	if(args["type"] == null){
-		args.Add("type","moveTo");	
-	}
-	
+	args["type"] = "moveTo";
+	args["isLocal"] = true;
 	init(target,args);
 }
 
 //MoveFromWorld static register:
 static function moveFromWorld(target: GameObject,args: Hashtable):void{
-	var destinationHold : float;
-	
-	if(args.Contains("position")){
-		var coordinates : Vector3 = args["position"];
-		
-		destinationHold = target.transform.localPosition.x;
-		target.transform.localPosition.x=coordinates.x;
-		coordinates.x=destinationHold;
-		
-		destinationHold = target.transform.localPosition.y;
-		target.transform.localPosition.y=coordinates.y;
-		coordinates.y=destinationHold;
-		
-		destinationHold = target.transform.localPosition.z;
-		target.transform.localPosition.z=coordinates.z;
-		coordinates.z=destinationHold;
-		
-		args["position"]=coordinates;
-	}else{
-		if(args.Contains("x")){
-			destinationHold = target.transform.position.x;
-			target.transform.position.x=args["x"];
-			args["x"]=destinationHold;
-		}else{
-			args["x"]=target.transform.position.x;
-		}	
-
-		if(args.Contains("y")){
-			destinationHold = target.transform.position.y;
-			target.transform.position.y=args["y"];
-			args["y"]=destinationHold;
-		}else{
-			args["y"]=target.transform.position.y;
-		}
-
-		if(args.Contains("z")){
-			destinationHold = target.transform.position.z;
-			target.transform.position.z=args["z"];
-			args["z"]=destinationHold;
-		}else{
-			args["z"]=target.transform.position.z;
-		}
-	}
-
-	if(args["type"] == null){
-		args.Add("type","moveToWorld");	
-	}
-	init(target,args);
+	args["isLocal"] = false;
+	iTween.moveFrom(target,args);
 }
 
 //ScaleBy static register:
 static function scaleBy(target: GameObject,args: Hashtable):void{
-	args.Add("type","scaleTo");
-	
-	var xValue : float;
-	var yValue : float;
-	var zValue : float;
-	
-	if(args.Contains("amount")){
-		var coordinates : Vector3 = args["amount"];
-		args["x"]=coordinates.x;
-		args["y"]=coordinates.y;
-		args["z"]=coordinates.z;			
-		args["amount"]=null;
-	}
-	
-	if(args.Contains("x")){
-		xValue=args["x"];
-		xValue=target.transform.localScale.x*xValue;
-		args["x"]=xValue;
-	}else{
-		xValue=target.transform.localScale.x;
-	}
-	
-	if(args.Contains("y")){
-		yValue=args["y"];
-		yValue=target.transform.localScale.y*yValue;
-		args["y"]=yValue;
-	}else{
-		yValue=target.transform.localScale.y;
-	}
-	
-	if(args.Contains("z")){
-		zValue=args["z"];
-		zValue=target.transform.localScale.z*zValue;
-		args["z"]=zValue;
-	}else{
-		zValue=target.transform.localScale.z;
-	}
-	
-	init(target,args);
+	args["by"] = "multiplication";
+	iTween.scaleAugment(target,args);
 }
 
 //ScaleAdd static register:
 static function scaleAdd(target: GameObject,args: Hashtable):void{
-	args.Add("type","scaleTo");
+	args["by"] = "addition";
+	iTween.scaleAugment(target,args);
+}
+
+//ScaleAugment helper:
+private static function scaleAugment(target: GameObject,args: Hashtable):void{
+	args["type"] ="scaleTo";
 	
 	var xValue : float;
 	var yValue : float;
@@ -453,7 +333,16 @@ static function scaleAdd(target: GameObject,args: Hashtable):void{
 	
 	if(args.Contains("x")){
 		xValue=args["x"];
-		xValue+=target.transform.localScale.x;
+		switch (args["by"]){
+			case "addition":
+				xValue+=target.transform.localScale.x;
+				break;
+			case "multiplication":
+				xValue=target.transform.localScale.x*xValue;
+				break;
+			default:
+				break;
+		}
 		args["x"]=xValue;
 	}else{
 		xValue=target.transform.localScale.x;
@@ -461,7 +350,16 @@ static function scaleAdd(target: GameObject,args: Hashtable):void{
 	
 	if(args.Contains("y")){
 		yValue=args["y"];
-		yValue+=target.transform.localScale.y;
+		switch (args["by"]){
+			case "addition":
+				yValue+=target.transform.localScale.y;
+				break;
+			case "multiplication":
+				yValue=target.transform.localScale.y*yValue;
+				break;
+			default:
+				break;
+		}
 		args["y"]=yValue;
 	}else{
 		yValue=target.transform.localScale.y;
@@ -469,20 +367,27 @@ static function scaleAdd(target: GameObject,args: Hashtable):void{
 	
 	if(args.Contains("z")){
 		zValue=args["z"];
-		zValue+=target.transform.localScale.z;
+		switch (args["by"]){
+			case "addition":
+				zValue+=target.transform.localScale.z;
+				break;
+			case "multiplication":
+				zValue=target.transform.localScale.z*zValue;
+				break;
+			default:
+				break;
+		}
 		args["z"]=zValue;
 	}else{
 		zValue=target.transform.localScale.z;
 	}
-	
+	args.Remove("amount");
 	init(target,args);
 }
 
 //Scale to static register:
 static function scaleTo(target: GameObject,args: Hashtable):void{
-	if(args["type"] == null){
-		args.Add("type","scaleTo");	
-	}
+	args["type"] = "scaleTo";
 	init(target,args);
 }
 
@@ -527,9 +432,7 @@ static function scaleFrom(target: GameObject,args: Hashtable){
 
 //Rotate to static register:
 static function rotateTo(target: GameObject,args: Hashtable):void{
-	if(args["type"] == null){
-		args.Add("type","rotateTo");	
-	}	
+	args["type"] = "rotateTo";	
 	init(target,args);
 }
 
@@ -579,7 +482,35 @@ static function rotateFrom(target: GameObject,args: Hashtable){
 
 //Rotate by static register:
 static function rotateBy(target: GameObject,args: Hashtable):void{
-	args.Add("type","rotateBy");
+	args["by"] = "multiplication";
+	rotateAugment(target,args);
+}
+
+//Rotate add static register:
+static function rotateAdd(target: GameObject,args: Hashtable):void{
+	args["by"] = "addition";
+	rotateAugment(target,args);
+}
+
+private static function rotateAugment(target: GameObject,args: Hashtable):void{
+	if(args.Contains("amount")){
+		args["x"] = args["amount"].x;
+		args["y"] = args["amount"].y;
+		args["z"] = args["amount"].z;
+		args.Remove("amount");
+	}else{
+		if(args["x"]==null){
+			args["x"] = 0;	
+		}
+		if(args["y"]==null){
+			args["y"] = 0;	
+		}
+		if(args["z"]==null){
+			args["z"] = 0;	
+		}	
+	}
+		
+	args["type"] ="rotateBy";
 	init(target,args);
 }
 
@@ -663,9 +594,7 @@ static function colorFrom(target: GameObject,args: Hashtable):void{
 
 //Color to static register:
 static function colorTo(target: GameObject,args: Hashtable):void{
-	if(args["type"] == null){
-		args.Add("type","colorTo");	
-	}
+	args["type"] = "colorTo";	
 	init(target,args);
 }
 
@@ -745,24 +674,12 @@ function Start(){
 			StartCoroutine("moveTo",args);
 			break;
 			moveTo({}); //fake call to avoid editor warnings 
-			
-		case "moveToWorld":
-			StartCoroutine("moveToWorld",args);
-			break;
-			moveToWorld({}); //fake call to avoid editor warnings 
-			
-		case "moveToBezier":
-			args["isLocal"] = "true";			
+						
+		case "moveToBezier":		
 			StartCoroutine("moveToBezier",args);
 			break;
 			moveToBezier({}); //fake call to avoid editor warnings 
-			
-		case "moveToBezierWorld":
-			args["isLocal"] = "false";			
-			StartCoroutine("moveToBezier",args);			
-			break;
-			moveToBezier({}); //fake call to avoid editor warnings 
-			
+						
 		case "scaleTo":
 			StartCoroutine("scaleTo",args);			
 			break;
@@ -772,10 +689,10 @@ function Start(){
 			StartCoroutine("rotateTo",args);
 			break;
 			rotateTo({}); //fake call to avoid editor warnings 
-			
+		
 		case "rotateBy":
 			StartCoroutine("rotateBy",args);
-			break;	
+			break;
 			rotateBy({}); //fake call to avoid editor warnings 
 			
 		case "colorTo":
@@ -865,10 +782,8 @@ private function audioTo(args:Hashtable) {
 	
 	//run tween:
 	for (i = 0.0; i < 1.0; i += Time.deltaTime*(1/runTime)) {
-		
 		sound.volume =easingFunc(startV,endV,i);
 		sound.pitch =easingFunc(startP,endP,i);
-				
 		yield;
 	}
 	
@@ -911,7 +826,6 @@ function stab(args:Hashtable){
 		yield WaitForSeconds (args["delay"]);
 	}
 	
-	//
 	inProgress=true;
 	
 	//target:
@@ -1330,6 +1244,9 @@ private function moveTo(args:Hashtable){
 	if(args["onCompleteTarget"]==null){
 		args.Add("onCompleteTarget",gameObject);
 	}
+	if(args["isLocal"]==null){
+		args.Add("isLocal",true);
+	}
 	
 	//delay:
 	var delay : float = args["delay"];
@@ -1343,7 +1260,12 @@ private function moveTo(args:Hashtable){
 	
 	//define object:
 	var obj : Transform = gameObject.transform;
-	var start : Vector3 = obj.localPosition;
+	var start : Vector3;
+	if(args["isLocal"]){
+		start = obj.localPosition;
+	}else{
+		start = obj.position;		
+	}
 	
 	//coordiantes:
 	if(args["position"] != null){
@@ -1372,103 +1294,25 @@ private function moveTo(args:Hashtable){
 	easingFunc = TRANSITIONS[easing];
 	
 	//run tween:
-	for (i = 0.0; i < 1.0; i += Time.deltaTime*(1/runTime)) {		
-		obj.localPosition.x=easingFunc(start.x,end.x,i);
-		obj.localPosition.y=easingFunc(start.y,end.y,i);
-		obj.localPosition.z=easingFunc(start.z,end.z,i);
-		yield;
-	}
-	obj.localPosition=end;
-	
-	if(args["onComplete"]){
-		var target : GameObject = args["onCompleteTarget"];
-		target.SendMessage(args["onComplete"], args["onCompleteParams"], SendMessageOptions.DontRequireReceiver);
-	}
-	
-	switch(args["loopType"]){
-		case "loop":
-			obj.localPosition.x=start.x;
-			obj.localPosition.y=start.y;
-			obj.localPosition.z=start.z;
-			iTween.moveTo(gameObject,args);
-			break;
-		case "pingPong":
-			args["x"]=start.x;
-			args["y"]=start.y;
-			args["z"]=start.z;
-			iTween.moveTo(gameObject,args);
-			break;
-		default:
-			Destroy (this);
-			break;	
-	}	
-}
-
-//Move to application:
-private function moveToWorld(args:Hashtable){	
-	//construct args:
-	if(args["time"]==null){
-		args.Add("time",moveDefaults["time"]);
-	}
-	if(args["delay"]==null){
-		args.Add("delay",moveDefaults["delay"]);
-	}
-	if(args["transition"]==null){
-		args.Add("transition",moveDefaults["transition"]);
-	}
-	if(args["onCompleteTarget"]==null){
-		args.Add("onCompleteTarget",gameObject);
-	}
-	
-	//delay:
-	var delay : float = args["delay"];
-	if(delay > 0){
-		yield WaitForSeconds (args["delay"]);
-	}
-	
-	//Look for conflicts:
-	checkForConflicts(tweenType);
-	inProgress=true;
-	
-	//define object:
-	var obj : Transform = gameObject.transform;
-	var start : Vector3 = obj.position;
-	
-	//coordiantes:
-	if(args["position"] != null){
-		var coordinates : Vector3 = args["position"];
-		args["x"]=coordinates.x;
-		args["y"]=coordinates.y;
-		args["z"]=coordinates.z;
+	if(args["isLocal"]){
+		for (i = 0.0; i < 1.0; i += Time.deltaTime*(1/runTime)) {		
+			obj.localPosition.x=easingFunc(start.x,end.x,i);
+			obj.localPosition.y=easingFunc(start.y,end.y,i);
+			obj.localPosition.z=easingFunc(start.z,end.z,i);
+			yield;
+		}
+		obj.localPosition=end;		
 	}else{
-		if(args["x"]==null){
-			args.Add("x",start.x);
+		for (i = 0.0; i < 1.0; i += Time.deltaTime*(1/runTime)) {		
+			obj.position.x=easingFunc(start.x,end.x,i);
+			obj.position.y=easingFunc(start.y,end.y,i);
+			obj.position.z=easingFunc(start.z,end.z,i);
+			yield;
 		}
-		if(args["y"]==null){
-			args.Add("y",start.y);
-		}
-		if(args["z"]==null){
-			args.Add("z",start.z);
-		}
+		obj.position=end;			
 	}
 	
-	//define targets:
-	var end : Vector3 = Vector3(args["x"], args["y"], args["z"]);
-	var easing : String = args["transition"];
-	var runTime : float = args["time"];
 	
-	var easingFunc = easeInQuad;
-	easingFunc = TRANSITIONS[easing];
-	
-	//run tween:
-	for (i = 0.0; i < 1.0; i += Time.deltaTime*(1/runTime)) {		
-		obj.position.x=easingFunc(start.x,end.x,i);
-		obj.position.y=easingFunc(start.y,end.y,i);
-		obj.position.z=easingFunc(start.z,end.z,i);
-		yield;
-	}
-	
-	obj.position=end;
 	if(args["onComplete"]){
 		var target : GameObject = args["onCompleteTarget"];
 		target.SendMessage(args["onComplete"], args["onCompleteParams"], SendMessageOptions.DontRequireReceiver);
@@ -1476,12 +1320,20 @@ private function moveToWorld(args:Hashtable){
 	
 	switch(args["loopType"]){
 		case "loop":
-			obj.position.x=start.x;
-			obj.position.y=start.y;
-			obj.position.z=start.z;
+			if(args["isLocal"]){
+				obj.localPosition.x=start.x;
+				obj.localPosition.y=start.y;
+				obj.localPosition.z=start.z;
+			}else{
+				obj.position.x=start.x;
+				obj.position.y=start.y;
+				obj.position.z=start.z;			
+			}
+			
 			iTween.moveTo(gameObject,args);
 			break;
 		case "pingPong":
+			args.Remove("position");
 			args["x"]=start.x;
 			args["y"]=start.y;
 			args["z"]=start.z;
@@ -1493,7 +1345,7 @@ private function moveToWorld(args:Hashtable){
 	}	
 }
 
-//Bezier move to application: - David Bardos
+//Bezier move to application:
 private function moveToBezier(args:Hashtable){	
 	//construct args:
 	if(args["time"]==null){
@@ -1510,6 +1362,12 @@ private function moveToBezier(args:Hashtable){
 	}
 	if(args["orientToPath"] == null){
 		args.Add("orientToPath",true);
+	}
+	if(args["isLocal"]==null){
+		args.Add("isLocal",true);
+	}
+	if(args["looped"]==null){
+		args["looped"]=false;
 	}
 			
 	//delay:
@@ -1545,69 +1403,51 @@ private function moveToBezier(args:Hashtable){
     var p : DictionaryEntry;
     var start : Vector3;
 	
-	if (args["isLocal"] == true) {
+	if (args["isLocal"]) {
 		beziers.splice(0,0, obj.transform.localPosition);
 		start=obj.transform.localPosition;
-	}
-	else {
+	}else{
 		beziers.splice(0,0, obj.transform.position);
 		start=obj.transform.position;
 	}
 
-	_beziersPI = ParseBeziers(beziers);
+	_beziersPI = ParseBeziers(beziers,args["looped"]);
 	var iNumPoints : int = _beziersPI.length;
 	
 	//run tween:
 	for (i = 0.0; i < 1.0; i += Time.deltaTime*(1/runTime)) {
-		//get the easing as a percentage... not * 100, of course
 		var virtTimePart : float = easingFunc(0, 1, i);
-
-		//get the array position of the intermediate point that we want
 		var iCurAxisPoint : int;
-		if (virtTimePart <= 0)
-		{
-			//first array position
+		
+		if (virtTimePart <= 0){
 			iCurAxisPoint = 0;
-		}
-		else if (virtTimePart >= 1)
-		{
-			//last array position
+		}else if (virtTimePart >= 1){
 			iCurAxisPoint = iNumPoints - 1;
-		}
-		else
-		{
-			//the transition is > 0 and less than 1. get the position we're looking for.
+		}else{
 			iCurAxisPoint = Mathf.Floor(iNumPoints * virtTimePart);
 		}
 
-		//we are getting how far past the current point we are.
 		var timeFract : float = iNumPoints * virtTimePart - iCurAxisPoint;
-		
-		//get the point info that we are interested in dealing with.
 		var bpi : BezierPointInfo = _beziersPI[iCurAxisPoint];
 
-		//get the new vector... I love vector math!
 		var newVector : Vector3 = bpi.starting + timeFract * (2 * (1 - timeFract) * (bpi.intermediate - bpi.starting) + timeFract * (bpi.end - bpi.starting));
 
 		//orientToPath - cutting off outer ends of curve percentage to avoid lookAt jitters:
-		if(args["orientToPath"] == true && i <.98 && i>.02){
+		if(args["orientToPath"] && i <.98 && i>.02){
 			obj.transform.LookAt(newVector);
 		}
 		
 		//look at target
 		if(args["lookAt"] != null){
-			args["orientToPath"] == false;
+			args["orientToPath"] = false;
 			var lookTarget : Vector3 = args["lookAt"];
 			obj.transform.LookAt(lookTarget);
 		}
 
 		//move object				
-		if (args["isLocal"] == "true") 
-		{
+		if (args["isLocal"]){
 			obj.transform.localPosition = newVector;			
-		}
-		else
-		{
+		}else{
 			obj.transform.position = newVector; 			
 		}		
 		yield;
@@ -1616,8 +1456,7 @@ private function moveToBezier(args:Hashtable){
 	var bpiEnd : BezierPointInfo = _beziersPI[_beziersPI.Count - 1];
 	
 	//get the object to it's final resting position
-	if (args["isLocal"] == "true") 
-	{
+	if (args["isLocal"]){
 		obj.transform.localPosition = bpiEnd.end;
 		
 		switch(args["loopType"]){
@@ -1628,21 +1467,19 @@ private function moveToBezier(args:Hashtable){
 				iTween.moveToBezier(gameObject,args);
 				break;
 			case "pingPong":
-				Debug.LogError("WARNING: Ping-ponging a bezier move will create undesired results!  Consider using a call back method and launching a new bezier.");
 				args["x"]=start.x;
 				args["y"]=start.y;
 				args["z"]=start.z;
 				beziers.Reverse();
 				args["bezier"]=beziers;
+				args["looped"]=true;
 				iTween.moveToBezier(gameObject,args);
 				break;
 			default:
 				Destroy (this);
 				break;	
 		}
-	}
-	else
-	{
+	}else{
 		obj.transform.position = bpiEnd.end;    
 		
 		switch(args["loopType"]){
@@ -1653,7 +1490,6 @@ private function moveToBezier(args:Hashtable){
 				iTween.moveToBezier(gameObject,args);
 				break;
 			case "pingPong":
-				Debug.LogError("WARNING: Ping-ponging a bezier move will create undesired results!  Consider using a call back method and launching a new bezier.");
 				args["x"]=start.x;
 				args["y"]=start.y;
 				args["z"]=start.z;
@@ -1667,67 +1503,11 @@ private function moveToBezier(args:Hashtable){
 		}		                
 	}
 	
-		
 	if(args["onComplete"]){
 		var target : GameObject = args["onCompleteTarget"];
 		target.SendMessage(args["onComplete"], args["onCompleteParams"], SendMessageOptions.DontRequireReceiver);
 	}
-	
-	
 }
-
-//Helper method for translating control points into bezier information. - David Bardos
-private function ParseBeziers(points: Array) : Array
-	{
-		var returnPoints : Array= new Array();
-
-		if (points.Count > 2)
-		{
-			//the first item is the starting position of the current point for that axis. So, we are storing off the following values:
-			//The starting position for the current point for the axis
-			//A smoothing point for the curve
-			//The next major point		
-			var iCurPoint : int;
-			
-			for (iCurPoint = 0; iCurPoint < points.Count - 1; iCurPoint++)
-			{
-				var curPoint : Vector3 = points[iCurPoint];
-
-				//I know I am going to store exactly 3, the starting, intermediate and end.
-				var curSetofPoints: BezierPointInfo = new BezierPointInfo();
-
-				curSetofPoints.starting = curPoint;
-				if (iCurPoint == 0)
-				{
-					var p1 : Vector3 = points[1];
-					var p2 : Vector3 = points[2];
-					curSetofPoints.intermediate = p1 - ((p2 - curPoint) / 4);					
-				}
-				else
-				{
-					//double the current point minus the prior point's intermediate position
-					var bpiint: BezierPointInfo = returnPoints[iCurPoint - 1];
-					curSetofPoints.intermediate = 2 * curPoint - bpiint.intermediate;
-				}
-				//This is fine because we end at the next to last item.
-				curSetofPoints.end = points[iCurPoint + 1];
-
-				returnPoints.push(curSetofPoints);
-			}
-		}
-		else
-		{
-			var curSetofPoints2: BezierPointInfo = new BezierPointInfo();
-			curSetofPoints2.starting = points[0];
-			curSetofPoints2.end = points[1];
-			curSetofPoints2.intermediate = ((curSetofPoints2.starting + curSetofPoints2.end) / 2);
-			
-			returnPoints.push(curSetofPoints2);
-		}
-
-		return returnPoints;
-	}
-	
 
 //Scale to application:
 private function scaleTo(args:Hashtable){	
@@ -1744,7 +1524,7 @@ private function scaleTo(args:Hashtable){
 	if(args["onCompleteTarget"]==null){
 		args.Add("onCompleteTarget",gameObject);
 	}
-		
+			
 	//delay:
 	var delay : float = args["delay"];
 	if(delay > 0){
@@ -1809,6 +1589,7 @@ private function scaleTo(args:Hashtable){
 			iTween.scaleTo(gameObject,args);
 			break;
 		case "pingPong":
+			args.Remove("scale");
 			args["x"]=start.x;
 			args["y"]=start.y;
 			args["z"]=start.z;
@@ -1875,7 +1656,7 @@ private function rotateTo(args:Hashtable) {
 	}
 		
 	//define targets:
-	var end = Vector3(clerp(start.x,args["x"],1), clerp(start.y,args["y"],1), clerp(start.z,args["z"],1));
+	var end : Vector3=Vector3(clerp(start.x,args["x"],1), clerp(start.y,args["y"],1), clerp(start.z,args["z"],1));
 	var easing : String = args["transition"];
 	var runTime : float = args["time"];
 	
@@ -1883,6 +1664,8 @@ private function rotateTo(args:Hashtable) {
 	easingFunc = TRANSITIONS[easing];
 	
 	//run tween:
+	var distanceY : float=end.y;
+	
 	for (i = 0.0; i < 1.0; i += Time.deltaTime*(1/runTime)) {
 		obj.localRotation=Quaternion.Euler(easingFunc(start.x,end.x,i),easingFunc(start.y,end.y,i),easingFunc(start.z,end.z,i));		
 		yield;
@@ -1901,6 +1684,7 @@ private function rotateTo(args:Hashtable) {
 			iTween.rotateTo(gameObject,args);
 			break;
 		case "pingPong":
+			args.Remove("rotation");
 			args["x"]=start.x;
 			args["y"]=start.y;
 			args["z"]=start.z;
@@ -1971,8 +1755,19 @@ private function rotateBy(args:Hashtable) {
 	var xValue : float = args["x"];
 	var yValue : float = args["y"];
 	var zValue : float = args["z"];
+		
+	var end : Vector3;
+	switch (args["by"]){
+		case "multiplication":
+			end = Vector3(360*xValue + obj.localEulerAngles.x, 360*yValue + obj.localEulerAngles.y, 360 *zValue + obj.localEulerAngles.z);
+			break;
+		case "addition":
+			end = Vector3(xValue + obj.localEulerAngles.x, yValue + obj.localEulerAngles.y, zValue + obj.localEulerAngles.z);
+			break;
+		default:
+			break;
+	}
 	
-	var	end = Vector3(360*xValue + obj.localEulerAngles.x, 360*yValue + obj.localEulerAngles.y, 360 *zValue + obj.localEulerAngles.x);
 	var easing : String = args["transition"];
 	var runTime : float = args["time"];
 	
@@ -1991,7 +1786,34 @@ private function rotateBy(args:Hashtable) {
 		var target : GameObject = args["onCompleteTarget"];
 		target.SendMessage(args["onComplete"], args["onCompleteParams"], SendMessageOptions.DontRequireReceiver);
 	}
-	Destroy (this);
+	
+	switch(args["loopType"]){
+		case "loop":
+			obj.localRotation=Quaternion.Euler(start);
+			iTween.rotateTo(gameObject,args);
+			break;
+		case "pingPong":
+			args.Remove("rotation");
+			args["x"]*=-1;
+			args["y"]*=-1;
+			args["z"]*=-1;
+			
+			switch (args["by"]){
+				case "multiplication":
+				iTween.rotateBy(gameObject,args);
+				break;
+			case "addition":
+				iTween.rotateAdd(gameObject,args);
+				break;
+			default:
+				break;
+			}
+			
+			break;
+		default:
+			Destroy (this);
+			break;	
+	}	
 }
 
 //Color to application:
@@ -2139,7 +1961,7 @@ private function colorTo(args:Hashtable) {
 	}
 }
 
-//Easing curves - credits: Robert Penner and a few other that I can't recall right now with a few additions and tweaks:
+//Easing curves:
 private function linear(start : float, end : float, value : float) : float{
 	return Mathf.Lerp(start, end, value);
 }
@@ -2374,4 +2196,50 @@ function punch (amplitude : float, value: float) : float {
 		s = period/(2*Mathf.PI) * Mathf.Asin (end/amplitude);
 		return (amplitude*Mathf.Pow(2,-10*value) * Mathf.Sin((value*1-s)*(2*Mathf.PI)/period) + end + start);
 	}
+}
+
+//Helper class for bezierCurves:
+class BezierPointInfo
+{
+	public var starting : Vector3;
+	public var intermediate : Vector3;
+	public var end: Vector3;
+}
+
+//Helper method for translating control points into bezier information for bezierCurves:
+private function ParseBeziers(points: Array, wasLoop:boolean) : Array{
+	
+	if(wasLoop){
+		points.Shift();
+	}
+	
+	var returnPoints : Array= new Array();
+
+	if (points.Count > 2){
+		var iCurPoint : int;
+		
+		for (iCurPoint = 0; iCurPoint < points.Count - 1; iCurPoint++){
+			var curPoint : Vector3 = points[iCurPoint];
+			var curSetofPoints: BezierPointInfo = new BezierPointInfo();
+			curSetofPoints.starting = curPoint;
+			if (iCurPoint == 0){
+				var p1 : Vector3 = points[1];
+				var p2 : Vector3 = points[2];
+				curSetofPoints.intermediate = p1 - ((p2 - curPoint) / 4);					
+			}else{
+				var bpiint: BezierPointInfo = returnPoints[iCurPoint - 1];
+				curSetofPoints.intermediate = 2 * curPoint - bpiint.intermediate;
+			}
+			curSetofPoints.end = points[iCurPoint + 1];
+			returnPoints.push(curSetofPoints);
+		}
+	}else{
+		var curSetofPoints2: BezierPointInfo = new BezierPointInfo();
+		curSetofPoints2.starting = points[0];
+		curSetofPoints2.end = points[1];
+		curSetofPoints2.intermediate = ((curSetofPoints2.starting + curSetofPoints2.end) / 2);
+		
+		returnPoints.push(curSetofPoints2);
+	}
+	return returnPoints;
 }
