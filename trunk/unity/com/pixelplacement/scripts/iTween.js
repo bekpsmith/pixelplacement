@@ -1,4 +1,4 @@
-//VERSION: 1.0.23
+//VERSION: 1.0.24
 
 /*
 Copyright (c)2010 Bob Berkebile(http://www.pixelplacement.com), C# port by Patrick Corkum(http://www.insquare.com)
@@ -50,7 +50,8 @@ public static var moveBezierDefaults : Hashtable = {"time":1,"delay":0,"transiti
 public static var punchPositionDefaults : Hashtable = {"time":1,"delay":0};
 public static var punchRotationDefaults : Hashtable = {"time":1,"delay":0};
 public static var colorDefaults : Hashtable = {"time":1,"delay":0,"transition":"linear"};
-public static var lookToDefaults : Hashtable = {"lookSpeed":3};
+public static var lookToUpdateDefaults : Hashtable = {"lookSpeed":3};
+public static var moveToUpdateDefaults : Hashtable = {"time":.05};
 
 //Transition curve organization - David Bardos
 private var TRANSITIONS : Hashtable = {"easeInQuad":easeInQuad, "easeOutQuad":easeOutQuad,"easeInOutQuad":easeInOutQuad, "easeInCubic":easeInCubic, "easeOutCubic":easeOutCubic, "easeInOutCubic":easeInOutCubic, "easeInQuart":easeInQuart, "easeOutQuart":easeOutQuart, "easeInOutQuart":easeInOutQuart, "easeInQuint":easeInQuint, "easeOutQuint":easeOutQuint, "easeInOutQuint":easeInOutQuint, "easeInSine":easeInSine, "easeOutSine":easeOutSine, "easeInOutSine":easeInOutSine, "easeInExpo":easeInExpo, "easeOutExpo":easeOutExpo, "easeInOutExpo":easeInOutExpo, "easeInCirc":easeInCirc, "easeOutCirc":easeOutCirc, "easeInOutCirc":easeInOutCirc, "linear":linear, "spring":spring, "bounce":bounce, "easeInBack":easeInBack, "easeOutBack":easeOutBack, "easeInOutBack":easeInOutBack}; 
@@ -124,7 +125,7 @@ static function lookToUpdate(target: GameObject, args: Hashtable):void{
 	
 	//Define speed:
 	if(args["lookSpeed"]==null){
-		lookSpeed = lookToDefaults["lookSpeed"];
+		lookSpeed = lookToUpdateDefaults["lookSpeed"];
 	}else{
 		lookSpeed = args["lookSpeed"];
 	}
@@ -132,6 +133,49 @@ static function lookToUpdate(target: GameObject, args: Hashtable):void{
 	//Apply look to target:
 	var targetRotation = Quaternion.LookRotation(lookTarget - target.transform.position, Vector3.up);
 	target.transform.rotation = Quaternion.Slerp(target.transform.rotation,targetRotation,Time.deltaTime*lookSpeed);
+}
+
+//MoveToUpdate method:
+static function moveToUpdate(target: GameObject, args: Hashtable):void{
+	var tempVelocityX : float = 0.0;
+	var tempVelocityY : float = 0.0;
+	var tempVelocityZ : float = 0.0;
+	var smoothTime : float;
+	var positions : Vector3;
+	
+	if(args["time"]==null){
+		smoothTime=moveToUpdateDefaults["time"];
+	}else{
+		smoothTime=args["time"];
+	}
+	
+	if(args["position"]==null){
+		if(args["x"]==null){
+			positions.x=target.transform.position.x;
+		}else{
+			positions.x=args["x"];
+		}
+		
+		if(args["y"]==null){
+			positions.y=target.transform.position.y;
+		}else{
+			positions.y=args["y"];
+		}
+		
+		if(args["z"]==null){
+			positions.z=target.transform.position.z;
+		}else{
+			positions.z=args["z"];
+		}
+	}else{
+		positions= args["position"];
+	}
+
+	var newX : float = Mathf.SmoothDamp(target.transform.position.x, positions.x, tempVelocityX, smoothTime);
+	var newY : float = Mathf.SmoothDamp(target.transform.position.y, positions.y, tempVelocityY, smoothTime);
+	var newZ : float = Mathf.SmoothDamp(target.transform.position.z, positions.z, tempVelocityZ, smoothTime);
+	
+	target.transform.position=Vector3(newX,newY,newZ);
 }
 
 //Fade to static register:
@@ -221,28 +265,58 @@ static function moveBy(target: GameObject,args: Hashtable):void{
 	
 	if(args.Contains("x")){
 		xValue = args["x"];
-		xValue+=target.transform.localPosition.x;
+		if(args["isLocal"]){
+			xValue+=target.transform.localPosition.x;
+		}else{
+			xValue+=target.transform.position.x;
+		}
 		args["x"]=xValue;
 	}else{
-		xValue=target.transform.localPosition.x;
+		if(args["isLocal"]){
+			xValue=target.transform.localPosition.x;
+		}else{
+			xValue=target.transform.position.x;
+		}
 	}
 	
 	if(args.Contains("y")){
 		yValue=args["y"];
-		yValue+=target.transform.localPosition.y;
+		if(args["isLocal"]){
+			yValue+=target.transform.localPosition.y;
+		}else{
+			yValue+=target.transform.position.y;
+		}
 		args["y"]=yValue;
 	}else{
-		yValue=target.transform.localPosition.y;	
+		if(args["isLocal"]){
+			yValue=target.transform.localPosition.y;	
+		}else{
+			yValue=target.transform.position.y;
+		}
 	}
 	
 	if(args.Contains("z")){
 		zValue=args["z"];
-		zValue+=target.transform.localPosition.z;
+		if(args["isLocal"]){
+			zValue+=target.transform.localPosition.z;
+		}else{
+			zValue+=target.transform.position.z;
+		}
 		args["z"]=zValue;
 	}else{
-		zValue=target.transform.localPosition.z;	
+		if(args["isLocal"]){
+			zValue=target.transform.localPosition.z;	
+		}else{
+			zValue=target.transform.position.z;	
+		}
 	}
 	init(target,args);
+}
+
+//MoveByWorld static register:
+static function moveByWorld(target: GameObject,args: Hashtable):void{
+	args["isLocal"] =false;	
+	iTween.moveBy(target,args);
 }
 
 //MoveTo static register:
@@ -739,6 +813,7 @@ function Start(){
 			colorTo({}); //fake call to avoid editor warnings 
 			
 		case "punchPosition":
+			enableKinematic();
 			StartCoroutine("punchPosition",args);
 			break;
 			punchPosition({}); //fake call to avoid editor warnings 
@@ -1766,29 +1841,11 @@ private function rotateBy(args:Hashtable) {
 	var obj : Transform = gameObject.transform;
 	var start : Vector3=Vector3(obj.localEulerAngles.x,obj.localEulerAngles.y,obj.localEulerAngles.z);
 	
-	//coordiantes:
-	if(args["amount"] != null){
-		var coordinates : Vector3;
-		coordinates = args["amount"];
-		args["x"]=coordinates.x;
-		args["y"]=coordinates.y;
-		args["z"]=coordinates.z;
-	}else{
-		if(args["x"]==null){
-			args.Add("x",start.x);
-		}
-		if(args["y"]==null){
-			args.Add("y",start.y);
-		}
-		if(args["z"]==null){
-			args.Add("z",start.z);
-		}
-	}
+	var xValue : float;
+	var yValue : float;
+	var zValue : float;
 	
-	//define targets:
-	var xValue : float = args["x"];
-	var yValue : float = args["y"];
-	var zValue : float = args["z"];
+	 //coordiantes:      if(args["amount"] != null){            var coordinates : Vector3;            coordinates = args["amount"];            args["x"]=coordinates.x;            args["y"]=coordinates.y;            args["z"]=coordinates.z;      }else{            if(args["x"]==null){                  args.Add("x",start.x);            }else{                xValue = args["x"];            }            if(args["y"]==null){                  args.Add("y",start.y);            }else{                yValue = args["y"];            }            if(args["z"]==null){                  args.Add("z",start.z);            }else{                zValue = args["z"];            }      }
 		
 	var end : Vector3;
 	switch (args["by"]){
@@ -2232,7 +2289,6 @@ class BezierPointInfo
 
 //Helper method for translating control points into bezier information for bezierCurves:
 private function ParseBeziers(points: Array, wasLoop:boolean) : Array{
-	
 	if(wasLoop){
 		points.Shift();
 	}
