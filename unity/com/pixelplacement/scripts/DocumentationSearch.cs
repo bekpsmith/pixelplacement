@@ -9,6 +9,7 @@ public class DocumentationSearch : EditorWindow{
 	bool showRecent = false;
 	Vector2 recentScroll;
 	List<string> recentTerms = new List<string>();
+	bool clearSearchBox = false;
 	
 	[MenuItem("Window/Doc Search")]
 	public static void LaunchWindow(){
@@ -22,7 +23,13 @@ public class DocumentationSearch : EditorWindow{
 	
 	void SearchBox(){
 		GUILayout.BeginHorizontal();
-		term = EditorGUILayout.TextField(term);
+		if(clearSearchBox){
+			term = EditorGUILayout.TextField("");
+			clearSearchBox = false;
+		}else{
+			term = EditorGUILayout.TextField(term);	
+		}
+		
 		if(GUILayout.Button("Search") && term !=""){
 			DoSearch(term,true);
 		}
@@ -51,6 +58,7 @@ public class DocumentationSearch : EditorWindow{
 			recentTerms.Reverse();
 			recentTerms.Add(term);
 			recentTerms.Reverse();	
+			clearSearchBox=true;
 		}
 	}
 
