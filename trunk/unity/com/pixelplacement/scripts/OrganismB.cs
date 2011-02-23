@@ -1,7 +1,7 @@
 using UnityEngine;
 using System.Collections;
 
-public class Organisim : MonoBehaviour
+public class OrganismB : MonoBehaviour
 {
 	float dampen = .98f;
 	float vx, vy, vz, vrx, vry, vrz;
@@ -30,8 +30,8 @@ public class Organisim : MonoBehaviour
 		//random rotation:
 		Quaternion newRot = _transform.rotation;
 		newRot.x+=vrx;
-		newRot.x+=vry;
-		newRot.x+=vrz;
+		newRot.y+=vry;
+		newRot.z+=vrz;
 		_transform.rotation = newRot;
 
 		vx *= dampen;
