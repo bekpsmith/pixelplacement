@@ -8,9 +8,9 @@ public class UIManager : MonoBehaviour{
 	
 	#region utility
 	//properties:
+	GUISkin skin;
 	private static System.Action UI;
-	GUIStyle blankStyle = new GUIStyle();	
-	string sdTexturePath = "sd", hdTexturePath = "hd", loadPath;	
+	string sdTexturePath = "SD", hdTexturePath = "HD", loadPath;	
 	int cutoffResolutionCombination = 800;
 	Dictionary<Images, Texture2D> imageAssets = new Dictionary<Images, Texture2D>();
 	Texture2D currentTexture;
@@ -30,19 +30,24 @@ public class UIManager : MonoBehaviour{
 			loadPath=hdTexturePath+"/";	
 		}
 		
-		//populate image assets:
+		//populate assets:
 		foreach(Images imageAssetName in System.Enum.GetValues(typeof(Images))){
 			imageAssets.Add(imageAssetName, LoadTexture(imageAssetName.ToString())); 
 		}
-		#endregion utility
 		
-		//initial ui layers:
-		//AddUILayer(HeaderLayer);
+		skin = new GUISkin();
+		#endregion utility
 	}	
 	
+	void Start(){
+		//initial ui layers:
+		AddUILayer(TestLayer);
+	}
+		
 	#region utility
 	void OnGUI(){
 		if(UI != null){
+			GUI.skin = skin;
 			UI(); 
 		}
 	}
@@ -72,4 +77,7 @@ public class UIManager : MonoBehaviour{
 	#endregion utility
 	
 	//ui layers:
+	void TestLayer(){
+		GUI.Button(new Rect(0,0,200,200), "Ass");
+	}
 }
