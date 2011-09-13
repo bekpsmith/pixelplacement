@@ -76,6 +76,15 @@ public class UIManager : MonoBehaviour{
 	Texture2D LoadTexture(string image){
 		return (Texture2D)Resources.Load(loadPath + image);
 	}
+	
+	bool ImageButton(float xpos, float ypos, Images image){
+		Texture2D imageData = GetImage(image);
+		if (GUI.Button(xpos,ypos,imageData.width,imageData.height)) {
+			return true;
+		}else{
+			return false;	
+		}
+	}
 	#endregion utility
 	
 	//ui layers:
