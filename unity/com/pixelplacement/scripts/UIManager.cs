@@ -8,7 +8,7 @@ public class UIManager : MonoBehaviour{
 	
 	#region utility
 	//properties:
-	GUISkin skin;
+	GUISkin blankSkin;
 	private static System.Action UI;
 	string sdTexturePath = "SD", hdTexturePath = "HD", loadPath;	
 	int cutoffResolutionCombination = 800;
@@ -35,7 +35,7 @@ public class UIManager : MonoBehaviour{
 			imageAssets.Add(imageAssetName, LoadTexture(imageAssetName.ToString())); 
 		}
 		
-		skin = new GUISkin();
+		blankSkin = new GUISkin();
 		#endregion utility
 	}	
 	
@@ -44,14 +44,16 @@ public class UIManager : MonoBehaviour{
 		AddUILayer(TestLayer);
 	}
 		
-	#region utility
+	
 	void OnGUI(){
+		#region utility
 		if(UI != null){
-			GUI.skin = skin;
 			UI(); 
 		}
+		#endregion utility
 	}
 	
+	#region utility
 	public static void AddUILayer(System.Action layer){
 		RemoveUILayer(layer); //duplicate layer fault tolerance
 		UI+=layer;
@@ -78,6 +80,7 @@ public class UIManager : MonoBehaviour{
 	
 	//ui layers:
 	void TestLayer(){
+		GUI.skin = blankSkin;
 		GUI.Button(new Rect(0,0,200,200), "Ass");
 	}
 }
