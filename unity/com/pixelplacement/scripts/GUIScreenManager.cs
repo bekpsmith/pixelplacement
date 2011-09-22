@@ -3,17 +3,14 @@ using System.Collections;
 using System.Collections.Generic;
 
 public class GUIScreenManager : MonoBehaviour {
-	float guiAlpha = 0, fadeSpeed = 5;
+	public float fadeSpeed = 5;
+	float guiAlpha = 0;
 	Color guiColor = Color.white;
 	int screenCount=0;
 	System.Action MainGUI;
 	System.Action[] screens;
 		
 	void Awake() {		
-		//register events:
-		SwipeDetection.OnSwipeDetected += ControlPresentation;
-		KeyDetection.OnKeyDetected += ControlPresentation;
-		
 		//setup screens array:
 		screens = new System.Action[] { FirstScreen, SecondScreen, ThirdScreen, FourthScreen };
 		SwapGUI(0);
@@ -85,6 +82,10 @@ public class GUIScreenManager : MonoBehaviour {
 	}
 	
 	IEnumerator DoSwapGUI(System.Action nextScreen) {
+		//turn off user control:
+		SwipeDetection.OnSwipeDetected -= ControlPresentation;
+		KeyDetection.OnKeyDetected -= ControlPresentation;
+		
 		//remove previous screen (if we have any):
 		if (MainGUI != null) {
 			//fade out:
@@ -114,5 +115,9 @@ public class GUIScreenManager : MonoBehaviour {
 		
 		//clamp alpha:
 		guiAlpha = 1;
+		
+		//return user control:
+		SwipeDetection.OnSwipeDetected += ControlPresentation;
+		KeyDetection.OnKeyDetected += ControlPresentation;
 	}
 }
