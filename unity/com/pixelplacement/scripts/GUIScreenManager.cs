@@ -3,48 +3,33 @@ using System.Collections;
 using System.Collections.Generic;
 
 public class GUIScreenManager : MonoBehaviour {
-	float guiAlpha = 1, fadeSpeed = 6;
+	float guiAlpha = 0, fadeSpeed = 5;
 	Color guiColor = Color.white;
 	int screenCount=0;
 	System.Action MainGUI;
 	System.Action[] screens;
-	
-	void Start() {
+		
+	void Awake() {		
+		//register events:
 		SwipeDetection.OnSwipeDetected += ControlPresentation;
-		//NextGUI(FirstButton);
+		KeyDetection.OnKeyDetected += ControlPresentation;
 		
 		//setup screens array:
 		screens = new System.Action[] { FirstScreen, SecondScreen, ThirdScreen, FourthScreen };
-		MainGUI += screens[screenCount];
+		SwapGUI(0);
 	}
-	
-	void ControlPresentation(Swipe swipeDirection) {
-		switch (swipeDirection) {
-			
-		case Swipe.Left:
-			//reduce count and transition to previous gui:
-			screenCount = Mathf.Max(--screenCount,0);
-			StartCoroutine(DoSwapGUI(screens[screenCount]));
-			break;
-			
-		case Swipe.Right:
-			//increment count and transition to next gui:
-			screenCount = Mathf.Min(++screenCount,screens.Length-1);
-			StartCoroutine(DoSwapGUI(screens[screenCount]));
-			break;
-		}
-	}
-	
+		
 	void OnGUI() {
-		if (MainGUI != null) {
-			
-			//set gui's alpha
-			guiColor.a = guiAlpha;
-			GUI.color = guiColor;
-			
-			//run gui screens:
-			MainGUI();	
-		}	
+		if (MainGUI == null) {
+			return;
+		}
+		
+		//set gui's alpha
+		guiColor.a = guiAlpha;
+		GUI.color = guiColor;
+		
+		//run gui screens:
+		MainGUI();	
 	}
 		
 	//***********
@@ -53,32 +38,52 @@ public class GUIScreenManager : MonoBehaviour {
 	
 	void FirstScreen() {
 		if (GUILayout.Button("One",GUILayout.Width(100),GUILayout.Height(100))) {
-			Debug.Log("1");
+			Debug.Log("1 pressed");
 		}
 	}
 	
 	void SecondScreen() {
 		if (GUILayout.Button("Two!",GUILayout.Width(100),GUILayout.Height(100))) {
-			Debug.Log("penis 2");
+			Debug.Log("2 pressed");
 		}
 	}	
 	
 	void ThirdScreen() {
 		if (GUILayout.Button("Three!",GUILayout.Width(100),GUILayout.Height(100))) {
-			Debug.Log("3 vagina");
+			Debug.Log("3 pressed");
 		}
 	}
 	
 	void FourthScreen() {
 		if (GUILayout.Button("Four!",GUILayout.Width(100),GUILayout.Height(100))) {
-			Debug.Log("4 cooks");
+			Debug.Log("4 pressed");
 		}
 	}
 	
-	//********************
-	//* Transition tools *
-	//********************
-		
+	//*********
+	//* Tools *
+	//*********
+	
+	void ControlPresentation(Swipe swipeDirection) {
+		switch (swipeDirection) {
+			
+		case Swipe.Left:
+			screenCount = Mathf.Max(--screenCount,0);
+			SwapGUI(screenCount);
+			break;
+			
+		case Swipe.Right:
+			screenCount = Mathf.Min(++screenCount,screens.Length-1);
+			SwapGUI(screenCount);
+			break;
+		}		
+	}
+	
+	void SwapGUI(int nextScreenID){
+		System.Action nextScreen = screens[nextScreenID];
+		StartCoroutine(DoSwapGUI(nextScreen));
+	}
+	
 	IEnumerator DoSwapGUI(System.Action nextScreen) {
 		//remove previous screen (if we have any):
 		if (MainGUI != null) {
