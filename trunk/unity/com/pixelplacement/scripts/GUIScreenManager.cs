@@ -57,24 +57,28 @@ public class GUIScreenManager : MonoBehaviour {
 		}
 	}
 	
-	//*********
-	//* Tools *
-	//*********
+	//************
+	//* Controls *
+	//************
 	
 	void ControlPresentation(Swipe swipeDirection) {
 		switch (swipeDirection) {
 			
-		case Swipe.Left:
+		case Swipe.Right:
 			screenCount = Mathf.Max(--screenCount,0);
 			SwapGUI(screenCount);
 			break;
 			
-		case Swipe.Right:
+		case Swipe.Left:
 			screenCount = Mathf.Min(++screenCount,screens.Length-1);
 			SwapGUI(screenCount);
 			break;
 		}		
 	}
+	
+	//*********
+	//* Tools *
+	//*********
 	
 	void SwapGUI(int nextScreenID){
 		System.Action nextScreen = screens[nextScreenID];
@@ -82,6 +86,7 @@ public class GUIScreenManager : MonoBehaviour {
 	}
 	
 	IEnumerator DoSwapGUI(System.Action nextScreen) {
+		
 		//turn off user control:
 		SwipeDetection.OnSwipeDetected -= ControlPresentation;
 		KeyDetection.OnKeyDetected -= ControlPresentation;
