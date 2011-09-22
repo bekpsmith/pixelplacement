@@ -1,19 +1,27 @@
+//For the record, it should be MAR and VAR. (show gyro shooting - need to add next and previous controls to gyro)
+//Tools used slide?
+//add timer at bottom of screen
+
+// add fade to black fade from balck transition betwen scenes
+
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 
 public class GUIScreenManager : MonoBehaviour {
 	public float fadeSpeed = 5;
+	public static int currentScreenID = 0;
 	float guiAlpha = 0;
 	Color guiColor = Color.white;
-	int screenCount=0;
 	System.Action MainGUI;
 	System.Action[] screens;
-		
-	void Awake() {		
+	
+	public Texture2D[] screenImages;
+	
+	void Start() {				
 		//setup screens array:
 		screens = new System.Action[] { FirstScreen, SecondScreen, ThirdScreen, FourthScreen };
-		SwapGUI(0);
+		SwapGUI(currentScreenID);
 	}
 		
 	void OnGUI() {
@@ -28,32 +36,35 @@ public class GUIScreenManager : MonoBehaviour {
 		//run gui screens:
 		MainGUI();	
 	}
+	
+	void OnDisable(){
+		//make sure we kill events that might be hanging aorund as we swap scenes:
+		UserControl(false);	
+	}
 		
 	//***********
 	//* Screens *
 	//***********
 	
 	void FirstScreen() {
-		if (GUILayout.Button("One",GUILayout.Width(100),GUILayout.Height(100))) {
-			Debug.Log("1 pressed");
-		}
+		GUI.DrawTexture(new Rect(0, 0, Screen.width, Screen.height), screenImages[0]);
 	}
 	
 	void SecondScreen() {
-		if (GUILayout.Button("Two!",GUILayout.Width(100),GUILayout.Height(100))) {
-			Debug.Log("2 pressed");
+		GUI.DrawTexture(new Rect(0, 0, Screen.width, Screen.height), screenImages[1]);
+		if (GUI.Button(new Rect(0, 0, 100, 100), "MAR")) {
+			Application.LoadLevel("GyroGaming");
 		}
 	}	
 	
 	void ThirdScreen() {
-		if (GUILayout.Button("Three!",GUILayout.Width(100),GUILayout.Height(100))) {
-			Debug.Log("3 pressed");
-		}
+		GUI.DrawTexture(new Rect(0, 0, Screen.width, Screen.height), screenImages[2]);
 	}
 	
 	void FourthScreen() {
-		if (GUILayout.Button("Four!",GUILayout.Width(100),GUILayout.Height(100))) {
-			Debug.Log("4 pressed");
+		GUI.DrawTexture(new Rect(0, 0, Screen.width, Screen.height), screenImages[3]);
+		if (GUI.Button(new Rect(425, 276, 100, 100), "Play")) {
+			iPhoneUtils.PlayMovie("FordFocusInteractive4.mp4", Color.black, iPhoneMovieControlMode.Minimal);
 		}
 	}
 	
@@ -61,19 +72,45 @@ public class GUIScreenManager : MonoBehaviour {
 	//* Controls *
 	//************
 	
-	void ControlPresentation(Swipe swipeDirection) {
+	void ControlPresentationSwipe(Swipe swipeDirection) {
 		switch (swipeDirection) {
 			
 		case Swipe.Right:
-			screenCount = Mathf.Max(--screenCount,0);
-			SwapGUI(screenCount);
+			currentScreenID = Mathf.Max(--currentScreenID,0);
+			SwapGUI(currentScreenID);
 			break;
 			
 		case Swipe.Left:
-			screenCount = Mathf.Min(++screenCount,screens.Length-1);
-			SwapGUI(screenCount);
+			currentScreenID = Mathf.Min(++currentScreenID,screens.Length-1);
+			SwapGUI(currentScreenID);
 			break;
 		}		
+	}
+	
+	//only present for in-editor debug:
+	void ControlPresentationKey(Swipe swipeDirection) {
+		switch (swipeDirection) {
+			
+		case Swipe.Left:
+			currentScreenID = Mathf.Max(--currentScreenID,0);
+			SwapGUI(currentScreenID);
+			break;
+			
+		case Swipe.Right:
+			currentScreenID = Mathf.Min(++currentScreenID,screens.Length-1);
+			SwapGUI(currentScreenID);
+			break;
+		}		
+	}	
+	
+	void UserControl(bool on){
+		if (on) {
+			SwipeDetection.OnSwipeDetected += ControlPresentationSwipe;
+			KeyDetection.OnKeyDetected += ControlPresentationKey;
+		}else{
+			SwipeDetection.OnSwipeDetected -= ControlPresentationSwipe;
+			KeyDetection.OnKeyDetected -= ControlPresentationKey;	
+		}
 	}
 	
 	//*********
@@ -88,8 +125,7 @@ public class GUIScreenManager : MonoBehaviour {
 	IEnumerator DoSwapGUI(System.Action nextScreen) {
 		
 		//turn off user control:
-		SwipeDetection.OnSwipeDetected -= ControlPresentation;
-		KeyDetection.OnKeyDetected -= ControlPresentation;
+		UserControl(false);
 		
 		//remove previous screen (if we have any):
 		if (MainGUI != null) {
@@ -122,7 +158,6 @@ public class GUIScreenManager : MonoBehaviour {
 		guiAlpha = 1;
 		
 		//return user control:
-		SwipeDetection.OnSwipeDetected += ControlPresentation;
-		KeyDetection.OnKeyDetected += ControlPresentation;
+		UserControl(true);
 	}
 }
