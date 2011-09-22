@@ -48,6 +48,10 @@ public class SwipeDetection : MonoBehaviour {
 	}
 	
 	void TestForSwipeGesture(Touch touch){
+			if (OnSwipeDetected == null) {
+				return;
+			}
+		
 			Vector2 lastPos = touch.position;
 			float distance = Vector2.Distance(lastPos, touchStartPos);
 			
