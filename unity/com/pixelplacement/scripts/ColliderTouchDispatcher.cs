@@ -1,3 +1,5 @@
+//ToDo: Add additional events: onReleaseOutside, onRelease, onReleaseOver
+
 using UnityEngine;
 using System.Collections;
 
