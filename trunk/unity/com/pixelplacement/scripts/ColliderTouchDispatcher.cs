@@ -6,11 +6,20 @@ public class ColliderTouchDispatcher : MonoBehaviour {
 	public Camera renderingCamera;
 	public bool useTouch = true;
 	public bool useMouse = true;
+	static ColliderTouchDispatcher _instance;
 	
 	void Awake(){
+		//duplicate instance check:
+		if ( _instance != null ) {
+			Destroy( this );
+			Debug.LogError( "ColliderTouchDispatcher error! You should only have one instance of ColliderTouchDispatcher in your scene!" );
+		}		
+		
 		if ( renderingCamera == null ) {
 			renderingCamera = Camera.main;
 		}
+		
+		_instance = this;
 	}
 
 	void Update () {
