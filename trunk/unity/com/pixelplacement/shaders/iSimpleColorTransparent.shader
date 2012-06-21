@@ -14,6 +14,7 @@ SubShader {
     Pass {
         ZWrite Off
         //Blend DstColor SrcColor
+        Blend SrcAlpha OneMinusSrcAlpha
         ColorMask RGB
         Color [_Color]
     }
