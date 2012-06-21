@@ -1,15 +1,21 @@
 Shader "iPhone/Simple Color + No Light + Transparent" {
-	Properties {
-		_Color ("Color", Color) = (1, 1, 1, 1)
-	}
-	Category {
-		Tags { "Queue"="Transparent" "RenderType"="Transparent"}
-		Blend SrcAlpha OneMinusSrcAlpha
+	
+Properties {
+    _Color ("Main Color", Color) = (1,1,1,1)
+}
 
-		SubShader {
-			Pass {
-				Color [_Color]
-			}
-		}
-   }
+SubShader {
+    Tags {"RenderType"="Transparent" "Queue"="Transparent"}
+
+    Pass {
+        ColorMask 0
+    }
+
+    Pass {
+        ZWrite Off
+        //Blend DstColor SrcColor
+        ColorMask RGB
+        Color [_Color]
+    }
+}
 }
